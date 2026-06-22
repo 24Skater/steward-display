@@ -55,6 +55,7 @@ function EditorPage() {
   const zoom = useEditorStore((s) => s.zoom);
   const reset = useEditorStore((s) => s.reset);
   const pushHistory = useEditorStore((s) => s.pushHistory);
+  const snapToGrid = useEditorStore((s) => s.snapToGrid);
 
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState("");
