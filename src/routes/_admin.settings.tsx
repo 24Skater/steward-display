@@ -389,13 +389,13 @@ function SettingsPage() {
     finishGridImport(warnings);
   };
 
-  const finishGridImport = (warnings: string[]) => {
+  const finishGridImport = (warnings: string[], message = "Grid defaults and history imported.") => {
     setImportDialogOpen(false);
     setPendingGridImport(null);
     if (warnings.length > 0) {
       setGridDefaultsWarnings(warnings);
     } else {
-      toast.success("Grid defaults and history imported.");
+      toast.success(message);
     }
   };
   const handleImportSettings = async (file: File) => {
