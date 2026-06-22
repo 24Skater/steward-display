@@ -377,6 +377,7 @@ function SettingsPage() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={handleExport}><Download className="h-4 w-4" /> Export screens</Button>
           <Button variant="outline" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4" /> Import screens</Button>
+          <Button variant="outline" onClick={handleExportSettings}><Download className="h-4 w-4" /> Export settings</Button>
           <Button variant="outline" onClick={handleExportGridDefaults}><Download className="h-4 w-4" /> Export grid defaults</Button>
           <Button variant="outline" onClick={() => settingsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import settings</Button>
           <input
