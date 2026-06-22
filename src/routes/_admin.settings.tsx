@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/select";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useScreenStore } from "@/store/screenStore";
-import { downloadJSON, exportScreensToJSON, parseImportedScreens } from "@/lib/export";
+import {
+  downloadJSON,
+  exportScreensToJSON,
+  parseImportedScreens,
+  exportSettingsToJSON,
+  parseImportedSettings,
+} from "@/lib/export";
 import { toast } from "sonner";
 import { ContrastAudit } from "@/components/settings/ContrastAudit";
 
@@ -47,6 +53,7 @@ function SettingsPage() {
   const screens = useScreenStore((s) => s.screens);
   const importScreens = useScreenStore((s) => s.importScreens);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const settingsFileRef = useRef<HTMLInputElement | null>(null);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
@@ -59,6 +66,35 @@ function SettingsPage() {
       const incoming = parseImportedScreens(text);
       importScreens(incoming);
       toast.success(`Imported ${incoming.length} screen${incoming.length === 1 ? "" : "s"}.`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't read that file.");
+    }
+  };
+
+  const handleExportSettings = () => {
+    const current = {
+      orgName,
+      timezone,
+      theme: "light" as const,
+      defaultOrientation,
+      defaultBackground,
+      weatherApiKey,
+      defaultGridSize,
+      defaultSnapStep,
+    };
+    downloadJSON(
+      `steward-settings-${new Date().toISOString().slice(0, 10)}.json`,
+      exportSettingsToJSON(current),
+    );
+    toast.success("Settings exported.");
+  };
+
+  const handleImportSettings = async (file: File) => {
+    try {
+      const text = await file.text();
+      const incoming = parseImportedSettings(text);
+      update(incoming);
+      toast.success("Settings imported.");
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
     }
@@ -131,6 +167,8 @@ function SettingsPage() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={handleExport}><Download className="h-4 w-4" /> Export screens</Button>
           <Button variant="outline" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4" /> Import screens</Button>
+          <Button variant="outline" onClick={handleExportSettings}><Download className="h-4 w-4" /> Export settings</Button>
+          <Button variant="outline" onClick={() => settingsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import settings</Button>
           <input
             ref={fileRef}
             type="file"
@@ -139,6 +177,17 @@ function SettingsPage() {
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) handleImport(f);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={settingsFileRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImportSettings(f);
               e.target.value = "";
             }}
           />
