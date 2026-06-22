@@ -56,6 +56,7 @@ function EditorPage() {
   const reset = useEditorStore((s) => s.reset);
   const pushHistory = useEditorStore((s) => s.pushHistory);
   const snapToGrid = useEditorStore((s) => s.snapToGrid);
+  const snapStep = useEditorStore((s) => s.snapStep);
 
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState("");
@@ -121,8 +122,8 @@ function EditorPage() {
     setActiveDrag(null);
     const data = e.active.data.current as { source: string; widgetId?: string; widgetType?: WidgetType } | undefined;
     if (!data) return;
-    const snapStep = snapToGrid ? 4 : 1;
-    const snap = (v: number) => Math.round(v / snapStep) * snapStep;
+    const step = snapToGrid ? snapStep : 1;
+    const snap = (v: number) => Math.round(v / step) * step;
 
     if (data.source === "palette" && data.widgetType) {
       const stageEl = document.querySelector<HTMLElement>("[data-stage-root]");
