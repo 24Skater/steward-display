@@ -210,6 +210,39 @@ export function WidgetConfigForm({
               onValueChange={(v) => set("titleSize", v[0])}
             />
           </Field>
+          <Field label="Title weight">
+            <Select
+              value={String(cfg.titleWeight ?? 700)}
+              onValueChange={(v) => set("titleWeight", Number(v))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="300">Light (300)</SelectItem>
+                <SelectItem value="400">Regular (400)</SelectItem>
+                <SelectItem value="500">Medium (500)</SelectItem>
+                <SelectItem value="600">Semibold (600)</SelectItem>
+                <SelectItem value="700">Bold (700)</SelectItem>
+                <SelectItem value="800">Extrabold (800)</SelectItem>
+                <SelectItem value="900">Black (900)</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <ColorField
+            label="Body color"
+            value={cfg.bodyColor ?? ""}
+            onChange={(v) => set("bodyColor", v)}
+            swatches={["#FFFFFF", "#0B1220", "#2563EB", "#DC2626", "#16A34A", "#D97706"]}
+            allowClear
+          />
+          <Field label={`Body size (${cfg.bodySize ?? 3})`} hint="Scales with widget width">
+            <Slider
+              value={[cfg.bodySize ?? 3]}
+              min={1}
+              max={10}
+              step={0.5}
+              onValueChange={(v) => set("bodySize", v[0])}
+            />
+          </Field>
         </div>
       );
     case "countdown":
