@@ -121,6 +121,8 @@ function EditorPage() {
     setActiveDrag(null);
     const data = e.active.data.current as { source: string; widgetId?: string; widgetType?: WidgetType } | undefined;
     if (!data) return;
+    const snapStep = snapToGrid ? 4 : 1;
+    const snap = (v: number) => Math.round(v / snapStep) * snapStep;
 
     if (data.source === "palette" && data.widgetType) {
       const stageEl = document.querySelector<HTMLElement>("[data-stage-root]");
@@ -132,8 +134,8 @@ function EditorPage() {
         const px = (e2.clientX + (e.delta?.x ?? 0) - rect.left) / effective;
         const py = (e2.clientY + (e.delta?.y ?? 0) - rect.top) / effective;
         if (px >= 0 && py >= 0 && px <= dims.w && py <= dims.h) {
-          gx = Math.max(0, Math.min(GRID_COLS - 2, Math.round(px / cellW)));
-          gy = Math.max(0, Math.min(GRID_ROWS - 2, Math.round(py / cellH)));
+          gx = Math.max(0, Math.min(GRID_COLS - 2, snap(Math.round(px / cellW))));
+          gy = Math.max(0, Math.min(GRID_ROWS - 2, snap(Math.round(py / cellH))));
         }
       }
       const w = addWidget(screen.id, data.widgetType, { x: gx, y: gy });
@@ -143,8 +145,8 @@ function EditorPage() {
       if (!w) return;
       const dx = Math.round(e.delta.x / effective / cellW);
       const dy = Math.round(e.delta.y / effective / cellH);
-      const nx = Math.max(0, Math.min(GRID_COLS - w.w, w.x + dx));
-      const ny = Math.max(0, Math.min(GRID_ROWS - w.h, w.y + dy));
+      const nx = Math.max(0, Math.min(GRID_COLS - w.w, snap(w.x + dx)));
+      const ny = Math.max(0, Math.min(GRID_ROWS - w.h, snap(w.y + dy)));
       if (nx !== w.x || ny !== w.y) {
         pushHistory(screen.widgets);
         updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
