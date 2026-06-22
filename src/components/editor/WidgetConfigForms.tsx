@@ -194,6 +194,22 @@ export function WidgetConfigForm({
               </SelectContent>
             </Select>
           </Field>
+          <ColorField
+            label="Title color"
+            value={cfg.titleColor ?? ""}
+            onChange={(v) => set("titleColor", v)}
+            swatches={["#FFFFFF", "#0B1220", "#2563EB", "#DC2626", "#16A34A", "#D97706"]}
+            allowClear
+          />
+          <Field label={`Title size (${cfg.titleSize ?? 5})`} hint="Scales with widget width">
+            <Slider
+              value={[cfg.titleSize ?? 5]}
+              min={2}
+              max={15}
+              step={0.5}
+              onValueChange={(v) => set("titleSize", v[0])}
+            />
+          </Field>
         </div>
       );
     case "countdown":
