@@ -70,6 +70,7 @@ export interface Settings {
   weatherApiKey?: string;
   defaultGridSize: number;
   defaultSnapStep: number;
+  maxGridHistorySize: number;
 }
 
 export const RESOLUTION_DIMENSIONS: Record<Exclude<ScreenResolution, "custom">, { w: number; h: number }> = {

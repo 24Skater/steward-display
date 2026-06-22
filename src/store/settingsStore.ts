@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS: Settings = {
   defaultBackground: "#0B1220",
   defaultGridSize: 1,
   defaultSnapStep: 4,
+  maxGridHistorySize: 10,
 };
 
 interface SettingsState extends Settings {
