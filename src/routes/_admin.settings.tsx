@@ -390,7 +390,11 @@ function SettingsPage() {
       ...(importHistory ? history : []),
     ].sort((a, b) => b.timestamp - a.timestamp);
     setGridDefaultsHistory(mergedHistory.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
-    finishGridImport(warnings);
+    const importedParts = [
+      importGridDefaults && "grid defaults",
+      importHistory && "undo history",
+    ].filter(Boolean);
+    finishGridImport(warnings, importedParts.length > 0 ? `Merged ${importedParts.join(" and ")}.` : "Nothing to import.");
   };
 
   const finishGridImport = (warnings: string[], message = "Grid defaults and history imported.") => {
