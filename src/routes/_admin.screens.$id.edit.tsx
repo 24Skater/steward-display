@@ -47,6 +47,7 @@ function EditorPage() {
   const select = useEditorStore((s) => s.select);
   const zoom = useEditorStore((s) => s.zoom);
   const reset = useEditorStore((s) => s.reset);
+  const pushHistory = useEditorStore((s) => s.pushHistory);
 
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState("");
@@ -114,7 +115,10 @@ function EditorPage() {
       const dy = Math.round(e.delta.y / effective / cellH);
       const nx = Math.max(0, Math.min(GRID_COLS - w.w, w.x + dx));
       const ny = Math.max(0, Math.min(GRID_ROWS - w.h, w.y + dy));
-      updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
+      if (nx !== w.x || ny !== w.y) {
+        pushHistory(screen.widgets);
+        updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
+      }
     }
   };
 
@@ -124,6 +128,7 @@ function EditorPage() {
   };
 
   const handleTemplate = (template: LayoutTemplate) => {
+    pushHistory(screen.widgets);
     setWidgets(screen.id, instantiateTemplate(template));
     setSkipTemplates(true);
   };
@@ -180,6 +185,8 @@ function EditorPage() {
                   <div><kbd>⌘/Ctrl + D</kbd> Duplicate</div>
                   <div><kbd>Delete</kbd> Remove</div>
                   <div><kbd>Esc</kbd> Deselect</div>
+                  <div><kbd>⌘/Ctrl + Z</kbd> Undo</div>
+                  <div><kbd>⌘/Ctrl + Y / ⇧ + ⌘/Ctrl + Z</kbd> Redo</div>
                 </div>
               </TooltipContent>
             </Tooltip>

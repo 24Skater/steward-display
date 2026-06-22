@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { Screen, WidgetInstance } from "@/types";
 import { useScreenStore } from "@/store/screenStore";
+import { useEditorStore } from "@/store/editorStore";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetConfigForm } from "./WidgetConfigForms";
@@ -48,6 +49,7 @@ export function PropertiesPanel({
   const removeWidget = useScreenStore((s) => s.removeWidget);
   const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
   const reorderWidget = useScreenStore((s) => s.reorderWidget);
+  const pushHistory = useEditorStore((s) => s.pushHistory);
   const def = getWidgetDefinition(widget.widgetType);
   const Icon = def?.icon;
 
@@ -77,6 +79,7 @@ export function PropertiesPanel({
   };
 
   const applyPresetWithUndo = (preset: WidgetPreset) => {
+    pushHistory(screen.widgets);
     const before = {
       config: { ...widget.config },
       style: widget.style ? { ...widget.style } : undefined,
