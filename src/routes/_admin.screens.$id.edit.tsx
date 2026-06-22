@@ -12,6 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Canvas, GRID_COLS, GRID_ROWS } from "@/components/editor/Canvas";
 import { WidgetPanel } from "@/components/editor/WidgetPanel";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
