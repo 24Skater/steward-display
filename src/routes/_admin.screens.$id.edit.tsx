@@ -234,7 +234,7 @@ function EditorPage() {
               <Canvas screen={screen} />
             )}
           </div>
-          {selected && (
+          {false && selected && (
             <PropertiesPanel screen={screen} widget={selected} onClose={() => select([])} />
           )}
         </div>
