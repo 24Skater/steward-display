@@ -125,7 +125,7 @@ function WidgetTile({
       >
         <WidgetRenderer widget={widget} />
       </div>
-      {selected && (
+      {false && selected && (
         <>
           {(["nw", "n", "ne", "e", "se", "s", "sw", "w"] as ResizeDir[]).map((dir) => {
             const pos: Record<ResizeDir, React.CSSProperties> = {
