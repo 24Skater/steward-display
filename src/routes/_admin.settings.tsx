@@ -212,6 +212,21 @@ function SettingsPage() {
             <RotateCcw className="h-4 w-4" /> Reset grid defaults
           </Button>
         </div>
+
+        <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Reset grid defaults?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will restore <strong>Default grid size</strong> to 1 cell and <strong>Default snap step</strong> to 4 cells, and overwrite your saved settings. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmResetGridDefaults}>Reset</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Section>
 
       <Section title="Data sources" description="Connect external services. Wiring lands in a future release.">
