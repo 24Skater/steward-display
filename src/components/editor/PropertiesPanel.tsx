@@ -234,19 +234,21 @@ export function PropertiesPanel({
               </div>
             )}
 
-            <div className="mt-3 rounded-md border border-border bg-background p-2">
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                  <Eye className="h-3 w-3" /> Preview
-                </span>
-                <span className="truncate text-[10px] text-muted-foreground">
-                  {previewPreset ? previewPreset.label : "Current widget"}
-                </span>
+            {hasAnyPresets && (
+              <div className="mt-3 rounded-md border border-border bg-background p-2">
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <Eye className="h-3 w-3" /> Preview
+                  </span>
+                  <span className="truncate text-[10px] text-muted-foreground">
+                    {previewPreset ? previewPreset.label : "Current widget"}
+                  </span>
+                </div>
+                <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
+                  <WidgetRenderer widget={previewWidget} />
+                </div>
               </div>
-              <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
-                <WidgetRenderer widget={previewWidget} />
-              </div>
-            </div>
+            )}
 
             <p className="mt-2 text-[10px] text-muted-foreground">
               {hasAnyPresets
