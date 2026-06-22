@@ -131,19 +131,26 @@ function SettingsPage() {
   };
 
   const confirmResetGridDefaults = () => {
-    const previous = { defaultGridSize, defaultSnapStep };
-    setPreviousGridSettings(previous);
+    const previous = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
+    setGridDefaultsHistory((history) => [previous, ...history].slice(0, 10));
     resetGridDefaults();
     setResetDialogOpen(false);
     toast.success("Grid defaults reset to safe values.", {
       action: {
         label: "Undo",
         onClick: () => {
-          update(previous);
+          update({ defaultGridSize: previous.defaultGridSize, defaultSnapStep: previous.defaultSnapStep });
           toast.success("Previous grid defaults restored.");
         },
       },
     });
+  };
+
+  const revertGridDefaults = (entry: { defaultGridSize: number; defaultSnapStep: number }) => {
+    const current = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
+    setGridDefaultsHistory((history) => [current, ...history].slice(0, 10));
+    update({ defaultGridSize: entry.defaultGridSize, defaultSnapStep: entry.defaultSnapStep });
+    toast.success("Grid defaults reverted to selected snapshot.");
   };
 
   return (
