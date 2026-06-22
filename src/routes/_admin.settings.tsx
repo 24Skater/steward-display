@@ -183,10 +183,6 @@ function SettingsPage() {
       toast.error(e?.message ?? "Couldn't read that file.");
     }
   };
-    } catch (e: any) {
-      toast.error(e?.message ?? "Couldn't read that file.");
-    }
-  };
 
   const handleResetGridDefaults = () => {
     setResetDialogOpen(true);
