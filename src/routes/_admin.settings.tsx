@@ -261,6 +261,7 @@ function SettingsPage() {
     maxGridHistorySize,
     gridImportIncludeDefaults,
     gridImportIncludeHistory,
+    lastGridImport,
     update,
     resetGridDefaults,
   } = useSettingsStore();
