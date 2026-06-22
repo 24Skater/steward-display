@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef } from "react";
-import { Download, Upload } from "lucide-react";
+import { useRef, useState } from "react";
+import { Download, Upload, X, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -54,6 +59,7 @@ function SettingsPage() {
   const importScreens = useScreenStore((s) => s.importScreens);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
+  const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
@@ -91,13 +97,12 @@ function SettingsPage() {
 
   const handleImportSettings = async (file: File) => {
     try {
+      setSettingsWarnings([]);
       const text = await file.text();
       const { settings: incoming, warnings } = parseImportedSettings(text);
       update(incoming);
       if (warnings.length > 0) {
-        toast.warning("Settings imported with warnings", {
-          description: warnings.join(" "),
-        });
+        setSettingsWarnings(warnings);
       } else {
         toast.success("Settings imported.");
       }
@@ -109,6 +114,26 @@ function SettingsPage() {
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
       <PageHeader title="Settings" subtitle="Configure your organization and defaults." />
+
+      {settingsWarnings.length > 0 && (
+        <Alert variant="destructive" className="relative">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Settings import warnings</AlertTitle>
+          <AlertDescription>
+            {settingsWarnings.map((warning, i) => (
+              <p key={i}>{warning}</p>
+            ))}
+          </AlertDescription>
+          <button
+            onClick={() => setSettingsWarnings([])}
+            className="absolute right-3 top-3 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label="Dismiss"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </Alert>
+      )}
+
 
       <Section title="Organization">
         <div className="space-y-1.5">
