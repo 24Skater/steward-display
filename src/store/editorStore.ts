@@ -6,6 +6,7 @@ interface EditorState {
   zoom: number;
   showGrid: boolean;
   snapToGrid: boolean;
+  snapStep: number;
   showAlignment: boolean;
   history: WidgetInstance[][];
   future: WidgetInstance[][];
@@ -14,6 +15,7 @@ interface EditorState {
   setZoom: (z: number) => void;
   toggleGrid: () => void;
   toggleSnap: () => void;
+  setSnapStep: (n: number) => void;
   toggleAlignment: () => void;
   pushHistory: (snapshot: WidgetInstance[]) => void;
   undo: () => WidgetInstance[] | null;
