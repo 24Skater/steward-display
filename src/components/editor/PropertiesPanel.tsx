@@ -125,7 +125,7 @@ export function PropertiesPanel({
     showUndoToast();
   };
 
-const previewWidget = useMemo<WidgetInstance>(() => {
+  const previewWidget = useMemo<WidgetInstance>(() => {
     const base = {
       id: "preset-preview",
       widgetType: widget.widgetType,
