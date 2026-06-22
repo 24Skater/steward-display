@@ -165,7 +165,8 @@ function EditorPage() {
   const showTemplates = !skipTemplates && screen.widgets.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col">
+    <TooltipProvider delayDuration={200}>
+      <div className="flex h-[calc(100vh-3.5rem)] flex-col">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
