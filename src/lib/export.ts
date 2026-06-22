@@ -61,6 +61,17 @@ export function parseImportedScreens(text: string): Screen[] {
   throw new Error("Invalid backup file. Expected a JSON array of screens.");
 }
 
+export function exportGridDefaultsToJSON(
+  gridDefaults: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number },
+  history: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[],
+): string {
+  return JSON.stringify(
+    { version: 1, exportedAt: new Date().toISOString(), gridDefaults, history },
+    null,
+    2,
+  );
+}
+
 export function exportSettingsToJSON(settings: Settings): string {
   return JSON.stringify(
     { version: 1, exportedAt: new Date().toISOString(), settings },
