@@ -1,0 +1,190 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft, Eye, Grid3x3 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Canvas, GRID_COLS, GRID_ROWS } from "@/components/editor/Canvas";
+import { WidgetPanel } from "@/components/editor/WidgetPanel";
+import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
+import { useScreenStore } from "@/store/screenStore";
+import { useEditorStore } from "@/store/editorStore";
+import { getScreenDimensions, type WidgetType } from "@/types";
+import { getWidgetDefinition } from "@/lib/widgetRegistry";
+import { EmptyState } from "@/components/layout/EmptyState";
+import { MonitorOff } from "lucide-react";
+
+export const Route = createFileRoute("/_admin/screens/$id/edit")({
+  head: () => ({ meta: [{ title: "Editor — Steward Display" }] }),
+  component: EditorPage,
+});
+
+function EditorPage() {
+  const { id } = Route.useParams();
+  const screen = useScreenStore((s) => s.screens.find((x) => x.id === id));
+  const hydrated = useScreenStore((s) => s.hydrated);
+  const updateScreen = useScreenStore((s) => s.updateScreen);
+  const addWidget = useScreenStore((s) => s.addWidget);
+  const updateWidget = useScreenStore((s) => s.updateWidget);
+  const selectedIds = useEditorStore((s) => s.selectedIds);
+  const select = useEditorStore((s) => s.select);
+  const toggleGrid = useEditorStore((s) => s.toggleGrid);
+  const showGrid = useEditorStore((s) => s.showGrid);
+  const zoom = useEditorStore((s) => s.zoom);
+  const reset = useEditorStore((s) => s.reset);
+
+  const [editingName, setEditingName] = useState(false);
+  const [draftName, setDraftName] = useState("");
+  const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(null);
+
+  useEffect(() => () => reset(), [reset]);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+
+  if (!hydrated) {
+    return <div className="p-10 text-muted-foreground">Loading…</div>;
+  }
+
+  if (!screen) {
+    return (
+      <main className="mx-auto max-w-2xl px-6 py-16">
+        <EmptyState
+          icon={MonitorOff}
+          title="Screen not found"
+          body="It may have been deleted or never existed on this device."
+          action={<Button asChild><Link to="/">Back to screens</Link></Button>}
+        />
+      </main>
+    );
+  }
+
+  const dims = getScreenDimensions(screen);
+  const cellW = dims.w / GRID_COLS;
+  const cellH = dims.h / GRID_ROWS;
+  const effective = zoom || 0.5;
+  const selected = screen.widgets.find((w) => selectedIds.includes(w.id));
+
+  const handleDragStart = (e: DragStartEvent) => {
+    const data = e.active.data.current as any;
+    if (data?.source === "palette") setActiveDrag({ source: "palette", widgetType: data.widgetType });
+    else setActiveDrag({ source: data?.source ?? "canvas" });
+  };
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    setActiveDrag(null);
+    const data = e.active.data.current as { source: string; widgetId?: string; widgetType?: WidgetType } | undefined;
+    if (!data) return;
+
+    if (data.source === "palette" && data.widgetType) {
+      const stageEl = document.querySelector<HTMLElement>("[data-stage-root]");
+      const e2 = e.activatorEvent as PointerEvent | undefined;
+      let gx = 6;
+      let gy = 4;
+      if (stageEl && e2) {
+        const rect = stageEl.getBoundingClientRect();
+        const px = (e2.clientX + (e.delta?.x ?? 0) - rect.left) / effective;
+        const py = (e2.clientY + (e.delta?.y ?? 0) - rect.top) / effective;
+        if (px >= 0 && py >= 0 && px <= dims.w && py <= dims.h) {
+          gx = Math.max(0, Math.min(GRID_COLS - 2, Math.round(px / cellW)));
+          gy = Math.max(0, Math.min(GRID_ROWS - 2, Math.round(py / cellH)));
+        }
+      }
+      const w = addWidget(screen.id, data.widgetType, { x: gx, y: gy });
+      if (w) select([w.id]);
+    } else if (data.source === "canvas" && data.widgetId) {
+      const w = screen.widgets.find((x) => x.id === data.widgetId);
+      if (!w) return;
+      const dx = Math.round(e.delta.x / effective / cellW);
+      const dy = Math.round(e.delta.y / effective / cellH);
+      const nx = Math.max(0, Math.min(GRID_COLS - w.w, w.x + dx));
+      const ny = Math.max(0, Math.min(GRID_ROWS - w.h, w.y + dy));
+      updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
+    }
+  };
+
+  const handleAdd = (type: WidgetType) => {
+    const w = addWidget(screen.id, type, { x: 6, y: 4 });
+    if (w) select([w.id]);
+  };
+
+  return (
+    <div className="flex h-[calc(100vh-3.5rem)] flex-col">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/"><ArrowLeft className="h-4 w-4" /> Back</Link>
+          </Button>
+          {editingName ? (
+            <Input
+              autoFocus
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              onBlur={() => {
+                if (draftName.trim()) updateScreen(screen.id, { name: draftName.trim() });
+                setEditingName(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                if (e.key === "Escape") setEditingName(false);
+              }}
+              className="h-8 w-64"
+            />
+          ) : (
+            <button
+              className="rounded-md px-2 py-1 text-sm font-semibold hover:bg-muted"
+              onClick={() => {
+                setDraftName(screen.name);
+                setEditingName(true);
+              }}
+            >
+              {screen.name}
+            </button>
+          )}
+          <span className="text-xs text-muted-foreground">Auto-saved</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleGrid}
+            aria-pressed={showGrid}
+            className={showGrid ? "text-blue" : ""}
+          >
+            <Grid3x3 className="h-4 w-4" /> Grid
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}>
+            <Eye className="h-4 w-4" /> Preview
+          </Button>
+        </div>
+      </div>
+
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="flex flex-1 overflow-hidden">
+          <WidgetPanel onAdd={handleAdd} />
+          <div data-stage-root className="flex flex-1 flex-col">
+            <Canvas screen={screen} />
+          </div>
+          {selected && (
+            <PropertiesPanel screen={screen} widget={selected} onClose={() => select([])} />
+          )}
+        </div>
+
+        <DragOverlay>
+          {activeDrag?.source === "palette" && activeDrag.widgetType && (
+            <div className="rounded-md border border-blue bg-card px-3 py-2 text-sm font-medium shadow-steward-md">
+              {getWidgetDefinition(activeDrag.widgetType)?.label}
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
+    </div>
+  );
+}
