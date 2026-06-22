@@ -240,3 +240,12 @@ function EditorPage() {
     </div>
   );
 }
+
+function ShortcutRow({ keys, action }: { keys: string; action: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-sm text-muted-foreground">{action}</span>
+      <kbd className="rounded-md border border-border bg-muted px-2 py-1 text-xs font-mono text-foreground">{keys}</kbd>
+    </div>
+  );
+}
