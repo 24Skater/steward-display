@@ -97,6 +97,10 @@ function SettingsPage() {
     writeJSON(STORAGE_KEYS.gridDefaultsHistory, gridDefaultsHistory);
   }, [gridDefaultsHistory]);
 
+  useEffect(() => {
+    setGridDefaultsHistory((history) => history.slice(0, maxGridHistorySize));
+  }, [maxGridHistorySize]);
+
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
     toast.success("Backup downloaded.");
