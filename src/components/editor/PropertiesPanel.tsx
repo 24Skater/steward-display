@@ -1,5 +1,5 @@
-import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User, Eye } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetConfigForm } from "./WidgetConfigForms";
 import { getPresetsForWidget, type WidgetPreset } from "@/lib/widgetPresets";
 import { usePresetStore, type CustomPreset } from "@/store/presetStore";
+import { WidgetRenderer } from "./WidgetRenderer";
+
 
 const BG_SWATCHES = ["", "#0B1220", "#111827", "#FFFFFF", "#FEF3C7", "#DBEAFE", "#FCE7F3"];
 const TEXT_SWATCHES = ["#FFFFFF", "#0B1220", "#F59E0B", "#DC2626", "#2563EB", "#16A34A"];
