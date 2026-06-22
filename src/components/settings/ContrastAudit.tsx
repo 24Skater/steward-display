@@ -9,6 +9,8 @@ import {
   Settings2,
   ExternalLink,
   Hash,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   auditBrandContrast,
