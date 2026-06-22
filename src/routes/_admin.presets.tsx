@@ -47,12 +47,12 @@ function PresetsPage() {
   const updatePreset = usePresetStore((s) => s.update);
   const removePreset = usePresetStore((s) => s.remove);
   const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<WidgetType | "all">("all");
+  const [typeFilter, setTypeFilter] = useState<string | "all">("all");
   const [editing, setEditing] = useState<CustomPreset | null>(null);
   const [deleting, setDeleting] = useState<CustomPreset | null>(null);
 
   const availableTypes = useMemo(() => {
-    const types = new Set<WidgetType>();
+    const types = new Set<string>();
     for (const p of presets) types.add(p.widgetType);
     return [...types].sort((a, b) => a.localeCompare(b));
   }, [presets]);
