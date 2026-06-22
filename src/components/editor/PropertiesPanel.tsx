@@ -240,9 +240,20 @@ export function PropertiesPanel({
                   <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                     <Eye className="h-3 w-3" /> Preview
                   </span>
-                  <span className="truncate text-[10px] text-muted-foreground">
-                    {previewPreset ? previewPreset.label : "Current widget"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-[10px] text-muted-foreground">
+                      {previewPreset ? previewPreset.label : "Current widget"}
+                    </span>
+                    {previewPreset && (
+                      <button
+                        type="button"
+                        onClick={() => applyPreset(previewPreset)}
+                        className="inline-flex items-center gap-1 rounded-md bg-blue px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue/90"
+                      >
+                        Apply
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
                   <WidgetRenderer widget={previewWidget} />
