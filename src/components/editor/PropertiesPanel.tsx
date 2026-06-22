@@ -1,0 +1,278 @@
+import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Screen, WidgetInstance } from "@/types";
+import { useScreenStore } from "@/store/screenStore";
+import { getWidgetDefinition } from "@/lib/widgetRegistry";
+import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
+import { WidgetConfigForm } from "./WidgetConfigForms";
+
+const BG_SWATCHES = ["", "#0B1220", "#111827", "#FFFFFF", "#FEF3C7", "#DBEAFE", "#FCE7F3"];
+const TEXT_SWATCHES = ["#FFFFFF", "#0B1220", "#F59E0B", "#DC2626", "#2563EB", "#16A34A"];
+
+export function PropertiesPanel({
+  screen,
+  widget,
+  onClose,
+}: {
+  screen: Screen;
+  widget: WidgetInstance;
+  onClose: () => void;
+}) {
+  const updateWidget = useScreenStore((s) => s.updateWidget);
+  const removeWidget = useScreenStore((s) => s.removeWidget);
+  const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
+  const reorderWidget = useScreenStore((s) => s.reorderWidget);
+  const def = getWidgetDefinition(widget.widgetType);
+  const Icon = def?.icon;
+
+  const patch = (p: Partial<WidgetInstance>) => updateWidget(screen.id, widget.id, p);
+  const patchConfig = (c: Record<string, unknown>) =>
+    updateWidget(screen.id, widget.id, { config: { ...widget.config, ...c } });
+  const patchStyle = (s: Partial<NonNullable<WidgetInstance["style"]>>) =>
+    updateWidget(screen.id, widget.id, { style: { ...widget.style, ...s } });
+
+  return (
+    <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
+      <div className="flex items-start justify-between gap-3 border-b border-border p-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {Icon && (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-foreground">
+              <Icon className="h-4 w-4" />
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-foreground">{def?.label}</p>
+            <p className="text-[11px] text-muted-foreground">{def?.category} widget</p>
+          </div>
+        </div>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5">
+        <ToolbarButton title="Duplicate" onClick={() => duplicateWidget(screen.id, widget.id)}>
+          <Copy className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton title="Bring to front" onClick={() => reorderWidget(screen.id, widget.id, "front")}>
+          <ChevronsUp className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton title="Bring forward" onClick={() => reorderWidget(screen.id, widget.id, "forward")}>
+          <ChevronUp className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton title="Send backward" onClick={() => reorderWidget(screen.id, widget.id, "backward")}>
+          <ChevronDown className="h-3.5 w-3.5" />
+        </ToolbarButton>
+        <ToolbarButton title="Send to back" onClick={() => reorderWidget(screen.id, widget.id, "back")}>
+          <ChevronsDown className="h-3.5 w-3.5" />
+        </ToolbarButton>
+      </div>
+
+      <Tabs defaultValue="content" className="flex min-h-0 flex-1 flex-col">
+        <TabsList className="mx-3 mt-3 grid grid-cols-3">
+          <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="style">Style</TabsTrigger>
+          <TabsTrigger value="layout">Layout</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="content" className="mt-0 flex-1 overflow-y-auto p-4">
+          <WidgetConfigForm widget={widget} onChange={patchConfig} />
+        </TabsContent>
+
+        <TabsContent value="style" className="mt-0 flex-1 space-y-5 overflow-y-auto p-4">
+          <ColorBlock
+            label="Background"
+            value={widget.style?.backgroundColor ?? ""}
+            onChange={(v) => patchStyle({ backgroundColor: v })}
+            swatches={BG_SWATCHES}
+            allowClear
+          />
+          <ColorBlock
+            label="Text color"
+            value={widget.style?.textColor ?? ""}
+            onChange={(v) => patchStyle({ textColor: v })}
+            swatches={TEXT_SWATCHES}
+            allowClear
+          />
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Corner radius</Label>
+            <Input
+              value={widget.style?.borderRadius ?? ""}
+              placeholder="e.g. 12px"
+              onChange={(e) => patchStyle({ borderRadius: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">
+              Opacity ({Math.round((widget.style?.opacity ?? 1) * 100)}%)
+            </Label>
+            <Slider
+              value={[Math.round((widget.style?.opacity ?? 1) * 100)]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={(v) => patchStyle({ opacity: v[0] / 100 })}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="layout" className="mt-0 flex-1 space-y-5 overflow-y-auto p-4">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Position</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Stepper label="X" value={widget.x} min={0} max={GRID_COLS - widget.w} onChange={(v) => patch({ x: v })} />
+              <Stepper label="Y" value={widget.y} min={0} max={GRID_ROWS - widget.h} onChange={(v) => patch({ y: v })} />
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Size</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Stepper label="Width" value={widget.w} min={1} max={GRID_COLS - widget.x} onChange={(v) => patch({ w: v })} />
+              <Stepper label="Height" value={widget.h} min={1} max={GRID_ROWS - widget.y} onChange={(v) => patch({ h: v })} />
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Quick align</p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" size="sm" onClick={() => patch({ x: Math.floor((GRID_COLS - widget.w) / 2) })}>
+                Center horizontally
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => patch({ y: Math.floor((GRID_ROWS - widget.h) / 2) })}>
+                Center vertically
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => patch({ x: 0, w: GRID_COLS })}>
+                Fill row
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => patch({ y: 0, h: GRID_ROWS })}>
+                Fill column
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <div className="border-t border-border p-3">
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={() => {
+            removeWidget(screen.id, widget.id);
+            onClose();
+          }}
+        >
+          <Trash2 className="h-4 w-4" /> Delete widget
+        </Button>
+      </div>
+    </aside>
+  );
+}
+
+function ToolbarButton({
+  title,
+  onClick,
+  children,
+}: {
+  title: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onClick={onClick}
+      className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+    >
+      {children}
+    </button>
+  );
+}
+
+function ColorBlock({
+  label,
+  value,
+  onChange,
+  swatches,
+  allowClear,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  swatches: string[];
+  allowClear?: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs font-medium">{label}</Label>
+      <div className="flex gap-2">
+        <input
+          type="color"
+          value={value || "#000000"}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-12 cursor-pointer rounded-md border border-border bg-background"
+          aria-label={`${label} picker`}
+        />
+        <Input value={value} placeholder="transparent" onChange={(e) => onChange(e.target.value)} className="flex-1 font-mono text-xs" />
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {swatches.map((s) => (
+          <button
+            key={s || "none"}
+            type="button"
+            onClick={() => onChange(s)}
+            className={
+              "h-6 w-6 rounded-md border transition-transform hover:scale-110 " +
+              (value === s ? "border-blue ring-2 ring-blue/40" : "border-border")
+            }
+            style={s ? { background: s } : { backgroundImage: "repeating-linear-gradient(45deg, hsl(var(--muted)) 0 4px, transparent 4px 8px)" }}
+            aria-label={s ? `Use ${s}` : "Transparent"}
+            title={s || "Transparent"}
+          />
+        ))}
+        {allowClear && value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="ml-1 rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Stepper({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-[11px] text-muted-foreground">{label}</Label>
+      <Input
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => {
+          const n = Number(e.target.value);
+          if (!Number.isNaN(n)) onChange(Math.max(min, Math.min(max, n)));
+        }}
+      />
+    </div>
+  );
+}
