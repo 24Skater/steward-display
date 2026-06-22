@@ -253,14 +253,36 @@ export function Canvas({ screen }: { screen: Screen }) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
+      const meta = e.metaKey || e.ctrlKey;
+
+      if (meta && (e.key === "z" || e.key === "Z")) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          const next = redo();
+          if (next) setWidgets(screen.id, next);
+        } else {
+          const prev = undo();
+          if (prev) setWidgets(screen.id, prev);
+        }
+        return;
+      }
+      if (meta && (e.key === "y" || e.key === "Y")) {
+        e.preventDefault();
+        const next = redo();
+        if (next) setWidgets(screen.id, next);
+        return;
+      }
+
       if (selectedIds.length === 0) return;
       const step = e.shiftKey ? 4 : 1;
       if (e.key === "Delete" || e.key === "Backspace") {
+        pushHistory(screen.widgets);
         selectedIds.forEach((id) => removeWidget(screen.id, id));
         select([]);
         e.preventDefault();
-      } else if ((e.key === "d" || e.key === "D") && (e.metaKey || e.ctrlKey)) {
+      } else if ((e.key === "d" || e.key === "D") && meta) {
         e.preventDefault();
+        pushHistory(screen.widgets);
         const newIds: string[] = [];
         selectedIds.forEach((id) => {
           const c = duplicateWidget(screen.id, id);
@@ -271,6 +293,7 @@ export function Canvas({ screen }: { screen: Screen }) {
         select([]);
       } else if (e.key.startsWith("Arrow")) {
         e.preventDefault();
+        pushHistory(screen.widgets);
         selectedIds.forEach((id) => {
           const w = screen.widgets.find((x) => x.id === id);
           if (!w) return;
@@ -285,7 +308,7 @@ export function Canvas({ screen }: { screen: Screen }) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [selectedIds, screen.id, screen.widgets, removeWidget, updateWidget, select, duplicateWidget]);
+  }, [selectedIds, screen.id, screen.widgets, removeWidget, updateWidget, select, duplicateWidget, setWidgets, pushHistory, undo, redo]);
 
   const zoomOptions = useMemo(() => [0.25, 0.5, 0.75, 1], []);
 
