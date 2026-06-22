@@ -184,26 +184,9 @@ function EditorPage() {
           <span className="text-xs text-muted-foreground">Auto-saved</span>
         </div>
         <div className="flex items-center gap-2">
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Keyboard className="h-4 w-4" /> Shortcuts
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                <div className="space-y-1">
-                  <div><kbd>↑ ↓ ← →</kbd> Nudge 1 cell</div>
-                  <div><kbd>⇧ + arrows</kbd> Nudge 4 cells</div>
-                  <div><kbd>⌘/Ctrl + D</kbd> Duplicate</div>
-                  <div><kbd>Delete</kbd> Remove</div>
-                  <div><kbd>Esc</kbd> Deselect</div>
-                  <div><kbd>⌘/Ctrl + Z</kbd> Undo</div>
-                  <div><kbd>⌘/Ctrl + Y / ⇧ + ⌘/Ctrl + Z</kbd> Redo</div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
+            <Keyboard className="h-4 w-4" /> Shortcuts
+          </Button>
           <Button variant="outline" size="sm" onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}>
             <Eye className="h-4 w-4" /> Preview
           </Button>
