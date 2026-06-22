@@ -73,20 +73,23 @@ function SettingsPage() {
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const MAX_GRID_HISTORY_SIZE = 10;
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
   >(() => {
     const loaded = readJSON<unknown>(STORAGE_KEYS.gridDefaultsHistory, []);
     if (!Array.isArray(loaded)) return [];
-    return loaded.filter((entry): entry is { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
-      if (!entry || typeof entry !== "object") return false;
-      const e = entry as Record<string, unknown>;
-      return (
-        typeof e.defaultGridSize === "number" &&
-        typeof e.defaultSnapStep === "number" &&
-        typeof e.timestamp === "number"
-      );
-    });
+    return loaded
+      .filter((entry): entry is { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
+        if (!entry || typeof entry !== "object") return false;
+        const e = entry as Record<string, unknown>;
+        return (
+          typeof e.defaultGridSize === "number" &&
+          typeof e.defaultSnapStep === "number" &&
+          typeof e.timestamp === "number"
+        );
+      })
+      .slice(0, MAX_GRID_HISTORY_SIZE);
   });
 
   useEffect(() => {
@@ -149,7 +152,7 @@ function SettingsPage() {
 
   const confirmResetGridDefaults = () => {
     const previous = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
-    setGridDefaultsHistory((history) => [previous, ...history].slice(0, 10));
+    setGridDefaultsHistory((history) => [previous, ...history].slice(0, MAX_GRID_HISTORY_SIZE));
     resetGridDefaults();
     setResetDialogOpen(false);
     toast.success("Grid defaults reset to safe values.", {
@@ -165,7 +168,7 @@ function SettingsPage() {
 
   const revertGridDefaults = (entry: { defaultGridSize: number; defaultSnapStep: number }) => {
     const current = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
-    setGridDefaultsHistory((history) => [current, ...history].slice(0, 10));
+    setGridDefaultsHistory((history) => [current, ...history].slice(0, MAX_GRID_HISTORY_SIZE));
     update({ defaultGridSize: entry.defaultGridSize, defaultSnapStep: entry.defaultSnapStep });
     toast.success("Grid defaults reverted to selected snapshot.");
   };
