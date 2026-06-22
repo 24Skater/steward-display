@@ -79,6 +79,13 @@ function SettingsPage() {
   const [gridDefaultsWarnings, setGridDefaultsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [clearHistoryDialogOpen, setClearHistoryDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingGridImport, setPendingGridImport] = useState<{
+    gridDefaults: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
+    history: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
+    warnings: string[];
+    filename: string;
+  } | null>(null);
   
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
@@ -157,15 +164,41 @@ function SettingsPage() {
       setGridDefaultsWarnings([]);
       const text = await file.text();
       const { gridDefaults, history, warnings } = parseImportedGridDefaults(text);
-      update(gridDefaults);
-      setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
-      if (warnings.length > 0) {
-        setGridDefaultsWarnings(warnings);
-      } else {
-        toast.success("Grid defaults and history imported.");
-      }
+      setPendingGridImport({ gridDefaults, history, warnings, filename: file.name });
+      setImportDialogOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
+    }
+  };
+
+  const confirmReplaceGridImport = () => {
+    if (!pendingGridImport) return;
+    const { gridDefaults, history, warnings } = pendingGridImport;
+    update(gridDefaults);
+    setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
+    finishGridImport(warnings);
+  };
+
+  const confirmMergeGridImport = () => {
+    if (!pendingGridImport) return;
+    const { gridDefaults, history, warnings } = pendingGridImport;
+    const mergedHistory = [
+      { defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() },
+      ...gridDefaultsHistory,
+      ...history,
+    ].sort((a, b) => b.timestamp - a.timestamp);
+    update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
+    setGridDefaultsHistory(mergedHistory.slice(0, gridDefaults.maxGridHistorySize));
+    finishGridImport(warnings);
+  };
+
+  const finishGridImport = (warnings: string[]) => {
+    setImportDialogOpen(false);
+    setPendingGridImport(null);
+    if (warnings.length > 0) {
+      setGridDefaultsWarnings(warnings);
+    } else {
+      toast.success("Grid defaults and history imported.");
     }
   };
   const handleImportSettings = async (file: File) => {
@@ -452,6 +485,32 @@ function SettingsPage() {
               e.target.value = "";
             }}
           />
+
+          <AlertDialog open={importDialogOpen} onOpenChange={(open) => { setImportDialogOpen(open); if (!open) setPendingGridImport(null); }}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Import grid defaults</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {pendingGridImport && (
+                    <>
+                      <p>
+                        <strong>{pendingGridImport.filename}</strong> contains {pendingGridImport.history.length} snapshot
+                        {pendingGridImport.history.length === 1 ? "" : "s"} with grid size {pendingGridImport.gridDefaults.defaultGridSize} and snap step {pendingGridImport.gridDefaults.defaultSnapStep}.
+                      </p>
+                      <p className="mt-2">
+                        Choose <strong>Replace</strong> to overwrite your current grid defaults and history with the imported values, or <strong>Merge</strong> to keep your current grid defaults active and add the imported snapshots to your history.
+                      </p>
+                    </>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
+                <AlertDialogAction onClick={confirmReplaceGridImport}>Replace</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </Section>
 
