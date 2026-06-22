@@ -64,6 +64,7 @@ function SettingsPage() {
     weatherApiKey,
     defaultGridSize,
     defaultSnapStep,
+    maxGridHistorySize,
     update,
     resetGridDefaults,
   } = useSettingsStore();
@@ -73,7 +74,7 @@ function SettingsPage() {
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
-  const MAX_GRID_HISTORY_SIZE = 10;
+  
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
   >(() => {
@@ -89,12 +90,16 @@ function SettingsPage() {
           typeof e.timestamp === "number"
         );
       })
-      .slice(0, MAX_GRID_HISTORY_SIZE);
+      .slice(0, maxGridHistorySize);
   });
 
   useEffect(() => {
     writeJSON(STORAGE_KEYS.gridDefaultsHistory, gridDefaultsHistory);
   }, [gridDefaultsHistory]);
+
+  useEffect(() => {
+    setGridDefaultsHistory((history) => history.slice(0, maxGridHistorySize));
+  }, [maxGridHistorySize]);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
@@ -122,6 +127,7 @@ function SettingsPage() {
       weatherApiKey,
       defaultGridSize,
       defaultSnapStep,
+      maxGridHistorySize,
     };
     downloadJSON(
       `steward-settings-${new Date().toISOString().slice(0, 10)}.json`,
@@ -152,7 +158,7 @@ function SettingsPage() {
 
   const confirmResetGridDefaults = () => {
     const previous = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
-    setGridDefaultsHistory((history) => [previous, ...history].slice(0, MAX_GRID_HISTORY_SIZE));
+    setGridDefaultsHistory((history) => [previous, ...history].slice(0, maxGridHistorySize));
     resetGridDefaults();
     setResetDialogOpen(false);
     toast.success("Grid defaults reset to safe values.", {
@@ -168,7 +174,7 @@ function SettingsPage() {
 
   const revertGridDefaults = (entry: { defaultGridSize: number; defaultSnapStep: number }) => {
     const current = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
-    setGridDefaultsHistory((history) => [current, ...history].slice(0, MAX_GRID_HISTORY_SIZE));
+    setGridDefaultsHistory((history) => [current, ...history].slice(0, maxGridHistorySize));
     update({ defaultGridSize: entry.defaultGridSize, defaultSnapStep: entry.defaultSnapStep });
     toast.success("Grid defaults reverted to selected snapshot.");
   };
@@ -245,6 +251,20 @@ function SettingsPage() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="maxGridHistorySize">Max undo snapshots</Label>
+            <Input
+              id="maxGridHistorySize"
+              type="number"
+              min={1}
+              max={100}
+              value={maxGridHistorySize}
+              onChange={(e) => {
+                const value = Math.max(1, Math.min(100, Number(e.target.value) || 1));
+                update({ maxGridHistorySize: value });
+              }}
+            />
           </div>
         </div>
         <div className="pt-2">
