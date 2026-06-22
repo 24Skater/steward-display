@@ -7,21 +7,26 @@ export interface AnnouncementConfig {
   titleWeight?: number; // 100-900, default 700
   bodyColor?: string;
   bodySize?: number; // cqw units, default 3
+  spacing?: number; // px gap between title and body, default 12
+  titleLineHeight?: number; // unitless, default 1.1
+  bodyLineHeight?: number; // unitless, default 1.4
 }
 
 export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
   const align = config.align ?? "center";
   const titleCqw = config.titleSize ?? 5;
   const bodyCqw = config.bodySize ?? 3;
+  const gap = config.spacing ?? 12;
   return (
     <div className={`flex h-full w-full flex-col justify-center p-6 text-${align}`}>
       {config.title && (
         <h3
-          className="leading-tight"
+          className=""
           style={{
             fontSize: `clamp(1rem, ${titleCqw}cqw, ${Math.max(2, titleCqw * 0.6)}rem)`,
             color: config.titleColor || undefined,
             fontWeight: config.titleWeight ?? 700,
+            lineHeight: config.titleLineHeight ?? 1.1,
           }}
         >
           {config.title}
@@ -29,11 +34,13 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
       )}
       {config.body && (
         <p
-          className="mt-3 leading-snug"
+          className=""
           style={{
             fontSize: `clamp(0.8rem, ${bodyCqw}cqw, ${Math.max(1.25, bodyCqw * 0.6)}rem)`,
             color: config.bodyColor || undefined,
             opacity: config.bodyColor ? 1 : 0.9,
+            lineHeight: config.bodyLineHeight ?? 1.4,
+            marginTop: config.title ? gap : 0,
           }}
         >
           {config.body}
