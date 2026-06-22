@@ -12,17 +12,29 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { auditBrandContrast, type PairResult } from "../src/lib/contrast";
+import { loadContrastConfig } from "../src/lib/contrast.config";
 
-const results = auditBrandContrast();
-const required = results.filter((r) => r.use !== "decorative");
+const config = loadContrastConfig();
+const results = auditBrandContrast(config);
+const required = results.filter((r) => r.required);
 const failures = required.filter((r) => !r.passAA);
 
 const pad = (s: string, n: number) => s.padEnd(n);
 
+console.log(`Steward brand contrast audit`);
 console.log(
-  `Steward brand contrast audit · ${required.length} required pairing(s), ${
-    results.length - required.length
-  } decorative\n`,
+  `  Mode: ${config.requireAAA ? "AAA" : "AA"}${
+    config.failOnDecorative ? " · decorative pairings enforced" : ""
+  }`,
+);
+console.log(
+  `  Thresholds: body ≥ ${config.thresholds.body}:1, large ≥ ${config.thresholds.large}:1, ui ≥ ${config.thresholds.ui}:1, decorative ≥ ${config.thresholds.decorative}:1`,
+);
+if (config.source.jsonPath) console.log(`  Config file: ${config.source.jsonPath}`);
+if (config.source.envOverrides.length)
+  console.log(`  Env overrides: ${config.source.envOverrides.join(", ")}`);
+console.log(
+  `  ${required.length} required pairing(s), ${results.length - required.length} informational\n`,
 );
 
 for (const r of results) {
@@ -65,10 +77,16 @@ mkdirSync(outDir, { recursive: true });
 const generatedAt = new Date().toISOString();
 const summary = {
   generatedAt,
+  config: {
+    requireAAA: config.requireAAA,
+    failOnDecorative: config.failOnDecorative,
+    thresholds: config.thresholds,
+    source: config.source,
+  },
   totals: {
     pairings: results.length,
     required: required.length,
-    decorative: results.length - required.length,
+    informational: results.length - required.length,
     passingAA: required.filter((r) => r.passAA).length,
     passingAAA: required.filter((r) => r.passAAA).length,
     failing: failures.length,
