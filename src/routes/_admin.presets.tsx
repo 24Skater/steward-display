@@ -1,11 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Pencil, Trash2, Sparkles, Search } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Search, X } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { usePresetStore, type CustomPreset } from "@/store/presetStore";
-import { getWidgetDefinition } from "@/lib/widgetRegistry";
+import { getWidgetDefinition, WIDGET_DEFINITIONS } from "@/lib/widgetRegistry";
 import type { WidgetType } from "@/types";
 import { toast } from "sonner";
 
