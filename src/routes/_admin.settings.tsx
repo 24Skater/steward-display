@@ -124,7 +124,12 @@ function SettingsPage() {
   };
 
   const handleResetGridDefaults = () => {
+    setResetDialogOpen(true);
+  };
+
+  const confirmResetGridDefaults = () => {
     resetGridDefaults();
+    setResetDialogOpen(false);
     toast.success("Grid defaults reset to safe values.");
   };
 
