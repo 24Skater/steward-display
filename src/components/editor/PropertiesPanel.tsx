@@ -49,6 +49,7 @@ export function PropertiesPanel({
   const removeWidget = useScreenStore((s) => s.removeWidget);
   const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
   const reorderWidget = useScreenStore((s) => s.reorderWidget);
+  const pushHistory = useEditorStore((s) => s.pushHistory);
   const def = getWidgetDefinition(widget.widgetType);
   const Icon = def?.icon;
 
