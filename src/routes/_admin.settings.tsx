@@ -129,9 +129,20 @@ function SettingsPage() {
   };
 
   const confirmResetGridDefaults = () => {
+    setPreviousGridSettings({ defaultGridSize, defaultSnapStep });
     resetGridDefaults();
     setResetDialogOpen(false);
-    toast.success("Grid defaults reset to safe values.");
+    toast.success("Grid defaults reset to safe values.", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          if (previousGridSettings) {
+            update(previousGridSettings);
+            toast.success("Previous grid defaults restored.");
+          }
+        },
+      },
+    });
   };
 
   return (
