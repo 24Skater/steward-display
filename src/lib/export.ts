@@ -15,6 +15,7 @@ const otherSettingsSchema = z.object({
   defaultOrientation: z.enum(["landscape", "portrait"]).optional(),
   defaultBackground: z.string().optional(),
   weatherApiKey: z.string().optional(),
+  maxGridHistorySize: z.number().int().min(1).max(100).optional(),
 });
 
 function validateGridField(
