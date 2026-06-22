@@ -362,13 +362,17 @@ function SettingsPage() {
   const confirmMergeGridImport = () => {
     if (!pendingGridImport) return;
     const { gridDefaults, history, warnings } = pendingGridImport;
+    if (importGridDefaults) {
+      update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
+    }
     const mergedHistory = [
-      { defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() },
+      ...(importGridDefaults
+        ? [{ defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() }]
+        : []),
       ...gridDefaultsHistory,
-      ...history,
+      ...(importHistory ? history : []),
     ].sort((a, b) => b.timestamp - a.timestamp);
-    update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
-    setGridDefaultsHistory(mergedHistory.slice(0, gridDefaults.maxGridHistorySize));
+    setGridDefaultsHistory(mergedHistory.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
     finishGridImport(warnings);
   };
 
