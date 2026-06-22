@@ -256,7 +256,6 @@ export function ContrastAudit() {
   }, [required]);
 
   const [highlightVar, setHighlightVar] = useState<string | null>(null);
-  const [showOnlyFailing, setShowOnlyFailing] = useState(false);
   const jumpToVar = useCallback((v: string) => {
     setHighlightVar(v);
     const el = document.getElementById(`token-${v}`);
