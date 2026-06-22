@@ -13,6 +13,7 @@ import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin.index'
 import { Route as AdminWidgetsRouteImport } from './routes/_admin.widgets'
 import { Route as AdminSettingsRouteImport } from './routes/_admin.settings'
+import { Route as AdminPresetsRouteImport } from './routes/_admin.presets'
 import { Route as ScreensIdPreviewRouteImport } from './routes/screens.$id.preview'
 import { Route as AdminScreensNewRouteImport } from './routes/_admin.screens.new'
 import { Route as AdminScreensIdEditRouteImport } from './routes/_admin.screens.$id.edit'
@@ -36,6 +37,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPresetsRoute = AdminPresetsRouteImport.update({
+  id: '/presets',
+  path: '/presets',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ScreensIdPreviewRoute = ScreensIdPreviewRouteImport.update({
   id: '/screens/$id/preview',
   path: '/screens/$id/preview',
@@ -54,6 +60,7 @@ const AdminScreensIdEditRoute = AdminScreensIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
+  '/presets': typeof AdminPresetsRoute
   '/settings': typeof AdminSettingsRoute
   '/widgets': typeof AdminWidgetsRoute
   '/screens/new': typeof AdminScreensNewRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
   '/screens/$id/edit': typeof AdminScreensIdEditRoute
 }
 export interface FileRoutesByTo {
+  '/presets': typeof AdminPresetsRoute
   '/settings': typeof AdminSettingsRoute
   '/widgets': typeof AdminWidgetsRoute
   '/': typeof AdminIndexRoute
@@ -71,6 +79,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_admin': typeof AdminRouteWithChildren
+  '/_admin/presets': typeof AdminPresetsRoute
   '/_admin/settings': typeof AdminSettingsRoute
   '/_admin/widgets': typeof AdminWidgetsRoute
   '/_admin/': typeof AdminIndexRoute
@@ -82,6 +91,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/presets'
     | '/settings'
     | '/widgets'
     | '/screens/new'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/screens/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/presets'
     | '/settings'
     | '/widgets'
     | '/'
@@ -98,6 +109,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_admin'
+    | '/_admin/presets'
     | '/_admin/settings'
     | '/_admin/widgets'
     | '/_admin/'
@@ -141,6 +153,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/presets': {
+      id: '/_admin/presets'
+      path: '/presets'
+      fullPath: '/presets'
+      preLoaderRoute: typeof AdminPresetsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/screens/$id/preview': {
       id: '/screens/$id/preview'
       path: '/screens/$id/preview'
@@ -166,6 +185,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminPresetsRoute: typeof AdminPresetsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminWidgetsRoute: typeof AdminWidgetsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -174,6 +194,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminPresetsRoute: AdminPresetsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminWidgetsRoute: AdminWidgetsRoute,
   AdminIndexRoute: AdminIndexRoute,
