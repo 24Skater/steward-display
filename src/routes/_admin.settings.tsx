@@ -164,15 +164,41 @@ function SettingsPage() {
       setGridDefaultsWarnings([]);
       const text = await file.text();
       const { gridDefaults, history, warnings } = parseImportedGridDefaults(text);
-      update(gridDefaults);
-      setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
-      if (warnings.length > 0) {
-        setGridDefaultsWarnings(warnings);
-      } else {
-        toast.success("Grid defaults and history imported.");
-      }
+      setPendingGridImport({ gridDefaults, history, warnings, filename: file.name });
+      setImportDialogOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
+    }
+  };
+
+  const confirmReplaceGridImport = () => {
+    if (!pendingGridImport) return;
+    const { gridDefaults, history, warnings } = pendingGridImport;
+    update(gridDefaults);
+    setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
+    finishGridImport(warnings);
+  };
+
+  const confirmMergeGridImport = () => {
+    if (!pendingGridImport) return;
+    const { gridDefaults, history, warnings } = pendingGridImport;
+    const mergedHistory = [
+      { defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() },
+      ...gridDefaultsHistory,
+      ...history,
+    ].sort((a, b) => b.timestamp - a.timestamp);
+    update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
+    setGridDefaultsHistory(mergedHistory.slice(0, gridDefaults.maxGridHistorySize));
+    finishGridImport(warnings);
+  };
+
+  const finishGridImport = (warnings: string[]) => {
+    setImportDialogOpen(false);
+    setPendingGridImport(null);
+    if (warnings.length > 0) {
+      setGridDefaultsWarnings(warnings);
+    } else {
+      toast.success("Grid defaults and history imported.");
     }
   };
   const handleImportSettings = async (file: File) => {
