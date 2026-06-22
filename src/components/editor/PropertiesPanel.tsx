@@ -249,7 +249,10 @@ export function PropertiesPanel({
                     {previewPreset && (
                       <button
                         type="button"
-                        onClick={() => applyPreset(previewPreset)}
+                        onClick={() => {
+                          applyPreset(previewPreset);
+                          toast.success(`Applied preset “${previewPreset.label}”`);
+                        }}
                         className="inline-flex items-center gap-1 rounded-md bg-blue px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue/90"
                       >
                         Apply
