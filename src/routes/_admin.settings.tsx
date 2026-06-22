@@ -168,7 +168,7 @@ function SettingsPage() {
 
   const revertGridDefaults = (entry: { defaultGridSize: number; defaultSnapStep: number }) => {
     const current = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
-    setGridDefaultsHistory((history) => [current, ...history].slice(0, 10));
+    setGridDefaultsHistory((history) => [current, ...history].slice(0, MAX_GRID_HISTORY_SIZE));
     update({ defaultGridSize: entry.defaultGridSize, defaultSnapStep: entry.defaultSnapStep });
     toast.success("Grid defaults reverted to selected snapshot.");
   };
