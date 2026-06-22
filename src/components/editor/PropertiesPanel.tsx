@@ -77,26 +77,55 @@ export function PropertiesPanel({
   };
 
   const applyPresetWithUndo = (preset: WidgetPreset) => {
-    const snapshot = {
+    const before = {
       config: { ...widget.config },
       style: widget.style ? { ...widget.style } : undefined,
     };
+    const after = {
+      config: { ...widget.config, ...(preset.config ?? {}) },
+      style: preset.style
+        ? { ...(widget.style ?? {}), ...preset.style }
+        : widget.style
+          ? { ...widget.style }
+          : undefined,
+    };
+
     applyPreset(preset);
-    toast.success(`Applied preset “${preset.label}”`, {
-      action: {
-        label: "Undo",
-        onClick: () => {
-          updateWidget(screen.id, widget.id, {
-            config: snapshot.config,
-            style: snapshot.style,
-          });
-          toast.success(`Reverted “${preset.label}”`);
+
+    const showUndoToast = () => {
+      toast.success(`Applied preset "${preset.label}"`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            updateWidget(screen.id, widget.id, {
+              config: before.config,
+              style: before.style,
+            });
+            showRedoToast();
+          },
         },
-      },
-    });
+      });
+    };
+
+    const showRedoToast = () => {
+      toast.success(`Reverted "${preset.label}"`, {
+        action: {
+          label: "Redo",
+          onClick: () => {
+            updateWidget(screen.id, widget.id, {
+              config: after.config,
+              style: after.style,
+            });
+            showUndoToast();
+          },
+        },
+      });
+    };
+
+    showUndoToast();
   };
 
-  const previewWidget = useMemo<WidgetInstance>(() => {
+const previewWidget = useMemo<WidgetInstance>(() => {
     const base = {
       id: "preset-preview",
       widgetType: widget.widgetType,
