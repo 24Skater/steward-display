@@ -291,6 +291,21 @@ export function Canvas({ screen }: { screen: Screen }) {
         setZoom(1);
         return;
       }
+      if (e.key === "g" || e.key === "G") {
+        e.preventDefault();
+        toggleGrid();
+        return;
+      }
+      if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        toggleSnap();
+        return;
+      }
+      if (e.key === "a" || e.key === "A") {
+        e.preventDefault();
+        toggleAlignment();
+        return;
+      }
 
       if (selectedIds.length === 0) return;
       const step = e.shiftKey ? 4 : 1;
