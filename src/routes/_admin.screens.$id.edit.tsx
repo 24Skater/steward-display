@@ -59,6 +59,10 @@ function EditorPage() {
   useEffect(() => () => reset(), [reset]);
 
   useEffect(() => {
+    if (!shortcutsOpen) setShortcutQuery("");
+  }, [shortcutsOpen]);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
       if (e.key === "?" && !e.metaKey && !e.ctrlKey && !e.altKey) {
