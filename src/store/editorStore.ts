@@ -5,12 +5,16 @@ interface EditorState {
   selectedIds: string[];
   zoom: number;
   showGrid: boolean;
+  snapToGrid: boolean;
+  showAlignment: boolean;
   history: WidgetInstance[][];
   future: WidgetInstance[][];
   select: (ids: string[]) => void;
   toggleSelect: (id: string, additive: boolean) => void;
   setZoom: (z: number) => void;
   toggleGrid: () => void;
+  toggleSnap: () => void;
+  toggleAlignment: () => void;
   pushHistory: (snapshot: WidgetInstance[]) => void;
   undo: () => WidgetInstance[] | null;
   redo: () => WidgetInstance[] | null;
