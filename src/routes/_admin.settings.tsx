@@ -16,6 +16,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useScreenStore } from "@/store/screenStore";
 import { downloadJSON, exportScreensToJSON, parseImportedScreens } from "@/lib/export";
 import { toast } from "sonner";
+import { ContrastAudit } from "@/components/settings/ContrastAudit";
 
 export const Route = createFileRoute("/_admin/settings")({
   head: () => ({ meta: [{ title: "Settings — Steward Display" }] }),
@@ -125,6 +126,13 @@ function SettingsPage() {
         >
           View brand guide on GitHub →
         </a>
+      </Section>
+
+      <Section
+        title="Accessibility · Brand contrast audit"
+        description="Live WCAG 2.1 contrast check for every brand token pairing. Run on every build; failures also log to the dev console."
+      >
+        <ContrastAudit />
       </Section>
     </main>
   );
