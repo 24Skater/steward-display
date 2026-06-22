@@ -79,6 +79,7 @@ export function PropertiesPanel({
   };
 
   const applyPresetWithUndo = (preset: WidgetPreset) => {
+    pushHistory(screen.widgets);
     const before = {
       config: { ...widget.config },
       style: widget.style ? { ...widget.style } : undefined,
