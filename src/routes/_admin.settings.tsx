@@ -249,6 +249,45 @@ function SettingsPage() {
         </AlertDialog>
       </Section>
 
+      {gridDefaultsHistory.length > 0 && (
+        <Section title="Grid defaults history" description="Revert to previous grid default snapshots from this session.">
+          <div className="space-y-3">
+            {gridDefaultsHistory.map((entry, index) => (
+              <div
+                key={`${entry.timestamp}-${index}`}
+                className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+              >
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">
+                    Grid size {entry.defaultGridSize}, snap step {entry.defaultSnapStep}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(entry.timestamp).toLocaleString()}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => revertGridDefaults(entry)}
+                >
+                  Revert
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={() => setGridDefaultsHistory([])}
+            >
+              Clear history
+            </Button>
+          </div>
+        </Section>
+      )}
+
       <Section title="Data sources" description="Connect external services. Wiring lands in a future release.">
         <div className="space-y-1.5">
           <Label htmlFor="weather">OpenWeatherMap API key</Label>
