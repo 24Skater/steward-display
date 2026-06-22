@@ -71,6 +71,8 @@ export interface Settings {
   defaultGridSize: number;
   defaultSnapStep: number;
   maxGridHistorySize: number;
+  gridImportIncludeDefaults?: boolean;
+  gridImportIncludeHistory?: boolean;
 }
 
 export const RESOLUTION_DIMENSIONS: Record<Exclude<ScreenResolution, "custom">, { w: number; h: number }> = {
