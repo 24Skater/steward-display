@@ -231,6 +231,14 @@ export function ContrastAudit() {
   const results = useMemo(() => auditBrandContrast(active), [active]);
   const light = results.filter((r) => r.theme === "light");
   const dark = results.filter((r) => r.theme === "dark");
+  const filteredLight = useMemo(
+    () => light.filter((r) => !showOnlyFailing || (r.required && !r.passAA)),
+    [light, showOnlyFailing],
+  );
+  const filteredDark = useMemo(
+    () => dark.filter((r) => !showOnlyFailing || (r.required && !r.passAA)),
+    [dark, showOnlyFailing],
+  );
   const required = results.filter((r) => r.required);
   const failing = required.filter((r) => !r.passAA).length;
   const level: "AA" | "AAA" = active.requireAAA ? "AAA" : "AA";
@@ -246,6 +254,7 @@ export function ContrastAudit() {
   }, [required]);
 
   const [highlightVar, setHighlightVar] = useState<string | null>(null);
+  const [showOnlyFailing, setShowOnlyFailing] = useState(false);
   const jumpToVar = useCallback((v: string) => {
     setHighlightVar(v);
     const el = document.getElementById(`token-${v}`);
