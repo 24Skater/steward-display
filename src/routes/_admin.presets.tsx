@@ -90,14 +90,45 @@ function PresetsPage() {
         subtitle="Manage saved configurations. Presets stay scoped to the widget type they were saved from — edit and delete them all here."
       />
 
-      <div className="relative max-w-sm">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search presets…"
-          className="pl-9"
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search presets…"
+            className="pl-9"
+          />
+        </div>
+        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as WidgetType | "all")}>
+          <SelectTrigger className="w-full sm:w-52">
+            <SelectValue placeholder="All widget types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All widget types</SelectItem>
+            {availableTypes.map((type) => {
+              const def = getWidgetDefinition(type as WidgetType);
+              return (
+                <SelectItem key={type} value={type}>
+                  {def?.label ?? type}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        {activeFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setQuery("");
+              setTypeFilter("all");
+            }}
+          >
+            <X className="mr-1 h-3.5 w-3.5" />
+            Clear filters
+          </Button>
+        )}
       </div>
 
       {presets.length === 0 ? (
@@ -107,8 +138,9 @@ function PresetsPage() {
           body="Open a screen, select a widget, then click ‘Save current’ in its settings panel to capture a preset."
         />
       ) : grouped.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No presets match “{query}”.</p>
+        <p className="text-sm text-muted-foreground">No presets match your filters.</p>
       ) : (
+
         <div className="space-y-6">
           {grouped.map(([type, list]) => {
             const def = getWidgetDefinition(type as WidgetType);
