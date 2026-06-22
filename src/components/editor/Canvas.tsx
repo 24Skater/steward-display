@@ -161,11 +161,13 @@ function CanvasStage({
   cellW,
   cellH,
   effective,
+  gridSize,
 }: {
   screen: Screen;
   cellW: number;
   cellH: number;
   effective: number;
+  gridSize: number;
 }) {
   const { setNodeRef } = useDroppable({ id: "canvas-stage" });
   const showGrid = useEditorStore((s) => s.showGrid);
@@ -194,7 +196,7 @@ function CanvasStage({
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)`,
-            backgroundSize: `${cellW}px ${cellH}px`,
+            backgroundSize: `${gridSize * cellW}px ${gridSize * cellH}px`,
           }}
         />
       )}
@@ -238,6 +240,8 @@ export function Canvas({ screen }: { screen: Screen }) {
   const toggleSnap = useEditorStore((s) => s.toggleSnap);
   const snapStep = useEditorStore((s) => s.snapStep);
   const setSnapStep = useEditorStore((s) => s.setSnapStep);
+  const gridSize = useEditorStore((s) => s.gridSize);
+  const setGridSize = useEditorStore((s) => s.setGridSize);
   const showAlignment = useEditorStore((s) => s.showAlignment);
   const toggleAlignment = useEditorStore((s) => s.toggleAlignment);
   const selectedIds = useEditorStore((s) => s.selectedIds);
@@ -249,6 +253,7 @@ export function Canvas({ screen }: { screen: Screen }) {
   const removeWidget = useScreenStore((s) => s.removeWidget);
   const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
   const setWidgets = useScreenStore((s) => s.setWidgets);
+  const gridStep = snapToGrid ? snapStep : gridSize;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -378,6 +383,7 @@ export function Canvas({ screen }: { screen: Screen }) {
           cellW={cellW}
           cellH={cellH}
           effective={effective}
+          gridSize={gridStep}
         />
         </div>
       </div>
@@ -400,6 +406,24 @@ export function Canvas({ screen }: { screen: Screen }) {
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Toggle grid</span>
             <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">G</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <select
+              aria-label="Grid size (cells)"
+              value={gridStep}
+              onChange={(e) => setGridSize(Number(e.target.value))}
+              disabled={snapToGrid}
+              className="h-6 rounded-full border border-border bg-card px-1.5 text-xs text-foreground focus:outline-none disabled:opacity-50"
+            >
+              {[1, 2, 4, 6, 8, 12, 16].map((n) => (
+                <option key={n} value={n}>{n} cells</option>
+              ))}
+            </select>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            {snapToGrid ? "Grid size matches snap step while Snap is enabled" : "Grid size"}
           </TooltipContent>
         </Tooltip>
         <Tooltip>
