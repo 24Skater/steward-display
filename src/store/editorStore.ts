@@ -7,6 +7,7 @@ interface EditorState {
   showGrid: boolean;
   snapToGrid: boolean;
   snapStep: number;
+  gridSize: number;
   showAlignment: boolean;
   history: WidgetInstance[][];
   future: WidgetInstance[][];
@@ -16,10 +17,11 @@ interface EditorState {
   toggleGrid: () => void;
   toggleSnap: () => void;
   setSnapStep: (n: number) => void;
+  setGridSize: (n: number) => void;
   toggleAlignment: () => void;
   pushHistory: (snapshot: WidgetInstance[]) => void;
-  undo: () => WidgetInstance[] | null;
-  redo: () => WidgetInstance[] | null;
+  undo: () => WidgetInstance[][] | null;
+  redo: () => WidgetInstance[][] | null;
   reset: () => void;
 }
 
@@ -29,6 +31,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   showGrid: true,
   snapToGrid: false,
   snapStep: 4,
+  gridSize: 1,
   showAlignment: false,
   history: [],
   future: [],
@@ -47,6 +50,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   toggleGrid: () => set({ showGrid: !get().showGrid }),
   toggleSnap: () => set({ snapToGrid: !get().snapToGrid }),
   setSnapStep: (n) => set({ snapStep: Math.max(1, Math.min(32, Math.round(n))) }),
+  setGridSize: (n) => set({ gridSize: Math.max(1, Math.min(32, Math.round(n))) }),
   toggleAlignment: () => set({ showAlignment: !get().showAlignment }),
   pushHistory: (snapshot) => {
     const next = [...get().history, snapshot].slice(-50);
