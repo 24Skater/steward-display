@@ -78,7 +78,7 @@ function SettingsPage() {
   >(() => {
     const loaded = readJSON<unknown>(STORAGE_KEYS.gridDefaultsHistory, []);
     if (!Array.isArray(loaded)) return [];
-    return loaded.filter((entry): entry is typeof loaded[number] & { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
+    return loaded.filter((entry): entry is { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
       if (!entry || typeof entry !== "object") return false;
       const e = entry as Record<string, unknown>;
       return (
