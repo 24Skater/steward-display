@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useScreenStore } from "@/store/screenStore";
+import { useSettingsStore } from "@/store/settingsStore";
 import { toast } from "sonner";
 import type { ScreenResolution } from "@/types";
 
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/_admin/screens/new")({
 function NewScreenPage() {
   const navigate = useNavigate();
   const create = useScreenStore((s) => s.createScreen);
+  const defaultGridSize = useSettingsStore((s) => s.defaultGridSize);
+  const defaultSnapStep = useSettingsStore((s) => s.defaultSnapStep);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
@@ -45,6 +48,8 @@ function NewScreenPage() {
       customWidth: resolution === "custom" ? customWidth : undefined,
       customHeight: resolution === "custom" ? customHeight : undefined,
       backgroundColor,
+      gridSize: defaultGridSize,
+      snapStep: defaultSnapStep,
     });
     toast.success("Screen created.");
     navigate({ to: "/screens/$id/edit", params: { id: s.id } });

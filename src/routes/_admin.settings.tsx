@@ -34,7 +34,16 @@ function Section({ title, description, children }: { title: string; description?
 }
 
 function SettingsPage() {
-  const { orgName, timezone, defaultOrientation, defaultBackground, weatherApiKey, update } = useSettingsStore();
+  const {
+    orgName,
+    timezone,
+    defaultOrientation,
+    defaultBackground,
+    weatherApiKey,
+    defaultGridSize,
+    defaultSnapStep,
+    update,
+  } = useSettingsStore();
   const screens = useScreenStore((s) => s.screens);
   const importScreens = useScreenStore((s) => s.importScreens);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -85,6 +94,28 @@ function SettingsPage() {
           <div className="space-y-1.5">
             <Label>Default background</Label>
             <Input value={defaultBackground} onChange={(e) => update({ defaultBackground: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Default grid size (cells)</Label>
+            <Select value={String(defaultGridSize)} onValueChange={(v) => update({ defaultGridSize: Number(v) })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[1, 2, 4, 6, 8, 12, 16].map((n) => (
+                  <SelectItem key={n} value={String(n)}>{n} cells</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Default snap step (cells)</Label>
+            <Select value={String(defaultSnapStep)} onValueChange={(v) => update({ defaultSnapStep: Number(v) })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[1, 2, 4, 6, 8, 12, 16].map((n) => (
+                  <SelectItem key={n} value={String(n)}>{n} cells</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </Section>

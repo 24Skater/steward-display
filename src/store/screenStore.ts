@@ -52,6 +52,8 @@ export const useScreenStore = create<ScreenState>((set, get) => ({
       showWatermark: input.showWatermark ?? false,
       widgets: input.widgets ?? [],
       schedule: input.schedule,
+      gridSize: input.gridSize,
+      snapStep: input.snapStep,
       createdAt: now,
       updatedAt: now,
     };

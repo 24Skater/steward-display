@@ -68,6 +68,8 @@ export interface Settings {
   defaultOrientation: "landscape" | "portrait";
   defaultBackground: string;
   weatherApiKey?: string;
+  defaultGridSize: number;
+  defaultSnapStep: number;
 }
 
 export const RESOLUTION_DIMENSIONS: Record<Exclude<ScreenResolution, "custom">, { w: number; h: number }> = {
