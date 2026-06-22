@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download, Upload, X, AlertTriangle, RotateCcw } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ import {
   exportSettingsToJSON,
   parseImportedSettings,
 } from "@/lib/export";
+import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
 import { toast } from "sonner";
 import { ContrastAudit } from "@/components/settings/ContrastAudit";
 
@@ -74,7 +75,23 @@ function SettingsPage() {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
-  >([]);
+  >(() => {
+    const loaded = readJSON<unknown>(STORAGE_KEYS.gridDefaultsHistory, []);
+    if (!Array.isArray(loaded)) return [];
+    return loaded.filter((entry): entry is { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
+      if (!entry || typeof entry !== "object") return false;
+      const e = entry as Record<string, unknown>;
+      return (
+        typeof e.defaultGridSize === "number" &&
+        typeof e.defaultSnapStep === "number" &&
+        typeof e.timestamp === "number"
+      );
+    });
+  });
+
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.gridDefaultsHistory, gridDefaultsHistory);
+  }, [gridDefaultsHistory]);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
