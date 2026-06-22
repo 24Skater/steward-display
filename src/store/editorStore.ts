@@ -5,12 +5,16 @@ interface EditorState {
   selectedIds: string[];
   zoom: number;
   showGrid: boolean;
+  snapToGrid: boolean;
+  showAlignment: boolean;
   history: WidgetInstance[][];
   future: WidgetInstance[][];
   select: (ids: string[]) => void;
   toggleSelect: (id: string, additive: boolean) => void;
   setZoom: (z: number) => void;
   toggleGrid: () => void;
+  toggleSnap: () => void;
+  toggleAlignment: () => void;
   pushHistory: (snapshot: WidgetInstance[]) => void;
   undo: () => WidgetInstance[] | null;
   redo: () => WidgetInstance[] | null;
@@ -21,6 +25,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   selectedIds: [],
   zoom: 0.5,
   showGrid: true,
+  snapToGrid: false,
+  showAlignment: false,
   history: [],
   future: [],
   select: (ids) => set({ selectedIds: ids }),
@@ -36,6 +42,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
   setZoom: (zoom) => set({ zoom }),
   toggleGrid: () => set({ showGrid: !get().showGrid }),
+  toggleSnap: () => set({ snapToGrid: !get().snapToGrid }),
+  toggleAlignment: () => set({ showAlignment: !get().showAlignment }),
   pushHistory: (snapshot) => {
     const next = [...get().history, snapshot].slice(-50);
     set({ history: next, future: [] });
