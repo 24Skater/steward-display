@@ -47,19 +47,30 @@ function PresetsPage() {
   const updatePreset = usePresetStore((s) => s.update);
   const removePreset = usePresetStore((s) => s.remove);
   const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<WidgetType | "all">("all");
   const [editing, setEditing] = useState<CustomPreset | null>(null);
   const [deleting, setDeleting] = useState<CustomPreset | null>(null);
 
+  const availableTypes = useMemo(() => {
+    const types = new Set<WidgetType>();
+    for (const p of presets) types.add(p.widgetType);
+    return [...types].sort((a, b) => a.localeCompare(b));
+  }, [presets]);
+
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const filtered = q
-      ? presets.filter(
-          (p) =>
-            p.label.toLowerCase().includes(q) ||
-            (p.description ?? "").toLowerCase().includes(q) ||
-            p.widgetType.toLowerCase().includes(q),
-        )
-      : presets;
+    let filtered = presets;
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((p) => p.widgetType === typeFilter);
+    }
+    if (q) {
+      filtered = filtered.filter(
+        (p) =>
+          p.label.toLowerCase().includes(q) ||
+          (p.description ?? "").toLowerCase().includes(q) ||
+          p.widgetType.toLowerCase().includes(q),
+      );
+    }
     const map = new Map<string, CustomPreset[]>();
     for (const p of filtered) {
       const list = map.get(p.widgetType) ?? [];
@@ -67,7 +78,10 @@ function PresetsPage() {
       map.set(p.widgetType, list);
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [presets, query]);
+  }, [presets, query, typeFilter]);
+
+  const activeFilters = query.trim() || typeFilter !== "all";
+
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
