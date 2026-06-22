@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, Undo2, Redo2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Screen, WidgetInstance } from "@/types";
 import { getScreenDimensions } from "@/types";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
