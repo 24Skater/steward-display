@@ -414,16 +414,20 @@ export function ContrastAudit() {
 
 function TokenReference({
   tokens,
+  visibleVars,
   sourcePath,
   failingVars,
   highlightVar,
 }: {
   tokens: Record<string, TokenLocation[]>;
+  visibleVars: Set<string>;
   sourcePath: string | undefined;
   failingVars: Set<string>;
   highlightVar: string | null;
 }) {
-  const names = Object.keys(tokens).sort();
+  const names = Object.keys(tokens)
+    .filter((n) => visibleVars.has(n))
+    .sort();
   if (!names.length) return null;
   return (
     <section
