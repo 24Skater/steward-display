@@ -56,6 +56,7 @@ function EditorPage() {
   const [skipTemplates, setSkipTemplates] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [shortcutQuery, setShortcutQuery] = useState("");
+  const [shortcutTab, setShortcutTab] = useState("all");
 
   useEffect(() => () => reset(), [reset]);
 
