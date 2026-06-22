@@ -220,9 +220,13 @@ export function Canvas({ screen }: { screen: Screen }) {
   const toggleGrid = useEditorStore((s) => s.toggleGrid);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const select = useEditorStore((s) => s.select);
+  const pushHistory = useEditorStore((s) => s.pushHistory);
+  const undo = useEditorStore((s) => s.undo);
+  const redo = useEditorStore((s) => s.redo);
   const updateWidget = useScreenStore((s) => s.updateWidget);
   const removeWidget = useScreenStore((s) => s.removeWidget);
   const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
+  const setWidgets = useScreenStore((s) => s.setWidgets);
 
   useEffect(() => {
     if (!containerRef.current) return;
