@@ -1,4 +1,33 @@
+import { z } from "zod";
 import type { Screen, Settings } from "@/types";
+
+const GRID_SIZE_OPTIONS = [1, 2, 4, 6, 8, 12, 16] as const;
+const DEFAULT_GRID_SIZE = 1;
+const DEFAULT_SNAP_STEP = 4;
+
+const isValidGridValue = (v: number) =>
+  (GRID_SIZE_OPTIONS as readonly number[]).includes(v);
+
+const importedSettingsSchema = z.object({
+  orgName: z.string().optional(),
+  timezone: z.string().optional(),
+  theme: z.enum(["light", "dark"]).optional(),
+  defaultOrientation: z.enum(["landscape", "portrait"]).optional(),
+  defaultBackground: z.string().optional(),
+  weatherApiKey: z.string().optional(),
+  defaultGridSize: z
+    .number()
+    .int()
+    .refine(isValidGridValue, { message: "Invalid default grid size" })
+    .optional()
+    .catch(DEFAULT_GRID_SIZE),
+  defaultSnapStep: z
+    .number()
+    .int()
+    .refine(isValidGridValue, { message: "Invalid default snap step" })
+    .optional()
+    .catch(DEFAULT_SNAP_STEP),
+});
 
 export function exportScreensToJSON(screens: Screen[]): string {
   return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), screens }, null, 2);
@@ -39,5 +68,5 @@ export function parseImportedSettings(text: string): Partial<Settings> {
   if (!candidate || typeof candidate !== "object") {
     throw new Error("Invalid settings file.");
   }
-  return candidate as Partial<Settings>;
+  return importedSettingsSchema.parse(candidate) as Partial<Settings>;
 }
