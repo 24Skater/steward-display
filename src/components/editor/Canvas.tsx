@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Maximize2, Minimize2, Undo2, Redo2 } from "lucide-react";
+import { Maximize2, Minimize2, Undo2, Redo2, Grid3x3, Magnet, AlignCenterVertical } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
