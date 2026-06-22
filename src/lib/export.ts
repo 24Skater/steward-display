@@ -72,6 +72,69 @@ export function exportGridDefaultsToJSON(
   );
 }
 
+export function parseImportedGridDefaults(text: string): {
+  gridDefaults: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
+  history: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
+  warnings: string[];
+} {
+  const parsed = JSON.parse(text);
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Invalid grid defaults file.");
+  }
+
+  const record = parsed as Record<string, unknown>;
+  const warnings: string[] = [];
+
+  const gridDefaultsRaw =
+    record.gridDefaults && typeof record.gridDefaults === "object"
+      ? (record.gridDefaults as Record<string, unknown>)
+      : record;
+
+  const gridSize = validateGridField(gridDefaultsRaw, "defaultGridSize", DEFAULT_GRID_SIZE);
+  if (gridSize.warning) warnings.push(gridSize.warning);
+  const finalGridSize = gridSize.value ?? DEFAULT_GRID_SIZE;
+
+  const snapStep = validateGridField(gridDefaultsRaw, "defaultSnapStep", DEFAULT_SNAP_STEP);
+  if (snapStep.warning) warnings.push(snapStep.warning);
+  const finalSnapStep = snapStep.value ?? DEFAULT_SNAP_STEP;
+
+  let finalMaxHistory = 10;
+  if ("maxGridHistorySize" in gridDefaultsRaw) {
+    const result = z.number().int().min(1).max(100).safeParse(gridDefaultsRaw.maxGridHistorySize);
+    if (result.success) {
+      finalMaxHistory = result.data;
+    } else {
+      warnings.push(
+        `maxGridHistorySize (${JSON.stringify(gridDefaultsRaw.maxGridHistorySize)}) is invalid; falling back to ${finalMaxHistory}.`,
+      );
+    }
+  }
+
+  const historyRaw = Array.isArray(record.history) ? record.history : [];
+  const history = historyRaw
+    .filter((entry): entry is Record<string, unknown> => !!entry && typeof entry === "object")
+    .map((entry) => {
+      const entryGridSize = validateGridField(entry, "defaultGridSize", finalGridSize);
+      const entrySnapStep = validateGridField(entry, "defaultSnapStep", finalSnapStep);
+      const timestamp = typeof entry.timestamp === "number" ? entry.timestamp : Date.now();
+      return {
+        defaultGridSize: entryGridSize.value ?? finalGridSize,
+        defaultSnapStep: entrySnapStep.value ?? finalSnapStep,
+        timestamp,
+      };
+    });
+
+  return {
+    gridDefaults: {
+      defaultGridSize: finalGridSize,
+      defaultSnapStep: finalSnapStep,
+      maxGridHistorySize: finalMaxHistory,
+    },
+    history: history.slice(0, finalMaxHistory),
+    warnings,
+  };
+}
+
 export function exportSettingsToJSON(settings: Settings): string {
   return JSON.stringify(
     { version: 1, exportedAt: new Date().toISOString(), settings },
