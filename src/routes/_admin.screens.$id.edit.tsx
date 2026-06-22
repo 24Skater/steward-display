@@ -24,11 +24,11 @@ import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { MonitorOff } from "lucide-react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_admin/screens/$id/edit")({
   head: () => ({ meta: [{ title: "Editor — Steward Display" }] }),
