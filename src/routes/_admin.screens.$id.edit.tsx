@@ -270,6 +270,7 @@ function EditorPage() {
         </DialogContent>
       </Dialog>
     </div>
+  </TooltipProvider>
   );
 }
 
