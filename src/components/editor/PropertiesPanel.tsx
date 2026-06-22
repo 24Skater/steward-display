@@ -76,6 +76,26 @@ export function PropertiesPanel({
     if (preset.style) patchStyle(preset.style);
   };
 
+  const applyPresetWithUndo = (preset: WidgetPreset) => {
+    const snapshot = {
+      config: { ...widget.config },
+      style: widget.style ? { ...widget.style } : undefined,
+    };
+    applyPreset(preset);
+    toast.success(`Applied preset “${preset.label}”`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          updateWidget(screen.id, widget.id, {
+            config: snapshot.config,
+            style: snapshot.style,
+          });
+          toast.success(`Reverted “${preset.label}”`);
+        },
+      },
+    });
+  };
+
   const previewWidget = useMemo<WidgetInstance>(() => {
     const base = {
       id: "preset-preview",
@@ -250,8 +270,7 @@ export function PropertiesPanel({
                       <button
                         type="button"
                         onClick={() => {
-                          applyPreset(previewPreset);
-                          toast.success(`Applied preset “${previewPreset.label}”`);
+                          applyPresetWithUndo(previewPreset);
                         }}
                         className="inline-flex items-center gap-1 rounded-md bg-blue px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue/90"
                       >
