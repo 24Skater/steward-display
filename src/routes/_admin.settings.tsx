@@ -152,7 +152,7 @@ function SettingsPage() {
 
   const confirmResetGridDefaults = () => {
     const previous = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
-    setGridDefaultsHistory((history) => [previous, ...history].slice(0, 10));
+    setGridDefaultsHistory((history) => [previous, ...history].slice(0, MAX_GRID_HISTORY_SIZE));
     resetGridDefaults();
     setResetDialogOpen(false);
     toast.success("Grid defaults reset to safe values.", {
