@@ -1,7 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, AlertTriangle, FileJson, Terminal, Settings2 } from "lucide-react";
+import {
+  Check,
+  AlertTriangle,
+  FileJson,
+  Terminal,
+  Settings2,
+  ExternalLink,
+  Hash,
+} from "lucide-react";
 import {
   auditBrandContrast,
   DEFAULT_CONTRAST_CONFIG,
@@ -9,39 +17,169 @@ import {
   type ContrastConfig,
 } from "@/lib/contrast";
 import { getContrastConfig } from "@/lib/contrastConfig.functions";
+import {
+  getTokenLocations,
+  type TokenLocation,
+} from "@/lib/tokenLocations.functions";
 
 type ResolvedConfig = ContrastConfig & {
   source: { jsonPath: string | null; envOverrides: string[] };
 };
 
-function Row({ r, level }: { r: PairResult; level: "AA" | "AAA" }) {
+const REPO_SOURCE_URL = (import.meta.env.VITE_REPO_SOURCE_URL ?? "") as string;
+
+function buildSourceHref(
+  sourcePath: string | undefined,
+  line: number | undefined,
+): string | null {
+  if (!REPO_SOURCE_URL || !sourcePath || !line) return null;
+  return `${REPO_SOURCE_URL.replace(/\/$/, "")}/${sourcePath}#L${line}`;
+}
+
+function TokenChip({
+  varName,
+  hex,
+  locations,
+  sourcePath,
+  onJump,
+}: {
+  varName: string;
+  hex: string;
+  locations: TokenLocation[] | undefined;
+  sourcePath: string | undefined;
+  onJump: (varName: string) => void;
+}) {
+  const firstLine = locations?.[0]?.line;
+  const href = buildSourceHref(sourcePath, firstLine);
+  const sharedClass =
+    "group inline-flex items-center gap-1 rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[11px] text-foreground transition-colors hover:border-primary hover:bg-primary/10";
+  const inner = (
+    <>
+      <span
+        className="inline-block h-2.5 w-2.5 rounded-sm border border-border/70"
+        style={{ background: hex }}
+        aria-hidden="true"
+      />
+      <span>{varName}</span>
+      {firstLine && (
+        <span className="text-muted-foreground">:{firstLine}</span>
+      )}
+    </>
+  );
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className={sharedClass}
+        title={`Open ${varName} in ${sourcePath} (line ${firstLine}) on GitHub`}
+      >
+        {inner}
+        <ExternalLink className="h-2.5 w-2.5 opacity-60 group-hover:opacity-100" />
+      </a>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => onJump(varName)}
+      className={sharedClass}
+      title={
+        firstLine
+          ? `Jump to ${varName} in the token reference below (line ${firstLine} in ${sourcePath})`
+          : `Jump to ${varName} in the token reference below`
+      }
+    >
+      {inner}
+    </button>
+  );
+}
+
+function Row({
+  r,
+  level,
+  tokens,
+  sourcePath,
+  onJump,
+}: {
+  r: PairResult;
+  level: "AA" | "AAA";
+  tokens: Record<string, TokenLocation[]>;
+  sourcePath: string | undefined;
+  onJump: (varName: string) => void;
+}) {
   const ok = r.passAA;
   const isInfo = !r.required;
+  const isFail = !isInfo && !ok;
   return (
     <li
-      className="flex items-center gap-3 rounded-md border border-border p-2"
+      className={
+        "flex flex-wrap items-center gap-3 rounded-md border p-2 transition-colors " +
+        (isFail
+          ? "border-red/60 bg-red/10 ring-1 ring-red/40 shadow-sm"
+          : "border-border")
+      }
       data-pass={ok}
+      data-fail={isFail || undefined}
+      aria-invalid={isFail || undefined}
     >
       <span
-        className="inline-flex h-9 w-16 shrink-0 items-center justify-center rounded text-xs font-semibold"
+        className={
+          "inline-flex h-9 w-16 shrink-0 items-center justify-center rounded text-xs font-semibold " +
+          (isFail ? "ring-2 ring-red/60" : "")
+        }
         style={{ background: r.bg, color: r.fg, border: "1px solid rgba(0,0,0,.08)" }}
         aria-hidden="true"
       >
         Aa
       </span>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-foreground">{r.name}</div>
-        <div className="text-xs text-muted-foreground">
-          {r.fg.toUpperCase()} on {r.bg.toUpperCase()} · {
-            r.use === "body" ? "Body text"
-            : r.use === "large" ? "Large text"
-            : r.use === "ui" ? "UI / non-text"
-            : "Decorative"
+        <div
+          className={
+            "truncate text-sm font-medium " +
+            (isFail ? "text-red" : "text-foreground")
           }
+        >
+          {isFail && <AlertTriangle className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />}
+          {r.name}
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          <TokenChip
+            varName={r.fgVar}
+            hex={r.fg}
+            locations={tokens[r.fgVar]}
+            sourcePath={sourcePath}
+            onJump={onJump}
+          />
+          <span className="opacity-60">on</span>
+          <TokenChip
+            varName={r.bgVar}
+            hex={r.bg}
+            locations={tokens[r.bgVar]}
+            sourcePath={sourcePath}
+            onJump={onJump}
+          />
+          <span className="opacity-60">·</span>
+          <span>
+            {r.use === "body"
+              ? "Body text"
+              : r.use === "large"
+                ? "Large text"
+                : r.use === "ui"
+                  ? "UI / non-text"
+                  : "Decorative"}
+          </span>
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        <span className="tabular-nums text-sm font-semibold text-foreground" title={`Threshold ≥ ${r.threshold}:1`}>
+        <span
+          className={
+            "tabular-nums text-sm font-semibold " +
+            (isFail ? "text-red" : "text-foreground")
+          }
+          title={`Threshold ≥ ${r.threshold}:1`}
+        >
           {r.ratio.toFixed(2)}:1
         </span>
         {isInfo ? (
@@ -55,7 +193,7 @@ function Row({ r, level }: { r: PairResult; level: "AA" | "AAA" }) {
           <span
             className={
               "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold " +
-              (ok ? "bg-emerald/15 text-emerald" : "bg-red/15 text-red")
+              (ok ? "bg-emerald/15 text-emerald" : "bg-red/20 text-red")
             }
             title={`Needs ≥ ${r.threshold}:1 for WCAG ${level}`}
           >
@@ -76,6 +214,15 @@ export function ContrastAudit() {
     staleTime: 60_000,
   });
 
+  const fetchTokens = useServerFn(getTokenLocations);
+  const { data: tokenData } = useQuery({
+    queryKey: ["token-locations"],
+    queryFn: () => fetchTokens(),
+    staleTime: 5 * 60_000,
+  });
+  const tokens = tokenData?.tokens ?? {};
+  const sourcePath = tokenData?.sourcePath;
+
   const active: ResolvedConfig =
     config ?? { ...DEFAULT_CONTRAST_CONFIG, source: { jsonPath: null, envOverrides: [] } };
 
@@ -85,6 +232,24 @@ export function ContrastAudit() {
   const required = results.filter((r) => r.required);
   const failing = required.filter((r) => !r.passAA).length;
   const level: "AA" | "AAA" = active.requireAAA ? "AAA" : "AA";
+  const failingVars = useMemo(() => {
+    const s = new Set<string>();
+    for (const r of required) {
+      if (!r.passAA) {
+        s.add(r.fgVar);
+        s.add(r.bgVar);
+      }
+    }
+    return s;
+  }, [required]);
+
+  const [highlightVar, setHighlightVar] = useState<string | null>(null);
+  const jumpToVar = useCallback((v: string) => {
+    setHighlightVar(v);
+    const el = document.getElementById(`token-${v}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => setHighlightVar(null), 2200);
+  }, []);
 
   return (
     <div className="space-y-5">
@@ -123,7 +288,7 @@ export function ContrastAudit() {
         </h3>
         <ul className="space-y-1.5">
           {light.map((r) => (
-            <Row key={`l-${r.name}`} r={r} level={level} />
+            <Row key={`l-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
           ))}
         </ul>
       </div>
@@ -134,11 +299,132 @@ export function ContrastAudit() {
         </h3>
         <ul className="space-y-1.5">
           {dark.map((r) => (
-            <Row key={`d-${r.name}`} r={r} level={level} />
+            <Row key={`d-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
           ))}
         </ul>
       </div>
+
+      <TokenReference
+        tokens={tokens}
+        sourcePath={sourcePath}
+        failingVars={failingVars}
+        highlightVar={highlightVar}
+      />
     </div>
+  );
+}
+
+function TokenReference({
+  tokens,
+  sourcePath,
+  failingVars,
+  highlightVar,
+}: {
+  tokens: Record<string, TokenLocation[]>;
+  sourcePath: string | undefined;
+  failingVars: Set<string>;
+  highlightVar: string | null;
+}) {
+  const names = Object.keys(tokens).sort();
+  if (!names.length) return null;
+  return (
+    <section
+      aria-labelledby="token-ref-heading"
+      className="rounded-lg border border-border bg-muted/30 p-4"
+    >
+      <header className="mb-3 flex items-center justify-between gap-2">
+        <div>
+          <h3
+            id="token-ref-heading"
+            className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+          >
+            Token reference
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            CSS custom properties defined in{" "}
+            <code className="rounded bg-background px-1 py-0.5 text-[11px]">
+              {sourcePath ?? "src/styles.css"}
+            </code>
+            . Click any chip above to jump here.
+          </p>
+        </div>
+        {!REPO_SOURCE_URL && (
+          <span
+            className="text-[11px] text-muted-foreground"
+            title="Set VITE_REPO_SOURCE_URL (e.g. https://github.com/org/repo/blob/main) to turn chips into deep-links."
+          >
+            Tip: set <code>VITE_REPO_SOURCE_URL</code> for GitHub deep-links
+          </span>
+        )}
+      </header>
+      <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+        {names.map((name) => {
+          const locs = tokens[name];
+          const isFailing = failingVars.has(name);
+          const isHighlight = highlightVar === name;
+          return (
+            <li
+              key={name}
+              id={`token-${name}`}
+              className={
+                "flex items-start gap-2 rounded-md border p-2 text-xs transition-colors " +
+                (isHighlight
+                  ? "border-primary bg-primary/15"
+                  : isFailing
+                    ? "border-red/50 bg-red/5"
+                    : "border-border bg-background")
+              }
+            >
+              <Hash className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <code className="truncate font-mono text-[12px] font-semibold text-foreground">
+                    {name}
+                  </code>
+                  {isFailing && (
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-red/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-red">
+                      <AlertTriangle className="h-2.5 w-2.5" />
+                      Failing pair
+                    </span>
+                  )}
+                </div>
+                <ul className="mt-1 space-y-0.5 text-[11px] text-muted-foreground">
+                  {locs.map((l) => {
+                    const href = buildSourceHref(sourcePath, l.line);
+                    const inner = (
+                      <>
+                        <span className="font-medium uppercase tracking-wide">{l.scope}</span>
+                        <span className="opacity-50">·</span>
+                        <code className="font-mono">{l.value}</code>
+                        <span className="opacity-50">·</span>
+                        <span>line {l.line}</span>
+                      </>
+                    );
+                    return (
+                      <li key={`${l.scope}-${l.line}`}>
+                        {href ? (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 hover:text-foreground hover:underline"
+                          >
+                            {inner}
+                            <ExternalLink className="h-2.5 w-2.5" />
+                          </a>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5">{inner}</span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
