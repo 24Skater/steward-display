@@ -89,10 +89,10 @@ export function PropertiesPanel({
         label: "Undo",
         onClick: () => {
           if (!previousWidgetState.current) return;
-          patchConfig(previousWidgetState.current.config);
-          if (previousWidgetState.current.style) {
-            patchStyle(previousWidgetState.current.style);
-          }
+          updateWidget(screen.id, widget.id, {
+            config: previousWidgetState.current.config,
+            style: previousWidgetState.current.style,
+          });
           toast.success(`Reverted “${preset.label}”`);
         },
       },
