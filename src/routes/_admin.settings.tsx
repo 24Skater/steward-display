@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { Download, Upload, X, AlertTriangle } from "lucide-react";
+import { Download, Upload, X, AlertTriangle, RotateCcw } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,7 @@ function SettingsPage() {
     defaultGridSize,
     defaultSnapStep,
     update,
+    resetGridDefaults,
   } = useSettingsStore();
   const screens = useScreenStore((s) => s.screens);
   const importScreens = useScreenStore((s) => s.importScreens);
@@ -109,6 +110,11 @@ function SettingsPage() {
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
     }
+  };
+
+  const handleResetGridDefaults = () => {
+    resetGridDefaults();
+    toast.success("Grid defaults reset to safe values.");
   };
 
   return (
@@ -184,6 +190,11 @@ function SettingsPage() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="pt-2">
+          <Button variant="outline" size="sm" onClick={handleResetGridDefaults}>
+            <RotateCcw className="h-4 w-4" /> Reset grid defaults
+          </Button>
         </div>
       </Section>
 
