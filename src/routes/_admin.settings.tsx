@@ -380,6 +380,12 @@ function SettingsPage() {
       patch.defaultSnapStep = gridDefaults.defaultSnapStep;
       patch.maxGridHistorySize = gridDefaults.maxGridHistorySize;
     }
+    patch.lastGridImport = {
+      timestamp: Date.now(),
+      mode: "replace",
+      includedDefaults: importGridDefaults,
+      includedHistory: importHistory,
+    };
     update(patch);
     if (importHistory) {
       setGridDefaultsHistory(history.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
@@ -394,9 +400,17 @@ function SettingsPage() {
   const confirmMergeGridImport = () => {
     if (!pendingGridImport) return;
     const { gridDefaults, history, warnings } = pendingGridImport;
+    const patch: Partial<Parameters<typeof update>[0]> = {};
     if (importGridDefaults) {
-      update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
+      patch.maxGridHistorySize = gridDefaults.maxGridHistorySize;
     }
+    patch.lastGridImport = {
+      timestamp: Date.now(),
+      mode: "merge",
+      includedDefaults: importGridDefaults,
+      includedHistory: importHistory,
+    };
+    update(patch);
     const mergedHistory = [
       ...(importGridDefaults
         ? [{ defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() }]
