@@ -36,6 +36,7 @@ import {
   exportSettingsToJSON,
   parseImportedSettings,
   exportGridDefaultsToJSON,
+  parseImportedGridDefaults,
 } from "@/lib/export";
 import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
 import { toast } from "sonner";
