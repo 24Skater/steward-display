@@ -19,25 +19,37 @@ function Row({ r }: { r: PairResult }) {
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-foreground">{r.name}</div>
         <div className="text-xs text-muted-foreground">
-          {r.fg.toUpperCase()} on {r.bg.toUpperCase()} · {r.use === "body" ? "Body text" : r.use === "large" ? "Large text" : "UI / non-text"}
+          {r.fg.toUpperCase()} on {r.bg.toUpperCase()} · {
+            r.use === "body" ? "Body text"
+            : r.use === "large" ? "Large text"
+            : r.use === "ui" ? "UI / non-text"
+            : "Decorative"
+          }
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
         <span className="tabular-nums text-sm font-semibold text-foreground">
           {r.ratio.toFixed(2)}:1
         </span>
-        <span
-          className={
-            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold " +
-            (ok
-              ? "bg-emerald/15 text-emerald"
-              : "bg-red/15 text-red")
-          }
-          title={`Needs ≥ ${r.threshold}:1 for WCAG AA`}
-        >
-          {ok ? <Check className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
-          {ok ? (r.passAAA ? "AAA" : "AA") : "Fail"}
-        </span>
+        {r.use === "decorative" ? (
+          <span
+            className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground"
+            title="Decorative — not required to meet WCAG"
+          >
+            Info
+          </span>
+        ) : (
+          <span
+            className={
+              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold " +
+              (ok ? "bg-emerald/15 text-emerald" : "bg-red/15 text-red")
+            }
+            title={`Needs ≥ ${r.threshold}:1 for WCAG AA`}
+          >
+            {ok ? <Check className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+            {ok ? (r.passAAA ? "AAA" : "AA") : "Fail"}
+          </span>
+        )}
       </div>
     </li>
   );
@@ -47,7 +59,8 @@ export function ContrastAudit() {
   const results = useMemo(() => auditBrandContrast(), []);
   const light = results.filter((r) => r.theme === "light");
   const dark = results.filter((r) => r.theme === "dark");
-  const failing = results.filter((r) => !r.passAA).length;
+  const required = results.filter((r) => r.use !== "decorative");
+  const failing = required.filter((r) => !r.passAA).length;
 
   return (
     <div className="space-y-5">
@@ -64,12 +77,12 @@ export function ContrastAudit() {
         {failing === 0 ? (
           <>
             <Check className="h-4 w-4" />
-            All {results.length} brand pairings meet WCAG AA.
+            All {required.length} required brand pairings meet WCAG AA.
           </>
         ) : (
           <>
             <AlertTriangle className="h-4 w-4" />
-            {failing} of {results.length} pairing{results.length === 1 ? "" : "s"} fail WCAG AA.
+            {failing} of {required.length} required pairing{required.length === 1 ? "" : "s"} fail WCAG AA.
           </>
         )}
       </div>
