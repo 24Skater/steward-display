@@ -16,6 +16,8 @@ interface ScreenState {
   addWidget: (screenId: string, type: WidgetType, position?: { x: number; y: number }) => WidgetInstance | undefined;
   updateWidget: (screenId: string, widgetId: string, patch: Partial<WidgetInstance>) => void;
   removeWidget: (screenId: string, widgetId: string) => void;
+  duplicateWidget: (screenId: string, widgetId: string) => WidgetInstance | undefined;
+  reorderWidget: (screenId: string, widgetId: string, direction: "front" | "back" | "forward" | "backward") => void;
   setWidgets: (screenId: string, widgets: WidgetInstance[]) => void;
 }
 
