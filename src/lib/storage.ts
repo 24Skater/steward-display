@@ -24,4 +24,5 @@ export const STORAGE_KEYS = {
   screens: "steward.screens",
   settings: "steward.settings",
   customPresets: "steward.customPresets",
+  gridDefaultsHistory: "steward.gridDefaultsHistory",
 } as const;
