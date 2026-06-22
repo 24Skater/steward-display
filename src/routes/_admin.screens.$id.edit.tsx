@@ -54,6 +54,7 @@ function EditorPage() {
   const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(null);
   const [skipTemplates, setSkipTemplates] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [shortcutQuery, setShortcutQuery] = useState("");
 
   useEffect(() => () => reset(), [reset]);
 
