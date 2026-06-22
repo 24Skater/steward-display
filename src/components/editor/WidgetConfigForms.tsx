@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import type { WidgetInstance } from "@/types";
+import { AnnouncementWidget } from "@/components/widgets/AnnouncementWidget";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -180,6 +181,20 @@ export function WidgetConfigForm({
     case "announcement":
       return (
         <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-foreground">Live preview</Label>
+            <div
+              className="overflow-hidden rounded-md border border-border"
+              style={{
+                backgroundColor: (widget.style?.backgroundColor as string) || "#0B1220",
+                color: (widget.style?.textColor as string) || "#FFFFFF",
+                height: 140,
+                containerType: "size",
+              }}
+            >
+              <AnnouncementWidget config={cfg as any} />
+            </div>
+          </div>
           <Field label="Title">
             <Input value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
           </Field>
