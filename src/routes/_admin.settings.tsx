@@ -60,26 +60,74 @@ function Section({ title, description, children }: { title: string; description?
 interface GridImportPreviewProps {
   filename: string;
   current: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
-  currentHistoryLength: number;
+  currentHistory: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
   imported: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
   importedHistory: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
   warnings: string[];
 }
 
+function DiffValue({
+  value,
+  baseline,
+  format,
+}: {
+  value: number;
+  baseline: number;
+  format: (n: number) => string;
+}) {
+  const changed = value !== baseline;
+  return (
+    <span className={changed ? "inline-flex items-center gap-1.5 font-medium text-foreground" : "inline-flex items-center gap-1.5 text-muted-foreground"}>
+      {format(value)}
+      {changed && (
+        <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+          changed
+        </span>
+      )}
+    </span>
+  );
+}
+
+function SnapshotList({
+  entries,
+  empty,
+}: {
+  entries: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
+  empty: string;
+}) {
+  if (entries.length === 0) {
+    return <p className="text-sm text-muted-foreground">{empty}</p>;
+  }
+  return (
+    <ul className="max-h-32 overflow-y-auto rounded-md border border-border bg-background p-2 space-y-1 text-xs">
+      {entries.map((entry, index) => (
+        <li key={`${entry.timestamp}-${index}`} className="flex justify-between gap-3">
+          <span>Grid {entry.defaultGridSize}, snap {entry.defaultSnapStep}</span>
+          <span className="text-muted-foreground">{new Date(entry.timestamp).toLocaleString()}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function GridImportPreview({
   filename,
   current,
-  currentHistoryLength,
+  currentHistory,
   imported,
   importedHistory,
   warnings,
 }: GridImportPreviewProps) {
+  const currentHistoryLength = currentHistory.length;
   const importedHistoryLength = importedHistory.length;
   const replaceHistoryCount = importedHistoryLength;
   const mergeHistoryCount = Math.min(1 + currentHistoryLength + importedHistoryLength, imported.maxGridHistorySize);
 
+  const formatCell = (n: number) => `${n} cell${n === 1 ? "" : "s"}`;
+  const formatCount = (n: number) => String(n);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p>
         <strong>{filename}</strong> contains {importedHistoryLength} snapshot
         {importedHistoryLength === 1 ? "" : "s"}.
@@ -96,61 +144,80 @@ function GridImportPreview({
         </div>
       )}
 
-      <div className="rounded-md border border-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-muted text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2 text-left font-medium">Setting</th>
-              <th className="px-3 py-2 text-left font-medium">Current</th>
-              <th className="px-3 py-2 text-left font-medium">After replace</th>
-              <th className="px-3 py-2 text-left font-medium">After merge</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            <tr>
-              <td className="px-3 py-2">Default grid size</td>
-              <td className="px-3 py-2">{current.defaultGridSize} cells</td>
-              <td className="px-3 py-2">{imported.defaultGridSize} cells</td>
-              <td className="px-3 py-2">{current.defaultGridSize} cells</td>
-            </tr>
-            <tr>
-              <td className="px-3 py-2">Default snap step</td>
-              <td className="px-3 py-2">{current.defaultSnapStep} cells</td>
-              <td className="px-3 py-2">{imported.defaultSnapStep} cells</td>
-              <td className="px-3 py-2">{current.defaultSnapStep} cells</td>
-            </tr>
-            <tr>
-              <td className="px-3 py-2">Max undo snapshots</td>
-              <td className="px-3 py-2">{current.maxGridHistorySize}</td>
-              <td className="px-3 py-2">{imported.maxGridHistorySize}</td>
-              <td className="px-3 py-2">{imported.maxGridHistorySize}</td>
-            </tr>
-            <tr>
-              <td className="px-3 py-2">Saved snapshots</td>
-              <td className="px-3 py-2">{currentHistoryLength}</td>
-              <td className="px-3 py-2">{replaceHistoryCount}</td>
-              <td className="px-3 py-2">{mergeHistoryCount}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div>
+        <p className="text-sm font-medium mb-2">Field-by-field diff</p>
+        <div className="rounded-md border border-border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium">Field</th>
+                <th className="px-3 py-2 text-left font-medium">Current</th>
+                <th className="px-3 py-2 text-left font-medium">After replace</th>
+                <th className="px-3 py-2 text-left font-medium">After merge</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              <tr>
+                <td className="px-3 py-2">Default grid size</td>
+                <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultGridSize)}</td>
+                <td className="px-3 py-2">
+                  <DiffValue value={imported.defaultGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue value={current.defaultGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                </td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2">Default snap step</td>
+                <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultSnapStep)}</td>
+                <td className="px-3 py-2">
+                  <DiffValue value={imported.defaultSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue value={current.defaultSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                </td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2">Max undo snapshots</td>
+                <td className="px-3 py-2 text-muted-foreground">{formatCount(current.maxGridHistorySize)}</td>
+                <td className="px-3 py-2">
+                  <DiffValue value={imported.maxGridHistorySize} baseline={current.maxGridHistorySize} format={formatCount} />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue value={imported.maxGridHistorySize} baseline={current.maxGridHistorySize} format={formatCount} />
+                </td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2">Saved snapshots</td>
+                <td className="px-3 py-2 text-muted-foreground">{formatCount(currentHistoryLength)}</td>
+                <td className="px-3 py-2">
+                  <DiffValue value={replaceHistoryCount} baseline={currentHistoryLength} format={formatCount} />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue value={mergeHistoryCount} baseline={currentHistoryLength} format={formatCount} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {importedHistoryLength > 0 && (
-        <div>
-          <p className="text-sm font-medium">Imported snapshots preview</p>
-          <ul className="mt-1 max-h-32 overflow-y-auto rounded-md border border-border bg-background p-2 space-y-1 text-xs">
-            {importedHistory.map((entry, index) => (
-              <li key={`${entry.timestamp}-${index}`} className="flex justify-between gap-3">
-                <span>Grid {entry.defaultGridSize}, snap {entry.defaultSnapStep}</span>
-                <span className="text-muted-foreground">{new Date(entry.timestamp).toLocaleString()}</span>
-              </li>
-            ))}
-          </ul>
+      <div>
+        <p className="text-sm font-medium mb-2">Undo history diff</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Current ({currentHistoryLength})</p>
+            <SnapshotList entries={currentHistory} empty="No current snapshots" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">Imported ({importedHistoryLength})</p>
+            <SnapshotList entries={importedHistory} empty="No imported snapshots" />
+          </div>
         </div>
-      )}
+      </div>
 
       <p className="text-xs text-muted-foreground">
-        Choose <strong>Replace</strong> to overwrite your current grid defaults and history, or <strong>Merge</strong> to keep your current defaults active and combine the imported snapshots into your history.
+        Choose <strong>Replace</strong> to overwrite your current grid defaults and history with the imported values, or <strong>Merge</strong> to keep your current defaults active and combine the imported snapshots into your history.
       </p>
     </div>
   );
@@ -597,7 +664,7 @@ function SettingsPage() {
                 <GridImportPreview
                   filename={pendingGridImport.filename}
                   current={{ defaultGridSize, defaultSnapStep, maxGridHistorySize }}
-                  currentHistoryLength={gridDefaultsHistory.length}
+                  currentHistory={gridDefaultsHistory}
                   imported={pendingGridImport.gridDefaults}
                   importedHistory={pendingGridImport.history}
                   warnings={pendingGridImport.warnings}
