@@ -72,7 +72,9 @@ function SettingsPage() {
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
-  const [previousGridSettings, setPreviousGridSettings] = useState<{ defaultGridSize: number; defaultSnapStep: number } | null>(null);
+  const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
+    { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
+  >([]);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
@@ -129,19 +131,26 @@ function SettingsPage() {
   };
 
   const confirmResetGridDefaults = () => {
-    const previous = { defaultGridSize, defaultSnapStep };
-    setPreviousGridSettings(previous);
+    const previous = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
+    setGridDefaultsHistory((history) => [previous, ...history].slice(0, 10));
     resetGridDefaults();
     setResetDialogOpen(false);
     toast.success("Grid defaults reset to safe values.", {
       action: {
         label: "Undo",
         onClick: () => {
-          update(previous);
+          update({ defaultGridSize: previous.defaultGridSize, defaultSnapStep: previous.defaultSnapStep });
           toast.success("Previous grid defaults restored.");
         },
       },
     });
+  };
+
+  const revertGridDefaults = (entry: { defaultGridSize: number; defaultSnapStep: number }) => {
+    const current = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
+    setGridDefaultsHistory((history) => [current, ...history].slice(0, 10));
+    update({ defaultGridSize: entry.defaultGridSize, defaultSnapStep: entry.defaultSnapStep });
+    toast.success("Grid defaults reverted to selected snapshot.");
   };
 
   return (
@@ -239,6 +248,45 @@ function SettingsPage() {
           </AlertDialogContent>
         </AlertDialog>
       </Section>
+
+      {gridDefaultsHistory.length > 0 && (
+        <Section title="Grid defaults history" description="Revert to previous grid default snapshots from this session.">
+          <div className="space-y-3">
+            {gridDefaultsHistory.map((entry, index) => (
+              <div
+                key={`${entry.timestamp}-${index}`}
+                className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+              >
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">
+                    Grid size {entry.defaultGridSize}, snap step {entry.defaultSnapStep}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(entry.timestamp).toLocaleString()}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => revertGridDefaults(entry)}
+                >
+                  Revert
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={() => setGridDefaultsHistory([])}
+            >
+              Clear history
+            </Button>
+          </div>
+        </Section>
+      )}
 
       <Section title="Data sources" description="Connect external services. Wiring lands in a future release.">
         <div className="space-y-1.5">
