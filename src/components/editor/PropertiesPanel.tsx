@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { Screen, WidgetInstance } from "@/types";
 import { useScreenStore } from "@/store/screenStore";
+import { useEditorStore } from "@/store/editorStore";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetConfigForm } from "./WidgetConfigForms";
