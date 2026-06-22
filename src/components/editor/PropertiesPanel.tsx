@@ -1,5 +1,5 @@
 import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User, Eye } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
