@@ -229,6 +229,7 @@ export function ContrastAudit() {
     config ?? { ...DEFAULT_CONTRAST_CONFIG, source: { jsonPath: null, envOverrides: [] } };
 
   const [showOnlyFailing, setShowOnlyFailing] = useState(false);
+  const [themeFilter, setThemeFilter] = useState<"all" | "light" | "dark">("all");
 
   const results = useMemo(() => auditBrandContrast(active), [active]);
   const light = results.filter((r) => r.theme === "light");
