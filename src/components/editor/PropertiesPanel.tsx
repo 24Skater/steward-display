@@ -1,5 +1,6 @@
 import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User, Eye } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ import { WidgetConfigForm } from "./WidgetConfigForms";
 import { getPresetsForWidget, type WidgetPreset } from "@/lib/widgetPresets";
 import { usePresetStore, type CustomPreset } from "@/store/presetStore";
 import { WidgetRenderer } from "./WidgetRenderer";
+
 
 
 const BG_SWATCHES = ["", "#0B1220", "#111827", "#FFFFFF", "#FEF3C7", "#DBEAFE", "#FCE7F3"];
@@ -247,7 +249,10 @@ export function PropertiesPanel({
                     {previewPreset && (
                       <button
                         type="button"
-                        onClick={() => applyPreset(previewPreset)}
+                        onClick={() => {
+                          applyPreset(previewPreset);
+                          toast.success(`Applied preset “${previewPreset.label}”`);
+                        }}
                         className="inline-flex items-center gap-1 rounded-md bg-blue px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue/90"
                       >
                         Apply
