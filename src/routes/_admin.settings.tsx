@@ -331,11 +331,26 @@ function SettingsPage() {
               variant="ghost"
               size="sm"
               className="text-muted-foreground"
-              onClick={() => setGridDefaultsHistory([])}
+              onClick={handleClearHistory}
             >
               Clear history
             </Button>
           </div>
+
+          <AlertDialog open={clearHistoryDialogOpen} onOpenChange={setClearHistoryDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear grid defaults history?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all saved grid default snapshots from the history panel and localStorage. You won't be able to revert to them afterward.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmClearHistory}>Clear</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </Section>
       )}
 
