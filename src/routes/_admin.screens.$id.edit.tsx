@@ -185,6 +185,8 @@ function EditorPage() {
                   <div><kbd>⌘/Ctrl + D</kbd> Duplicate</div>
                   <div><kbd>Delete</kbd> Remove</div>
                   <div><kbd>Esc</kbd> Deselect</div>
+                  <div><kbd>⌘/Ctrl + Z</kbd> Undo</div>
+                  <div><kbd>⌘/Ctrl + Y / ⇧ + ⌘/Ctrl + Z</kbd> Redo</div>
                 </div>
               </TooltipContent>
             </Tooltip>
