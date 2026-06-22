@@ -76,10 +76,8 @@ export function PropertiesPanel({
     if (preset.style) patchStyle(preset.style);
   };
 
-  const previousWidgetState = useRef<{ config: Record<string, unknown>; style?: WidgetInstance["style"] } | null>(null);
-
   const applyPresetWithUndo = (preset: WidgetPreset) => {
-    previousWidgetState.current = {
+    const snapshot = {
       config: { ...widget.config },
       style: widget.style ? { ...widget.style } : undefined,
     };
@@ -88,10 +86,9 @@ export function PropertiesPanel({
       action: {
         label: "Undo",
         onClick: () => {
-          if (!previousWidgetState.current) return;
           updateWidget(screen.id, widget.id, {
-            config: previousWidgetState.current.config,
-            style: previousWidgetState.current.style,
+            config: snapshot.config,
+            style: snapshot.style,
           });
           toast.success(`Reverted “${preset.label}”`);
         },
