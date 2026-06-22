@@ -69,7 +69,7 @@ interface GridImportPreviewProps {
 function GridImportPreview({
   filename,
   current,
-  currentHistoryLength,
+  currentHistory,
   imported,
   importedHistory,
   warnings,
