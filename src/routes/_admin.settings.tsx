@@ -127,7 +127,7 @@ function GridImportPreview({
   const formatCount = (n: number) => String(n);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p>
         <strong>{filename}</strong> contains {importedHistoryLength} snapshot
         {importedHistoryLength === 1 ? "" : "s"}.
@@ -143,6 +143,9 @@ function GridImportPreview({
           </ul>
         </div>
       )}
+
+      <div>
+        <p className="text-sm font-medium mb-2">Field-by-field diff</p>
 
       <div className="rounded-md border border-border overflow-hidden">
         <table className="w-full text-sm">
