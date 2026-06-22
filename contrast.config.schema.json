@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Steward brand contrast config",
+  "description": "Per-branch overrides for the WCAG contrast audit. Env vars (CONTRAST_BODY, CONTRAST_LARGE, CONTRAST_UI, CONTRAST_DECORATIVE, CONTRAST_REQUIRE_AAA, CONTRAST_FAIL_ON_DECORATIVE) take precedence over values in this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "body": { "type": "number", "exclusiveMinimum": 0, "description": "Min ratio for body text (WCAG AA default 4.5)." },
+        "large": { "type": "number", "exclusiveMinimum": 0, "description": "Min ratio for large text (WCAG AA default 3.0)." },
+        "ui": { "type": "number", "exclusiveMinimum": 0, "description": "Min ratio for UI / non-text (WCAG 1.4.11 default 3.0)." },
+        "decorative": { "type": "number", "exclusiveMinimum": 0, "description": "Floor for purely decorative pairings; informational unless failOnDecorative is true." }
+      }
+    },
+    "requireAAA": {
+      "type": "boolean",
+      "description": "When true, evaluate against AAA targets (body 7:1, large/ui 4.5:1) and ignore the thresholds block."
+    },
+    "failOnDecorative": {
+      "type": "boolean",
+      "description": "When true, decorative pairings count as failures too."
+    }
+  }
+}

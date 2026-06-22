@@ -8,6 +8,36 @@
 
 export type ContrastUse = "body" | "large" | "ui" | "decorative";
 
+/**
+ * Per-use minimum contrast ratios + escalation flags.
+ *
+ * Resolution order (highest precedence first), applied by `loadContrastConfig`:
+ *   1. Env vars (CONTRAST_BODY, CONTRAST_LARGE, CONTRAST_UI, CONTRAST_DECORATIVE,
+ *      CONTRAST_REQUIRE_AAA, CONTRAST_FAIL_ON_DECORATIVE)
+ *   2. JSON file at $CONTRAST_CONFIG or ./contrast.config.json
+ *   3. WCAG 2.1 AA defaults
+ */
+export type ContrastConfig = {
+  thresholds: Record<ContrastUse, number>;
+  /** When true, evaluate against AAA targets (body 7, others 4.5) instead of AA. */
+  requireAAA: boolean;
+  /** When true, decorative pairings count as failures too. */
+  failOnDecorative: boolean;
+};
+
+export const DEFAULT_CONTRAST_CONFIG: ContrastConfig = {
+  thresholds: { body: 4.5, large: 3.0, ui: 3.0, decorative: 1.5 },
+  requireAAA: false,
+  failOnDecorative: false,
+};
+
+const AAA_THRESHOLDS: Record<ContrastUse, number> = {
+  body: 7.0,
+  large: 4.5,
+  ui: 4.5,
+  decorative: 1.5,
+};
+
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 function expand(hex: string): string {
@@ -39,10 +69,12 @@ export function contrastRatio(fg: string, bg: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-export function wcagThreshold(use: ContrastUse): number {
-  if (use === "body") return 4.5;
-  if (use === "decorative") return 1.5; // informational only
-  return 3.0;
+export function wcagThreshold(
+  use: ContrastUse,
+  config: ContrastConfig = DEFAULT_CONTRAST_CONFIG,
+): number {
+  const base = (config.requireAAA ? AAA_THRESHOLDS : config.thresholds)[use];
+  return base ?? DEFAULT_CONTRAST_CONFIG.thresholds[use];
 }
 
 export type PairResult = {
@@ -54,6 +86,8 @@ export type PairResult = {
   threshold: number;
   passAA: boolean;
   passAAA: boolean;
+  /** True only when the pair's outcome should fail CI under the active config. */
+  required: boolean;
   theme: "light" | "dark";
 };
 
@@ -126,23 +160,31 @@ export const DARK_PAIRS: PairDef[] = [
   { name: "Gold focus ring vs dark bg", fg: DARK.gold, bg: DARK.bg, use: "ui" },
 ];
 
-export function evaluatePair(p: PairDef, theme: "light" | "dark"): PairResult {
+export function evaluatePair(
+  p: PairDef,
+  theme: "light" | "dark",
+  config: ContrastConfig = DEFAULT_CONTRAST_CONFIG,
+): PairResult {
   const ratio = contrastRatio(p.fg, p.bg);
-  const threshold = wcagThreshold(p.use);
+  const threshold = wcagThreshold(p.use, config);
+  const aaaTarget = AAA_THRESHOLDS[p.use];
   return {
     ...p,
     theme,
     ratio,
     threshold,
     passAA: ratio >= threshold,
-    passAAA: ratio >= (p.use === "body" ? 7 : 4.5),
+    passAAA: ratio >= aaaTarget,
+    required: p.use !== "decorative" || config.failOnDecorative,
   };
 }
 
-export function auditBrandContrast(): PairResult[] {
+export function auditBrandContrast(
+  config: ContrastConfig = DEFAULT_CONTRAST_CONFIG,
+): PairResult[] {
   return [
-    ...LIGHT_PAIRS.map((p) => evaluatePair(p, "light")),
-    ...DARK_PAIRS.map((p) => evaluatePair(p, "dark")),
+    ...LIGHT_PAIRS.map((p) => evaluatePair(p, "light", config)),
+    ...DARK_PAIRS.map((p) => evaluatePair(p, "dark", config)),
   ];
 }
 
@@ -151,9 +193,7 @@ let warned = false;
 export function warnOnContrastFailures(): void {
   if (warned || typeof console === "undefined") return;
   warned = true;
-  const failures = auditBrandContrast().filter(
-    (r) => r.use !== "decorative" && !r.passAA,
-  );
+  const failures = auditBrandContrast().filter((r) => r.required && !r.passAA);
   if (!failures.length) {
     console.info(
       "%c[Steward contrast] All brand token pairings pass WCAG AA.",

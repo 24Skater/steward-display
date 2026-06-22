@@ -5,10 +5,21 @@ on:
     branches: [main]
   pull_request:
 
+# Tighten or loosen rules per branch via env vars, or commit a
+# contrast.config.json. Resolution order: env > contrast.config.json > AA defaults.
+# Examples:
+#   CONTRAST_REQUIRE_AAA: "true"        # demand AAA everywhere
+#   CONTRAST_BODY: "5.0"                # bump body-text minimum
+#   CONTRAST_FAIL_ON_DECORATIVE: "true" # also enforce decorative pairings
+#   CONTRAST_CONFIG: ".github/contrast.release.json"
+
 jobs:
   contrast:
     name: WCAG AA contrast check
     runs-on: ubuntu-latest
+    env:
+      # Default branches stay on WCAG AA. Demand AAA only on release branches.
+      CONTRAST_REQUIRE_AAA: ${{ startsWith(github.ref, 'refs/heads/release/') && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
 
