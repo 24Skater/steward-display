@@ -118,9 +118,13 @@ function GridImportPreview({
   importedHistory,
   warnings,
 }: GridImportPreviewProps) {
+  const currentHistoryLength = currentHistory.length;
   const importedHistoryLength = importedHistory.length;
   const replaceHistoryCount = importedHistoryLength;
   const mergeHistoryCount = Math.min(1 + currentHistoryLength + importedHistoryLength, imported.maxGridHistorySize);
+
+  const formatCell = (n: number) => `${n} cell${n === 1 ? "" : "s"}`;
+  const formatCount = (n: number) => String(n);
 
   return (
     <div className="space-y-4">
