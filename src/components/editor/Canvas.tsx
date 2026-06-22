@@ -223,6 +223,10 @@ export function Canvas({ screen }: { screen: Screen }) {
   const setZoom = useEditorStore((s) => s.setZoom);
   const showGrid = useEditorStore((s) => s.showGrid);
   const toggleGrid = useEditorStore((s) => s.toggleGrid);
+  const snapToGrid = useEditorStore((s) => s.snapToGrid);
+  const toggleSnap = useEditorStore((s) => s.toggleSnap);
+  const showAlignment = useEditorStore((s) => s.showAlignment);
+  const toggleAlignment = useEditorStore((s) => s.toggleAlignment);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const select = useEditorStore((s) => s.select);
   const pushHistory = useEditorStore((s) => s.pushHistory);
