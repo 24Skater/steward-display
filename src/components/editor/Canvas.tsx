@@ -169,6 +169,7 @@ function CanvasStage({
 }) {
   const { setNodeRef } = useDroppable({ id: "canvas-stage" });
   const showGrid = useEditorStore((s) => s.showGrid);
+  const showAlignment = useEditorStore((s) => s.showAlignment);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const toggleSelect = useEditorStore((s) => s.toggleSelect);
   const select = useEditorStore((s) => s.select);
@@ -196,6 +197,16 @@ function CanvasStage({
             backgroundSize: `${cellW}px ${cellH}px`,
           }}
         />
+      )}
+      {showAlignment && (
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-blue/60" />
+          <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-blue/60" />
+          <div className="absolute left-1/3 top-0 h-full w-px bg-blue/25" />
+          <div className="absolute left-2/3 top-0 h-full w-px bg-blue/25" />
+          <div className="absolute left-0 top-1/3 h-px w-full bg-blue/25" />
+          <div className="absolute left-0 top-2/3 h-px w-full bg-blue/25" />
+        </div>
       )}
       <div className="absolute inset-0 text-white">
         {screen.widgets.map((w) => (
