@@ -191,6 +191,11 @@ function SettingsPage() {
             </Select>
           </div>
         </div>
+        <div className="pt-2">
+          <Button variant="outline" size="sm" onClick={handleResetGridDefaults}>
+            <RotateCcw className="h-4 w-4" /> Reset grid defaults
+          </Button>
+        </div>
       </Section>
 
       <Section title="Data sources" description="Connect external services. Wiring lands in a future release.">
