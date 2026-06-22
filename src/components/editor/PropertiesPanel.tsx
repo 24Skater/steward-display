@@ -514,23 +514,32 @@ function PresetEditorDialog({
 }
 
 function ToolbarButton({
-  title,
+  tooltip,
+  shortcut,
   onClick,
   children,
 }: {
-  title: string;
+  tooltip: string;
+  shortcut?: string;
   onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
-    >
-      {children}
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+        <span>{tooltip}</span>
+        {shortcut && <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">{shortcut}</kbd>}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
