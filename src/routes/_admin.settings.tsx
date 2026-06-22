@@ -79,6 +79,13 @@ function SettingsPage() {
   const [gridDefaultsWarnings, setGridDefaultsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [clearHistoryDialogOpen, setClearHistoryDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingGridImport, setPendingGridImport] = useState<{
+    gridDefaults: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
+    history: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
+    warnings: string[];
+    filename: string;
+  } | null>(null);
   
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
