@@ -485,6 +485,32 @@ function SettingsPage() {
               e.target.value = "";
             }}
           />
+
+          <AlertDialog open={importDialogOpen} onOpenChange={(open) => { setImportDialogOpen(open); if (!open) setPendingGridImport(null); }}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Import grid defaults</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {pendingGridImport && (
+                    <>
+                      <p>
+                        <strong>{pendingGridImport.filename}</strong> contains {pendingGridImport.history.length} snapshot
+                        {pendingGridImport.history.length === 1 ? "" : "s"} with grid size {pendingGridImport.gridDefaults.defaultGridSize} and snap step {pendingGridImport.gridDefaults.defaultSnapStep}.
+                      </p>
+                      <p className="mt-2">
+                        Choose <strong>Replace</strong> to overwrite your current grid defaults and history with the imported values, or <strong>Merge</strong> to keep your current grid defaults active and add the imported snapshots to your history.
+                      </p>
+                    </>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
+                <AlertDialogAction onClick={confirmReplaceGridImport}>Replace</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </Section>
 
