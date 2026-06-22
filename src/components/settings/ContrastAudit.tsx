@@ -295,7 +295,33 @@ export function ContrastAudit() {
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-muted p-1"
+          role="group"
+          aria-label="Theme focus"
+        >
+          {(["all", "light", "dark"] as const).map((t) => {
+            const active = themeFilter === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setThemeFilter(t)}
+                aria-pressed={active}
+                className={
+                  "rounded px-2.5 py-1 text-xs font-medium transition-colors " +
+                  (active
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                {t === "all" ? "All themes" : t === "light" ? "Light" : "Dark"}
+              </button>
+            );
+          })}
+        </div>
+
         <button
           type="button"
           onClick={() => setShowOnlyFailing((v) => !v)}
