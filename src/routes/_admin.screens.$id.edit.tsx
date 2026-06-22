@@ -294,6 +294,8 @@ const SHORTCUTS = [
   { keys: "Drag", action: "Move widget", category: "canvas" },
   { keys: "Drag handle", action: "Resize widget", category: "canvas" },
   { keys: "Scroll", action: "Pan canvas", category: "canvas" },
+  { keys: "⌘/Ctrl + 0", action: "Fit to screen", category: "canvas" },
+  { keys: "⌘/Ctrl + 1", action: "Actual size", category: "canvas" },
   { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets", category: "widgets" },
   { keys: "Delete / Backspace", action: "Remove selected widgets", category: "widgets" },
   { keys: "?", action: "Open this help", category: "presets" },

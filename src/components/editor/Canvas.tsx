@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, Undo2, Redo2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Screen, WidgetInstance } from "@/types";
 import { getScreenDimensions } from "@/types";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
@@ -272,6 +277,16 @@ export function Canvas({ screen }: { screen: Screen }) {
         if (next) setWidgets(screen.id, next);
         return;
       }
+      if (meta && (e.key === "0" || e.key === ")")) {
+        e.preventDefault();
+        setZoom(autoZoom);
+        return;
+      }
+      if (meta && (e.key === "1" || e.key === "!")) {
+        e.preventDefault();
+        setZoom(1);
+        return;
+      }
 
       if (selectedIds.length === 0) return;
       const step = e.shiftKey ? 4 : 1;
@@ -338,40 +353,97 @@ export function Canvas({ screen }: { screen: Screen }) {
       <div className="pointer-events-auto absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs shadow-steward-md">
         <span className="font-medium text-muted-foreground">{dims.w}×{dims.h}</span>
         <span className="text-border">|</span>
-        <button
-          onClick={toggleGrid}
-          className={
-            "rounded-full px-2 py-0.5 " +
-            (showGrid ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
-          }
-          title="Toggle grid"
-        >
-          Grid
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggleGrid}
+              className={
+                "rounded-full px-2 py-0.5 " +
+                (showGrid ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
+              }
+            >
+              Grid
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">Toggle grid</TooltipContent>
+        </Tooltip>
         <span className="text-border">|</span>
         {zoomOptions.map((z) => (
-          <button
-            key={z}
-            onClick={() => setZoom(z)}
-            className={`rounded-full px-2 py-0.5 ${Math.abs(zoom - z) < 0.01 ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted"}`}
-          >
-            {Math.round(z * 100)}%
-          </button>
+          <Tooltip key={z}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setZoom(z)}
+                className={`rounded-full px-2 py-0.5 ${Math.abs(zoom - z) < 0.01 ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                {Math.round(z * 100)}%
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">Zoom to {Math.round(z * 100)}%</TooltipContent>
+          </Tooltip>
         ))}
-        <button
-          onClick={() => setZoom(autoZoom)}
-          className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
-          title="Fit to screen"
-        >
-          <Maximize2 className="inline h-3 w-3" />
-        </button>
-        <button
-          onClick={() => setZoom(1)}
-          className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
-          title="Actual size"
-        >
-          <Minimize2 className="inline h-3 w-3" />
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setZoom(autoZoom)}
+              className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
+            >
+              <Maximize2 className="inline h-3 w-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Fit to screen</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + 0</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setZoom(1)}
+              className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
+            >
+              <Minimize2 className="inline h-3 w-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Actual size</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + 1</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <span className="text-border">|</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => {
+                const prev = undo();
+                if (prev) setWidgets(screen.id, prev);
+              }}
+              className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="inline h-3 w-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Undo</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + Z</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => {
+                const next = redo();
+                if (next) setWidgets(screen.id, next);
+              }}
+              className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
+            >
+              <Redo2 className="inline h-3 w-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Redo</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + Y</kbd>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
