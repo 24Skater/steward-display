@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useScreenStore } from "@/store/screenStore";
 import {
@@ -64,6 +65,8 @@ interface GridImportPreviewProps {
   imported: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
   importedHistory: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
   warnings: string[];
+  importGridDefaults: boolean;
+  importHistory: boolean;
 }
 
 function DiffValue({
@@ -117,11 +120,26 @@ function GridImportPreview({
   imported,
   importedHistory,
   warnings,
+  importGridDefaults,
+  importHistory,
 }: GridImportPreviewProps) {
   const currentHistoryLength = currentHistory.length;
   const importedHistoryLength = importedHistory.length;
-  const replaceHistoryCount = importedHistoryLength;
-  const mergeHistoryCount = Math.min(1 + currentHistoryLength + importedHistoryLength, imported.maxGridHistorySize);
+
+  const replaceGridSize = importGridDefaults ? imported.defaultGridSize : current.defaultGridSize;
+  const replaceSnapStep = importGridDefaults ? imported.defaultSnapStep : current.defaultSnapStep;
+  const replaceMax = importGridDefaults ? imported.maxGridHistorySize : current.maxGridHistorySize;
+  const replaceHistoryCount = importHistory ? importedHistoryLength : currentHistoryLength;
+
+  const mergeGridSize = current.defaultGridSize;
+  const mergeSnapStep = current.defaultSnapStep;
+  const mergeMax = importGridDefaults ? imported.maxGridHistorySize : current.maxGridHistorySize;
+  const mergeHistoryCount = Math.min(
+    currentHistoryLength +
+      (importGridDefaults ? 1 : 0) +
+      (importHistory ? importedHistoryLength : 0),
+    mergeMax,
+  );
 
   const formatCell = (n: number) => `${n} cell${n === 1 ? "" : "s"}`;
   const formatCount = (n: number) => String(n);
@@ -161,30 +179,30 @@ function GridImportPreview({
                 <td className="px-3 py-2">Default grid size</td>
                 <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultGridSize)}</td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.defaultGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                  <DiffValue value={replaceGridSize} baseline={current.defaultGridSize} format={formatCell} />
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={current.defaultGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                  <DiffValue value={mergeGridSize} baseline={current.defaultGridSize} format={formatCell} />
                 </td>
               </tr>
               <tr>
                 <td className="px-3 py-2">Default snap step</td>
                 <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultSnapStep)}</td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.defaultSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                  <DiffValue value={replaceSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={current.defaultSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                  <DiffValue value={mergeSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
                 </td>
               </tr>
               <tr>
                 <td className="px-3 py-2">Max undo snapshots</td>
                 <td className="px-3 py-2 text-muted-foreground">{formatCount(current.maxGridHistorySize)}</td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.maxGridHistorySize} baseline={current.maxGridHistorySize} format={formatCount} />
+                  <DiffValue value={replaceMax} baseline={current.maxGridHistorySize} format={formatCount} />
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.maxGridHistorySize} baseline={current.maxGridHistorySize} format={formatCount} />
+                  <DiffValue value={mergeMax} baseline={current.maxGridHistorySize} format={formatCount} />
                 </td>
               </tr>
               <tr>
@@ -215,10 +233,6 @@ function GridImportPreview({
           </div>
         </div>
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        Choose <strong>Replace</strong> to overwrite your current grid defaults and history with the imported values, or <strong>Merge</strong> to keep your current defaults active and combine the imported snapshots into your history.
-      </p>
     </div>
   );
 }
@@ -252,6 +266,9 @@ function SettingsPage() {
     warnings: string[];
     filename: string;
   } | null>(null);
+  const [importGridDefaults, setImportGridDefaults] = useState(true);
+  const [importHistory, setImportHistory] = useState(true);
+  
   
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
@@ -331,6 +348,8 @@ function SettingsPage() {
       const text = await file.text();
       const { gridDefaults, history, warnings } = parseImportedGridDefaults(text);
       setPendingGridImport({ gridDefaults, history, warnings, filename: file.name });
+      setImportGridDefaults(true);
+      setImportHistory(true);
       setImportDialogOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
@@ -340,31 +359,51 @@ function SettingsPage() {
   const confirmReplaceGridImport = () => {
     if (!pendingGridImport) return;
     const { gridDefaults, history, warnings } = pendingGridImport;
-    update(gridDefaults);
-    setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
-    finishGridImport(warnings);
+    const patch: Partial<Parameters<typeof update>[0]> = {};
+    if (importGridDefaults) {
+      patch.defaultGridSize = gridDefaults.defaultGridSize;
+      patch.defaultSnapStep = gridDefaults.defaultSnapStep;
+      patch.maxGridHistorySize = gridDefaults.maxGridHistorySize;
+    }
+    update(patch);
+    if (importHistory) {
+      setGridDefaultsHistory(history.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
+    }
+    const importedParts = [
+      importGridDefaults && "grid defaults",
+      importHistory && "undo history",
+    ].filter(Boolean);
+    finishGridImport(warnings, importedParts.length > 0 ? `Replaced ${importedParts.join(" and ")}.` : "Nothing to import.");
   };
 
   const confirmMergeGridImport = () => {
     if (!pendingGridImport) return;
     const { gridDefaults, history, warnings } = pendingGridImport;
+    if (importGridDefaults) {
+      update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
+    }
     const mergedHistory = [
-      { defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() },
+      ...(importGridDefaults
+        ? [{ defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() }]
+        : []),
       ...gridDefaultsHistory,
-      ...history,
+      ...(importHistory ? history : []),
     ].sort((a, b) => b.timestamp - a.timestamp);
-    update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
-    setGridDefaultsHistory(mergedHistory.slice(0, gridDefaults.maxGridHistorySize));
-    finishGridImport(warnings);
+    setGridDefaultsHistory(mergedHistory.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
+    const importedParts = [
+      importGridDefaults && "grid defaults",
+      importHistory && "undo history",
+    ].filter(Boolean);
+    finishGridImport(warnings, importedParts.length > 0 ? `Merged ${importedParts.join(" and ")}.` : "Nothing to import.");
   };
 
-  const finishGridImport = (warnings: string[]) => {
+  const finishGridImport = (warnings: string[], message = "Grid defaults and history imported.") => {
     setImportDialogOpen(false);
     setPendingGridImport(null);
     if (warnings.length > 0) {
       setGridDefaultsWarnings(warnings);
     } else {
-      toast.success("Grid defaults and history imported.");
+      toast.success(message);
     }
   };
   const handleImportSettings = async (file: File) => {
@@ -668,14 +707,29 @@ function SettingsPage() {
                   imported={pendingGridImport.gridDefaults}
                   importedHistory={pendingGridImport.history}
                   warnings={pendingGridImport.warnings}
+                  importGridDefaults={importGridDefaults}
+                  importHistory={importHistory}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">No import is currently pending.</p>
               )}
+              {pendingGridImport && (
+                <div className="space-y-3 rounded-md border border-border p-4">
+                  <p className="text-sm font-medium">Import options</p>
+                  <Label className="flex items-center justify-between gap-4 text-sm font-normal">
+                    Grid defaults
+                    <Switch checked={importGridDefaults} onCheckedChange={setImportGridDefaults} />
+                  </Label>
+                  <Label className="flex items-center justify-between gap-4 text-sm font-normal">
+                    Undo history
+                    <Switch checked={importHistory} onCheckedChange={setImportHistory} />
+                  </Label>
+                </div>
+              )}
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
-                <AlertDialogAction onClick={confirmReplaceGridImport}>Replace</AlertDialogAction>
+                <AlertDialogAction disabled={!importGridDefaults && !importHistory} onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
+                <AlertDialogAction disabled={!importGridDefaults && !importHistory} onClick={confirmReplaceGridImport}>Replace</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
