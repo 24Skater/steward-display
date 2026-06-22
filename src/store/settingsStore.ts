@@ -16,6 +16,7 @@ interface SettingsState extends Settings {
   hydrated: boolean;
   hydrate: () => void;
   update: (patch: Partial<Settings>) => void;
+  resetGridDefaults: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
@@ -28,7 +29,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
   update: (patch) => {
     set(patch);
-    const { hydrated: _h, hydrate: _hy, update: _u, ...rest } = get();
+    const { hydrated: _h, hydrate: _hy, update: _u, resetGridDefaults: _r, ...rest } = get();
+    writeJSON(STORAGE_KEYS.settings, rest);
+  },
+  resetGridDefaults: () => {
+    const patch = {
+      defaultGridSize: DEFAULT_SETTINGS.defaultGridSize,
+      defaultSnapStep: DEFAULT_SETTINGS.defaultSnapStep,
+    };
+    set(patch);
+    const { hydrated: _h, hydrate: _hy, update: _u, resetGridDefaults: _r, ...rest } = get();
     writeJSON(STORAGE_KEYS.settings, rest);
   },
 }));
