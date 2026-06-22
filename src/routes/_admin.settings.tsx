@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useScreenStore } from "@/store/screenStore";
 import {
