@@ -64,6 +64,7 @@ function SettingsPage() {
     weatherApiKey,
     defaultGridSize,
     defaultSnapStep,
+    maxGridHistorySize,
     update,
     resetGridDefaults,
   } = useSettingsStore();
