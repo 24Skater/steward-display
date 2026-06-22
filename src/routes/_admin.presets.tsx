@@ -100,7 +100,7 @@ function PresetsPage() {
             className="pl-9"
           />
         </div>
-        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as WidgetType | "all")}>
+        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as string | "all")}>
           <SelectTrigger className="w-full sm:w-52">
             <SelectValue placeholder="All widget types" />
           </SelectTrigger>
