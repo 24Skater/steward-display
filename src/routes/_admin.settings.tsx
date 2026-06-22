@@ -75,7 +75,19 @@ function SettingsPage() {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
-  >(() => readJSON(STORAGE_KEYS.gridDefaultsHistory, []));
+  >(() => {
+    const loaded = readJSON<unknown>(STORAGE_KEYS.gridDefaultsHistory, []);
+    if (!Array.isArray(loaded)) return [];
+    return loaded.filter((entry): entry is typeof loaded[number] & { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
+      if (!entry || typeof entry !== "object") return false;
+      const e = entry as Record<string, unknown>;
+      return (
+        typeof e.defaultGridSize === "number" &&
+        typeof e.defaultSnapStep === "number" &&
+        typeof e.timestamp === "number"
+      );
+    });
+  });
 
   useEffect(() => {
     writeJSON(STORAGE_KEYS.gridDefaultsHistory, gridDefaultsHistory);
