@@ -727,6 +727,11 @@ function SettingsPage() {
                 <AlertDialogDescription>
                   Review the changes below before choosing how to apply the import.
                 </AlertDialogDescription>
+                {lastGridImport && (
+                  <p className="text-xs text-muted-foreground">
+                    Last import: {formatRelativeTime(lastGridImport.timestamp)} · {lastGridImport.mode === "replace" ? "Replace" : "Merge"} · Grid defaults {lastGridImport.includedDefaults ? "on" : "off"} · Undo history {lastGridImport.includedHistory ? "on" : "off"}
+                  </p>
+                )}
               </AlertDialogHeader>
               {pendingGridImport ? (
                 <GridImportPreview
