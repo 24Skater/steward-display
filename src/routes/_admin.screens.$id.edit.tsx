@@ -241,8 +241,9 @@ function EditorPage() {
             className="mb-2"
           />
           <Tabs value={shortcutTab} onValueChange={setShortcutTab}>
-            <TabsList className="mb-3 grid w-full grid-cols-5">
+            <TabsList className="mb-3 grid w-full grid-cols-6">
               <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="edit">Edit</TabsTrigger>
               <TabsTrigger value="canvas">Canvas</TabsTrigger>
               <TabsTrigger value="widgets">Widgets</TabsTrigger>
               <TabsTrigger value="media">Media</TabsTrigger>
