@@ -417,6 +417,7 @@ function SettingsPage() {
           <Button variant="outline" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4" /> Import screens</Button>
           <Button variant="outline" onClick={handleExportSettings}><Download className="h-4 w-4" /> Export settings</Button>
           <Button variant="outline" onClick={handleExportGridDefaults}><Download className="h-4 w-4" /> Export grid defaults</Button>
+          <Button variant="outline" onClick={() => gridDefaultsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import grid defaults</Button>
           <Button variant="outline" onClick={() => settingsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import settings</Button>
           <input
             ref={fileRef}
@@ -437,6 +438,17 @@ function SettingsPage() {
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) handleImportSettings(f);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={gridDefaultsFileRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImportGridDefaults(f);
               e.target.value = "";
             }}
           />
