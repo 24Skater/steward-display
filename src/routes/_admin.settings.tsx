@@ -36,6 +36,7 @@ import {
   exportSettingsToJSON,
   parseImportedSettings,
 } from "@/lib/export";
+import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
 import { toast } from "sonner";
 import { ContrastAudit } from "@/components/settings/ContrastAudit";
 
