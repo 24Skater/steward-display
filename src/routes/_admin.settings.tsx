@@ -335,6 +335,8 @@ function SettingsPage() {
       const text = await file.text();
       const { gridDefaults, history, warnings } = parseImportedGridDefaults(text);
       setPendingGridImport({ gridDefaults, history, warnings, filename: file.name });
+      setImportGridDefaults(true);
+      setImportHistory(true);
       setImportDialogOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
