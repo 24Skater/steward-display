@@ -20,6 +20,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import type { Screen, WidgetInstance } from "@/types";
 import { useScreenStore } from "@/store/screenStore";
@@ -152,7 +158,8 @@ export function PropertiesPanel({
 
 
   return (
-    <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
+    <TooltipProvider delayDuration={200}>
+      <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
       <div className="flex items-start justify-between gap-3 border-b border-border p-3">
         <div className="flex min-w-0 items-center gap-2">
           {Icon && (
@@ -171,19 +178,19 @@ export function PropertiesPanel({
       </div>
 
       <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5">
-        <ToolbarButton title="Duplicate" onClick={() => duplicateWidget(screen.id, widget.id)}>
+        <ToolbarButton tooltip="Duplicate" shortcut="⌘/Ctrl + D" onClick={() => duplicateWidget(screen.id, widget.id)}>
           <Copy className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Bring to front" onClick={() => reorderWidget(screen.id, widget.id, "front")}>
+        <ToolbarButton tooltip="Bring to front" onClick={() => reorderWidget(screen.id, widget.id, "front")}>
           <ChevronsUp className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Bring forward" onClick={() => reorderWidget(screen.id, widget.id, "forward")}>
+        <ToolbarButton tooltip="Bring forward" onClick={() => reorderWidget(screen.id, widget.id, "forward")}>
           <ChevronUp className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Send backward" onClick={() => reorderWidget(screen.id, widget.id, "backward")}>
+        <ToolbarButton tooltip="Send backward" onClick={() => reorderWidget(screen.id, widget.id, "backward")}>
           <ChevronDown className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Send to back" onClick={() => reorderWidget(screen.id, widget.id, "back")}>
+        <ToolbarButton tooltip="Send to back" onClick={() => reorderWidget(screen.id, widget.id, "back")}>
           <ChevronsDown className="h-3.5 w-3.5" />
         </ToolbarButton>
       </div>
@@ -400,16 +407,24 @@ export function PropertiesPanel({
       </Tabs>
 
       <div className="border-t border-border p-3">
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={() => {
-            removeWidget(screen.id, widget.id);
-            onClose();
-          }}
-        >
-          <Trash2 className="h-4 w-4" /> Delete widget
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => {
+                removeWidget(screen.id, widget.id);
+                onClose();
+              }}
+            >
+              <Trash2 className="h-4 w-4" /> Delete widget
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+            <span>Remove selected widget</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">Delete / Backspace</kbd>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <PresetEditorDialog
@@ -432,6 +447,7 @@ export function PropertiesPanel({
         }}
       />
     </aside>
+  </TooltipProvider>
   );
 }
 
@@ -508,23 +524,32 @@ function PresetEditorDialog({
 }
 
 function ToolbarButton({
-  title,
+  tooltip,
+  shortcut,
   onClick,
   children,
 }: {
-  title: string;
+  tooltip: string;
+  shortcut?: string;
   onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
-    >
-      {children}
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+        <span>{tooltip}</span>
+        {shortcut && <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">{shortcut}</kbd>}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

@@ -30,6 +30,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/_admin/screens/$id/edit")({
   head: () => ({ meta: [{ title: "Editor — Steward Display" }] }),
@@ -159,7 +165,8 @@ function EditorPage() {
   const showTemplates = !skipTemplates && screen.widgets.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col">
+    <TooltipProvider delayDuration={200}>
+      <div className="flex h-[calc(100vh-3.5rem)] flex-col">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
@@ -194,9 +201,17 @@ function EditorPage() {
           <span className="text-xs text-muted-foreground">Auto-saved</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
-            <Keyboard className="h-4 w-4" /> Shortcuts
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
+                <Keyboard className="h-4 w-4" /> Shortcuts
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+              <span>Keyboard shortcuts</span>
+              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">?</kbd>
+            </TooltipContent>
+          </Tooltip>
           <Button variant="outline" size="sm" onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}>
             <Eye className="h-4 w-4" /> Preview
           </Button>
@@ -263,6 +278,7 @@ function EditorPage() {
         </DialogContent>
       </Dialog>
     </div>
+  </TooltipProvider>
   );
 }
 
