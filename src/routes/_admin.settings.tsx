@@ -57,6 +57,105 @@ function Section({ title, description, children }: { title: string; description?
   );
 }
 
+interface GridImportPreviewProps {
+  filename: string;
+  current: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
+  currentHistoryLength: number;
+  imported: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
+  importedHistory: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
+  warnings: string[];
+}
+
+function GridImportPreview({
+  filename,
+  current,
+  currentHistoryLength,
+  imported,
+  importedHistory,
+  warnings,
+}: GridImportPreviewProps) {
+  const importedHistoryLength = importedHistory.length;
+  const replaceHistoryCount = importedHistoryLength;
+  const mergeHistoryCount = Math.min(1 + currentHistoryLength + importedHistoryLength, imported.maxGridHistorySize);
+
+  return (
+    <div className="space-y-4">
+      <p>
+        <strong>{filename}</strong> contains {importedHistoryLength} snapshot
+        {importedHistoryLength === 1 ? "" : "s"}.
+      </p>
+
+      {warnings.length > 0 && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          <p className="font-medium">Import warnings</p>
+          <ul className="list-disc pl-4">
+            {warnings.map((warning, i) => (
+              <li key={i}>{warning}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="rounded-md border border-border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-muted text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-left font-medium">Setting</th>
+              <th className="px-3 py-2 text-left font-medium">Current</th>
+              <th className="px-3 py-2 text-left font-medium">After replace</th>
+              <th className="px-3 py-2 text-left font-medium">After merge</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            <tr>
+              <td className="px-3 py-2">Default grid size</td>
+              <td className="px-3 py-2">{current.defaultGridSize} cells</td>
+              <td className="px-3 py-2">{imported.defaultGridSize} cells</td>
+              <td className="px-3 py-2">{current.defaultGridSize} cells</td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2">Default snap step</td>
+              <td className="px-3 py-2">{current.defaultSnapStep} cells</td>
+              <td className="px-3 py-2">{imported.defaultSnapStep} cells</td>
+              <td className="px-3 py-2">{current.defaultSnapStep} cells</td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2">Max undo snapshots</td>
+              <td className="px-3 py-2">{current.maxGridHistorySize}</td>
+              <td className="px-3 py-2">{imported.maxGridHistorySize}</td>
+              <td className="px-3 py-2">{imported.maxGridHistorySize}</td>
+            </tr>
+            <tr>
+              <td className="px-3 py-2">Saved snapshots</td>
+              <td className="px-3 py-2">{currentHistoryLength}</td>
+              <td className="px-3 py-2">{replaceHistoryCount}</td>
+              <td className="px-3 py-2">{mergeHistoryCount}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {importedHistoryLength > 0 && (
+        <div>
+          <p className="text-sm font-medium">Imported snapshots preview</p>
+          <ul className="mt-1 max-h-32 overflow-y-auto rounded-md border border-border bg-background p-2 space-y-1 text-xs">
+            {importedHistory.map((entry, index) => (
+              <li key={`${entry.timestamp}-${index}`} className="flex justify-between gap-3">
+                <span>Grid {entry.defaultGridSize}, snap {entry.defaultSnapStep}</span>
+                <span className="text-muted-foreground">{new Date(entry.timestamp).toLocaleString()}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p className="text-xs text-muted-foreground">
+        Choose <strong>Replace</strong> to overwrite your current grid defaults and history, or <strong>Merge</strong> to keep your current defaults active and combine the imported snapshots into your history.
+      </p>
+    </div>
+  );
+}
+
 function SettingsPage() {
   const {
     orgName,
