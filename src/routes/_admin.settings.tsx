@@ -705,10 +705,23 @@ function SettingsPage() {
               ) : (
                 <p className="text-sm text-muted-foreground">No import is currently pending.</p>
               )}
+              {pendingGridImport && (
+                <div className="space-y-3 rounded-md border border-border p-4">
+                  <p className="text-sm font-medium">Import options</p>
+                  <Label className="flex items-center justify-between gap-4 text-sm font-normal">
+                    Grid defaults
+                    <Switch checked={importGridDefaults} onCheckedChange={setImportGridDefaults} />
+                  </Label>
+                  <Label className="flex items-center justify-between gap-4 text-sm font-normal">
+                    Undo history
+                    <Switch checked={importHistory} onCheckedChange={setImportHistory} />
+                  </Label>
+                </div>
+              )}
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
-                <AlertDialogAction onClick={confirmReplaceGridImport}>Replace</AlertDialogAction>
+                <AlertDialogAction disabled={!importGridDefaults && !importHistory} onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
+                <AlertDialogAction disabled={!importGridDefaults && !importHistory} onClick={confirmReplaceGridImport}>Replace</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
