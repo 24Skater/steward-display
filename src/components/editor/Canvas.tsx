@@ -377,14 +377,51 @@ export function Canvas({ screen }: { screen: Screen }) {
             <button
               onClick={toggleGrid}
               className={
-                "rounded-full px-2 py-0.5 " +
+                "inline-flex h-6 w-6 items-center justify-center rounded-full " +
                 (showGrid ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
               }
             >
-              Grid
+              <Grid3x3 className="h-3.5 w-3.5" />
             </button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="text-xs">Toggle grid</TooltipContent>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Toggle grid</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">G</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggleSnap}
+              className={
+                "inline-flex h-6 w-6 items-center justify-center rounded-full " +
+                (snapToGrid ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
+              }
+            >
+              <Magnet className="h-3.5 w-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Snap to grid</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">S</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggleAlignment}
+              className={
+                "inline-flex h-6 w-6 items-center justify-center rounded-full " +
+                (showAlignment ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
+              }
+            >
+              <AlignCenterVertical className="h-3.5 w-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Alignment guides</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">A</kbd>
+          </TooltipContent>
         </Tooltip>
         <span className="text-border">|</span>
         {zoomOptions.map((z) => (
