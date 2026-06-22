@@ -253,7 +253,23 @@ export function Canvas({ screen }: { screen: Screen }) {
   const removeWidget = useScreenStore((s) => s.removeWidget);
   const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
   const setWidgets = useScreenStore((s) => s.setWidgets);
+  const updateScreen = useScreenStore((s) => s.updateScreen);
   const gridStep = snapToGrid ? snapStep : gridSize;
+
+  useEffect(() => {
+    if (typeof screen.gridSize === "number") setGridSize(screen.gridSize);
+    if (typeof screen.snapStep === "number") setSnapStep(screen.snapStep);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen.id]);
+
+  const handleGridSizeChange = (n: number) => {
+    setGridSize(n);
+    updateScreen(screen.id, { gridSize: n });
+  };
+  const handleSnapStepChange = (n: number) => {
+    setSnapStep(n);
+    updateScreen(screen.id, { snapStep: n });
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -413,7 +429,7 @@ export function Canvas({ screen }: { screen: Screen }) {
             <select
               aria-label="Grid size (cells)"
               value={gridStep}
-              onChange={(e) => setGridSize(Number(e.target.value))}
+              onChange={(e) => handleGridSizeChange(Number(e.target.value))}
               disabled={snapToGrid}
               className="h-6 rounded-full border border-border bg-card px-1.5 text-xs text-foreground focus:outline-none disabled:opacity-50"
             >
@@ -448,7 +464,7 @@ export function Canvas({ screen }: { screen: Screen }) {
             <select
               aria-label="Snap step size (cells)"
               value={snapStep}
-              onChange={(e) => setSnapStep(Number(e.target.value))}
+              onChange={(e) => handleSnapStepChange(Number(e.target.value))}
               disabled={!snapToGrid}
               className="h-6 rounded-full border border-border bg-card px-1.5 text-xs text-foreground focus:outline-none disabled:opacity-50"
             >
