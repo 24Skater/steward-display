@@ -236,6 +236,8 @@ export function Canvas({ screen }: { screen: Screen }) {
   const toggleGrid = useEditorStore((s) => s.toggleGrid);
   const snapToGrid = useEditorStore((s) => s.snapToGrid);
   const toggleSnap = useEditorStore((s) => s.toggleSnap);
+  const snapStep = useEditorStore((s) => s.snapStep);
+  const setSnapStep = useEditorStore((s) => s.setSnapStep);
   const showAlignment = useEditorStore((s) => s.showAlignment);
   const toggleAlignment = useEditorStore((s) => s.toggleAlignment);
   const selectedIds = useEditorStore((s) => s.selectedIds);
@@ -415,6 +417,24 @@ export function Canvas({ screen }: { screen: Screen }) {
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Snap to grid</span>
             <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">S</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <select
+              aria-label="Snap step size (cells)"
+              value={snapStep}
+              onChange={(e) => setSnapStep(Number(e.target.value))}
+              disabled={!snapToGrid}
+              className="h-6 rounded-full border border-border bg-card px-1.5 text-xs text-foreground focus:outline-none disabled:opacity-50"
+            >
+              {[1, 2, 4, 6, 8, 12, 16].map((n) => (
+                <option key={n} value={n}>{n} cells</option>
+              ))}
+            </select>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            Snap step (drag drops round to this many cells)
           </TooltipContent>
         </Tooltip>
         <Tooltip>
