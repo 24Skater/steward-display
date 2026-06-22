@@ -268,8 +268,8 @@ function SettingsPage() {
     warnings: string[];
     filename: string;
   } | null>(null);
-  const [importGridDefaults, setImportGridDefaults] = useState(true);
-  const [importHistory, setImportHistory] = useState(true);
+  const [importGridDefaults, setImportGridDefaults] = useState(gridImportIncludeDefaults ?? true);
+  const [importHistory, setImportHistory] = useState(gridImportIncludeHistory ?? true);
   
   
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
