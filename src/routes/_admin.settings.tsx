@@ -115,6 +115,26 @@ function SettingsPage() {
     <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
       <PageHeader title="Settings" subtitle="Configure your organization and defaults." />
 
+      {settingsWarnings.length > 0 && (
+        <Alert variant="destructive" className="relative">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Settings import warnings</AlertTitle>
+          <AlertDescription>
+            {settingsWarnings.map((warning, i) => (
+              <p key={i}>{warning}</p>
+            ))}
+          </AlertDescription>
+          <button
+            onClick={() => setSettingsWarnings([])}
+            className="absolute right-3 top-3 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label="Dismiss"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </Alert>
+      )}
+
+
       <Section title="Organization">
         <div className="space-y-1.5">
           <Label htmlFor="org">Name</Label>
