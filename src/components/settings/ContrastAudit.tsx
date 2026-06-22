@@ -229,6 +229,7 @@ export function ContrastAudit() {
     config ?? { ...DEFAULT_CONTRAST_CONFIG, source: { jsonPath: null, envOverrides: [] } };
 
   const [showOnlyFailing, setShowOnlyFailing] = useState(false);
+  const [themeFilter, setThemeFilter] = useState<"all" | "light" | "dark">("all");
 
   const results = useMemo(() => auditBrandContrast(active), [active]);
   const light = results.filter((r) => r.theme === "light");
@@ -294,7 +295,33 @@ export function ContrastAudit() {
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-muted p-1"
+          role="group"
+          aria-label="Theme focus"
+        >
+          {(["all", "light", "dark"] as const).map((t) => {
+            const active = themeFilter === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setThemeFilter(t)}
+                aria-pressed={active}
+                className={
+                  "rounded px-2.5 py-1 text-xs font-medium transition-colors " +
+                  (active
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                {t === "all" ? "All themes" : t === "light" ? "Light" : "Dark"}
+              </button>
+            );
+          })}
+        </div>
+
         <button
           type="button"
           onClick={() => setShowOnlyFailing((v) => !v)}
@@ -320,39 +347,43 @@ export function ContrastAudit() {
         </button>
       </div>
 
-      <div>
-        <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Light theme
-        </h3>
-        <ul className="space-y-1.5">
-          {filteredLight.length === 0 ? (
-            <li className="text-sm text-muted-foreground">
-              {showOnlyFailing ? "No failing pairs in the light theme." : "No pairs in the light theme."}
-            </li>
-          ) : (
-            filteredLight.map((r) => (
-              <Row key={`l-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
-            ))
-          )}
-        </ul>
-      </div>
+      {themeFilter !== "dark" && (
+        <div>
+          <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Light theme
+          </h3>
+          <ul className="space-y-1.5">
+            {filteredLight.length === 0 ? (
+              <li className="text-sm text-muted-foreground">
+                {showOnlyFailing ? "No failing pairs in the light theme." : "No pairs in the light theme."}
+              </li>
+            ) : (
+              filteredLight.map((r) => (
+                <Row key={`l-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
+              ))
+            )}
+          </ul>
+        </div>
+      )}
 
-      <div>
-        <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Dark theme
-        </h3>
-        <ul className="space-y-1.5">
-          {filteredDark.length === 0 ? (
-            <li className="text-sm text-muted-foreground">
-              {showOnlyFailing ? "No failing pairs in the dark theme." : "No pairs in the dark theme."}
-            </li>
-          ) : (
-            filteredDark.map((r) => (
-              <Row key={`d-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
-            ))
-          )}
-        </ul>
-      </div>
+      {themeFilter !== "light" && (
+        <div>
+          <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Dark theme
+          </h3>
+          <ul className="space-y-1.5">
+            {filteredDark.length === 0 ? (
+              <li className="text-sm text-muted-foreground">
+                {showOnlyFailing ? "No failing pairs in the dark theme." : "No pairs in the dark theme."}
+              </li>
+            ) : (
+              filteredDark.map((r) => (
+                <Row key={`d-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
+              ))
+            )}
+          </ul>
+        </div>
+      )}
 
       <TokenReference
         tokens={tokens}
