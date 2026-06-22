@@ -25,6 +25,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   selectedIds: [],
   zoom: 0.5,
   showGrid: true,
+  snapToGrid: false,
+  showAlignment: false,
   history: [],
   future: [],
   select: (ids) => set({ selectedIds: ids }),
@@ -40,6 +42,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
   setZoom: (zoom) => set({ zoom }),
   toggleGrid: () => set({ showGrid: !get().showGrid }),
+  toggleSnap: () => set({ snapToGrid: !get().snapToGrid }),
+  toggleAlignment: () => set({ showAlignment: !get().showAlignment }),
   pushHistory: (snapshot) => {
     const next = [...get().history, snapshot].slice(-50);
     set({ history: next, future: [] });
