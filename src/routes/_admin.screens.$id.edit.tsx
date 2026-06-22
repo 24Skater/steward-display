@@ -240,14 +240,25 @@ function EditorPage() {
             onChange={(e) => setShortcutQuery(e.target.value)}
             className="mb-2"
           />
-          <div className="grid gap-3 py-2">
-            {SHORTCUTS.filter((s) => {
-              const q = shortcutQuery.toLowerCase();
-              return s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
-            }).map((s) => (
-              <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
-            ))}
-          </div>
+          <Tabs value={shortcutTab} onValueChange={setShortcutTab}>
+            <TabsList className="mb-3 grid w-full grid-cols-5">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="canvas">Canvas</TabsTrigger>
+              <TabsTrigger value="widgets">Widgets</TabsTrigger>
+              <TabsTrigger value="media">Media</TabsTrigger>
+              <TabsTrigger value="presets">Presets</TabsTrigger>
+            </TabsList>
+            <div className="grid gap-3 py-2">
+              {SHORTCUTS.filter((s) => {
+                const matchesTab = shortcutTab === "all" || s.category === shortcutTab;
+                const q = shortcutQuery.toLowerCase();
+                const matchesQuery = s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
+                return matchesTab && matchesQuery;
+              }).map((s) => (
+                <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
+              ))}
+            </div>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
