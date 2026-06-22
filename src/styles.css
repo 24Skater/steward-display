@@ -96,12 +96,12 @@
   --gold: #e8b847;          /* Kingdom Gold — brand primary */
   --gold-dark: #c49a2e;     /* Kingdom Gold hover */
   --blue: #2563eb;          /* Action / links */
-  --emerald: #16a34a;       /* Success */
+  --emerald: #15803d;       /* Success — AA white-on-emerald */
   --amber: #f59e0b;         /* Warning */
   --red: #dc2626;           /* Danger */
   --ink: #0b1220;           /* Darkest text */
   --slate: #334155;         /* Secondary text */
-  --muted-fg: #6b7a8d;      /* Muted text on parchment */
+  --muted-fg: #57647a;      /* Muted text on parchment — AA on #faf7f2 */
   --surface: #ffffff;       /* Card / panel surface */
   --subtle: #f8fafc;        /* Cool subtle background */
   --parchment: #faf7f2;     /* Warm parchment — ChMS default bg */
@@ -119,13 +119,13 @@
   --secondary: #f5eed8;
   --secondary-foreground: #1b2a41;
   --muted: #f1ead6;
-  --muted-foreground: #6b7a8d;
+  --muted-foreground: #57647a;
   --accent: #f5eed8;
   --accent-foreground: #1b2a41;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #ddd0a8;
-  --input: #ddd0a8;
+  --border: #b8a778;
+  --input: #b8a778;
   --ring: #2563eb;
 
   --chart-1: oklch(0.646 0.222 41.116);
@@ -149,7 +149,7 @@
   --subtle: #060f1a;
   --ink: #f5eed8;
   --slate: #cbd5e1;
-  --muted-fg: #8a7a5c;
+  --muted-fg: #a89878;
 
   --background: #060f1a;
   --foreground: #f5eed8;
@@ -162,13 +162,13 @@
   --secondary: #1e2f4a;
   --secondary-foreground: #f5eed8;
   --muted: #1a2740;
-  --muted-foreground: #8a7a5c;
+  --muted-foreground: #a89878;
   --accent: #1e2f4a;
   --accent-foreground: #f5eed8;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #1a2f4a;
-  --input: #1a2f4a;
+  --border: #3d5878;
+  --input: #3d5878;
   --ring: #e8b847;
 
   --chart-1: oklch(0.488 0.243 264.376);
