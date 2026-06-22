@@ -74,6 +74,7 @@ function SettingsPage() {
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [clearHistoryDialogOpen, setClearHistoryDialogOpen] = useState(false);
   
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
@@ -170,6 +171,16 @@ function SettingsPage() {
         },
       },
     });
+  };
+
+  const handleClearHistory = () => {
+    setClearHistoryDialogOpen(true);
+  };
+
+  const confirmClearHistory = () => {
+    setGridDefaultsHistory([]);
+    setClearHistoryDialogOpen(false);
+    toast.success("Grid defaults history cleared.");
   };
 
   const revertGridDefaults = (entry: { defaultGridSize: number; defaultSnapStep: number }) => {
@@ -320,11 +331,26 @@ function SettingsPage() {
               variant="ghost"
               size="sm"
               className="text-muted-foreground"
-              onClick={() => setGridDefaultsHistory([])}
+              onClick={handleClearHistory}
             >
               Clear history
             </Button>
           </div>
+
+          <AlertDialog open={clearHistoryDialogOpen} onOpenChange={setClearHistoryDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear grid defaults history?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all saved grid default snapshots from the history panel and localStorage. You won't be able to revert to them afterward.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmClearHistory}>Clear</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </Section>
       )}
 
