@@ -162,35 +162,6 @@ export function PropertiesPanel({
   return (
     <TooltipProvider delayDuration={200}>
       <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
-      <div className="p-3">DEBUG panel</div>
-      </aside>
-    </TooltipProvider>
-  );
-}
-
-function _UNUSED({screen, widget, onClose}: any) {
-  const Icon: any = null;
-  const def: any = null;
-  const duplicateWidget: any = null;
-  const reorderWidget: any = null;
-  const builtInPresets: any[] = [];
-  const customPresets: any[] = [];
-  const previewPreset: any = null;
-  const setPreviewPreset: any = () => {};
-  const setEditorPreset: any = () => {};
-  const applyPreset: any = () => {};
-  const applyPresetWithUndo: any = () => {};
-  const updatePreset: any = () => {};
-  const removePreset: any = () => {};
-  const patch: any = () => {};
-  const patchConfig: any = () => {};
-  const patchStyle: any = () => {};
-  const hasAnyPresets = false;
-  const previewWidget: any = widget;
-  const removeWidget: any = () => {};
-  const editorPreset: any = null;
-  const createPreset: any = () => {};
-  return (<>
       <div className="flex items-start justify-between gap-3 border-b border-border p-3">
         <div className="flex min-w-0 items-center gap-2">
           {Icon && (
@@ -479,7 +450,6 @@ function _UNUSED({screen, widget, onClose}: any) {
       />
     </aside>
   </TooltipProvider>
-  );
   );
 }
 
