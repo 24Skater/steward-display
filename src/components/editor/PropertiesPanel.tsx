@@ -67,13 +67,29 @@ export function PropertiesPanel({
     | { mode: "edit"; preset: CustomPreset }
     | null
   >(null);
+  const [previewPreset, setPreviewPreset] = useState<WidgetPreset | null>(null);
 
   const applyPreset = (preset: WidgetPreset) => {
     if (preset.config) patchConfig(preset.config);
     if (preset.style) patchStyle(preset.style);
   };
 
+  const previewWidget = useMemo<WidgetInstance | null>(() => {
+    if (!previewPreset) return null;
+    return {
+      id: "preset-preview",
+      widgetType: widget.widgetType,
+      x: 0,
+      y: 0,
+      w: 12,
+      h: 6,
+      config: { ...widget.config, ...(previewPreset.config ?? {}) },
+      style: { ...widget.style, ...(previewPreset.style ?? {}) },
+    };
+  }, [previewPreset, widget]);
+
   const hasAnyPresets = builtInPresets.length > 0 || customPresets.length > 0;
+
 
   return (
     <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
