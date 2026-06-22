@@ -73,6 +73,12 @@ export interface Settings {
   maxGridHistorySize: number;
   gridImportIncludeDefaults?: boolean;
   gridImportIncludeHistory?: boolean;
+  lastGridImport?: {
+    timestamp: number;
+    mode: "merge" | "replace";
+    includedDefaults: boolean;
+    includedHistory: boolean;
+  };
 }
 
 export const RESOLUTION_DIMENSIONS: Record<Exclude<ScreenResolution, "custom">, { w: number; h: number }> = {
