@@ -8,6 +8,8 @@ const DEFAULT_SETTINGS: Settings = {
   theme: "light",
   defaultOrientation: "landscape",
   defaultBackground: "#0B1220",
+  defaultGridSize: 1,
+  defaultSnapStep: 4,
 };
 
 interface SettingsState extends Settings {

@@ -12,6 +12,7 @@ import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetRenderer } from "./WidgetRenderer";
 import { useEditorStore } from "@/store/editorStore";
 import { useScreenStore } from "@/store/screenStore";
+import { useSettingsStore } from "@/store/settingsStore";
 
 export { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 
@@ -254,11 +255,13 @@ export function Canvas({ screen }: { screen: Screen }) {
   const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
   const setWidgets = useScreenStore((s) => s.setWidgets);
   const updateScreen = useScreenStore((s) => s.updateScreen);
+  const defaultGridSize = useSettingsStore((s) => s.defaultGridSize);
+  const defaultSnapStep = useSettingsStore((s) => s.defaultSnapStep);
   const gridStep = snapToGrid ? snapStep : gridSize;
 
   useEffect(() => {
-    if (typeof screen.gridSize === "number") setGridSize(screen.gridSize);
-    if (typeof screen.snapStep === "number") setSnapStep(screen.snapStep);
+    setGridSize(typeof screen.gridSize === "number" ? screen.gridSize : defaultGridSize);
+    setSnapStep(typeof screen.snapStep === "number" ? screen.snapStep : defaultSnapStep);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen.id]);
 
