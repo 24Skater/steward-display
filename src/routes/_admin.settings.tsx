@@ -66,6 +66,50 @@ interface GridImportPreviewProps {
   warnings: string[];
 }
 
+function DiffValue({
+  value,
+  baseline,
+  format,
+}: {
+  value: number;
+  baseline: number;
+  format: (n: number) => string;
+}) {
+  const changed = value !== baseline;
+  return (
+    <span className={changed ? "inline-flex items-center gap-1.5 font-medium text-foreground" : "inline-flex items-center gap-1.5 text-muted-foreground"}>
+      {format(value)}
+      {changed && (
+        <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+          changed
+        </span>
+      )}
+    </span>
+  );
+}
+
+function SnapshotList({
+  entries,
+  empty,
+}: {
+  entries: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
+  empty: string;
+}) {
+  if (entries.length === 0) {
+    return <p className="text-sm text-muted-foreground">{empty}</p>;
+  }
+  return (
+    <ul className="max-h-32 overflow-y-auto rounded-md border border-border bg-background p-2 space-y-1 text-xs">
+      {entries.map((entry, index) => (
+        <li key={`${entry.timestamp}-${index}`} className="flex justify-between gap-3">
+          <span>Grid {entry.defaultGridSize}, snap {entry.defaultSnapStep}</span>
+          <span className="text-muted-foreground">{new Date(entry.timestamp).toLocaleString()}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function GridImportPreview({
   filename,
   current,
