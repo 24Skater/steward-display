@@ -74,21 +74,27 @@ export function PropertiesPanel({
     if (preset.style) patchStyle(preset.style);
   };
 
-  const previewWidget = useMemo<WidgetInstance | null>(() => {
-    if (!previewPreset) return null;
-    return {
+  const previewWidget = useMemo<WidgetInstance>(() => {
+    const base = {
       id: "preset-preview",
       widgetType: widget.widgetType,
       x: 0,
       y: 0,
       w: 12,
       h: 6,
+      config: widget.config,
+      style: widget.style,
+    };
+    if (!previewPreset) return base;
+    return {
+      ...base,
       config: { ...widget.config, ...(previewPreset.config ?? {}) },
       style: { ...widget.style, ...(previewPreset.style ?? {}) },
     };
   }, [previewPreset, widget]);
 
   const hasAnyPresets = builtInPresets.length > 0 || customPresets.length > 0;
+
 
 
   return (
