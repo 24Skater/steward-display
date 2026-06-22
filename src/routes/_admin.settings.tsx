@@ -173,6 +173,16 @@ function SettingsPage() {
     });
   };
 
+  const handleClearHistory = () => {
+    setClearHistoryDialogOpen(true);
+  };
+
+  const confirmClearHistory = () => {
+    setGridDefaultsHistory([]);
+    setClearHistoryDialogOpen(false);
+    toast.success("Grid defaults history cleared.");
+  };
+
   const revertGridDefaults = (entry: { defaultGridSize: number; defaultSnapStep: number }) => {
     const current = { defaultGridSize, defaultSnapStep, timestamp: Date.now() };
     setGridDefaultsHistory((history) => [current, ...history].slice(0, maxGridHistorySize));
