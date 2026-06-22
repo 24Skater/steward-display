@@ -234,9 +234,7 @@ function EditorPage() {
               <Canvas screen={screen} />
             )}
           </div>
-          {selected && (
-            <PropertiesPanel screen={screen} widget={selected} onClose={() => select([])} />
-          )}
+          {/* DEBUG: panel disabled */}
         </div>
 
         <DragOverlay>
