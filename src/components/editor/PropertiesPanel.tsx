@@ -1,4 +1,4 @@
-import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X } from "lucide-react";
+import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { useScreenStore } from "@/store/screenStore";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetConfigForm } from "./WidgetConfigForms";
+import { getPresetsForWidget, type WidgetPreset } from "@/lib/widgetPresets";
 
 const BG_SWATCHES = ["", "#0B1220", "#111827", "#FFFFFF", "#FEF3C7", "#DBEAFE", "#FCE7F3"];
 const TEXT_SWATCHES = ["#FFFFFF", "#0B1220", "#F59E0B", "#DC2626", "#2563EB", "#16A34A"];
@@ -34,6 +35,11 @@ export function PropertiesPanel({
     updateWidget(screen.id, widget.id, { config: { ...widget.config, ...c } });
   const patchStyle = (s: Partial<NonNullable<WidgetInstance["style"]>>) =>
     updateWidget(screen.id, widget.id, { style: { ...widget.style, ...s } });
+  const presets = getPresetsForWidget(widget.widgetType);
+  const applyPreset = (preset: WidgetPreset) => {
+    if (preset.config) patchConfig(preset.config);
+    if (preset.style) patchStyle(preset.style);
+  };
 
   return (
     <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
@@ -80,6 +86,28 @@ export function PropertiesPanel({
         </TabsList>
 
         <TabsContent value="content" className="mt-0 flex-1 overflow-y-auto p-4">
+          {presets.length > 0 && (
+            <div className="mb-5 rounded-md border border-border bg-muted/40 p-3">
+              <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <Sparkles className="h-3 w-3" />
+                Presets
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {presets.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => applyPreset(p)}
+                    title={p.description}
+                    className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:border-blue hover:bg-blue/10 hover:text-blue"
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">Applies common settings — you can still tweak below.</p>
+            </div>
+          )}
           <WidgetConfigForm widget={widget} onChange={patchConfig} />
         </TabsContent>
 
