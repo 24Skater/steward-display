@@ -407,16 +407,24 @@ export function PropertiesPanel({
       </Tabs>
 
       <div className="border-t border-border p-3">
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={() => {
-            removeWidget(screen.id, widget.id);
-            onClose();
-          }}
-        >
-          <Trash2 className="h-4 w-4" /> Delete widget
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => {
+                removeWidget(screen.id, widget.id);
+                onClose();
+              }}
+            >
+              <Trash2 className="h-4 w-4" /> Delete widget
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+            <span>Remove selected widget</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">Delete / Backspace</kbd>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       <PresetEditorDialog
