@@ -244,6 +244,25 @@ function SettingsPage() {
         </Alert>
       )}
 
+      {gridDefaultsWarnings.length > 0 && (
+        <Alert variant="destructive" className="relative">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Grid defaults import warnings</AlertTitle>
+          <AlertDescription>
+            {gridDefaultsWarnings.map((warning, i) => (
+              <p key={i}>{warning}</p>
+            ))}
+          </AlertDescription>
+          <button
+            onClick={() => setGridDefaultsWarnings([])}
+            className="absolute right-3 top-3 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label="Dismiss"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </Alert>
+      )}
+
 
       <Section title="Organization">
         <div className="space-y-1.5">
