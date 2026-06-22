@@ -92,9 +92,15 @@ function SettingsPage() {
   const handleImportSettings = async (file: File) => {
     try {
       const text = await file.text();
-      const incoming = parseImportedSettings(text);
+      const { settings: incoming, warnings } = parseImportedSettings(text);
       update(incoming);
-      toast.success("Settings imported.");
+      if (warnings.length > 0) {
+        toast.warning("Settings imported with warnings", {
+          description: warnings.join(" "),
+        });
+      } else {
+        toast.success("Settings imported.");
+      }
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
     }
