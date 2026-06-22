@@ -152,7 +152,22 @@ function SettingsPage() {
     toast.success("Grid defaults and history exported.");
   };
 
-  const handleImportSettings = async (file: File) => {
+  const handleImportGridDefaults = async (file: File) => {
+    try {
+      setGridDefaultsWarnings([]);
+      const text = await file.text();
+      const { gridDefaults, history, warnings } = parseImportedGridDefaults(text);
+      update(gridDefaults);
+      setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
+      if (warnings.length > 0) {
+        setGridDefaultsWarnings(warnings);
+      } else {
+        toast.success("Grid defaults and history imported.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't read that file.");
+    }
+  };
     try {
       setSettingsWarnings([]);
       const text = await file.text();
