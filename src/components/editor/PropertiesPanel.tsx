@@ -320,7 +320,9 @@ export function PropertiesPanel({
                     )}
                   </div>
                 </div>
-                <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border bg-muted" />
+                <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
+                  <WidgetRenderer widget={previewWidget} />
+                </div>
               </div>
             )}
 
