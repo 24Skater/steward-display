@@ -175,72 +175,73 @@ export function PropertiesPanel({
                   <User className="h-2.5 w-2.5" /> My presets
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                {customPresets.map((p) => (
-                  <div
-                    key={p.id}
-                    className="group inline-flex items-stretch overflow-hidden rounded-full border border-border bg-background text-[11px] font-medium text-foreground transition-colors hover:border-blue"
-                    onMouseEnter={() => setPreviewPreset(p)}
-                    onMouseLeave={() => setPreviewPreset(null)}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => applyPreset(p)}
-                      title={p.description}
-                      className="px-2.5 py-1 hover:text-blue"
+                  {customPresets.map((p) => (
+                    <div
+                      key={p.id}
+                      className="group inline-flex items-stretch overflow-hidden rounded-full border border-border bg-background text-[11px] font-medium text-foreground transition-colors hover:border-blue"
+                      onMouseEnter={() => setPreviewPreset(p)}
+                      onMouseLeave={() => setPreviewPreset(null)}
                     >
-                      {p.label}
-                    </button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          type="button"
-                          aria-label="Preset options"
-                          className="border-l border-border px-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <MoreHorizontal className="h-3 w-3" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setEditorPreset({ mode: "edit", preset: p })}>
-                          <Pencil className="h-3.5 w-3.5" /> Rename
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={() => {
-                            updatePreset(p.id, {
-                              config: { ...widget.config },
-                              style: widget.style ? { ...widget.style } : undefined,
-                            });
-                          }}
-                        >
-                          <Sparkles className="h-3.5 w-3.5" /> Update from current
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={() => removePreset(p.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => applyPreset(p)}
+                        title={p.description}
+                        className="px-2.5 py-1 hover:text-blue"
+                      >
+                        {p.label}
+                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label="Preset options"
+                            className="border-l border-border px-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <MoreHorizontal className="h-3 w-3" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => setEditorPreset({ mode: "edit", preset: p })}>
+                            <Pencil className="h-3.5 w-3.5" /> Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => {
+                              updatePreset(p.id, {
+                                config: { ...widget.config },
+                                style: widget.style ? { ...widget.style } : undefined,
+                              });
+                            }}
+                          >
+                            <Sparkles className="h-3.5 w-3.5" /> Update from current
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => removePreset(p.id)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {previewWidget && (
-            <div className="mt-3 rounded-md border border-border bg-background p-2">
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                  <Eye className="h-3 w-3" /> Preview
-                </span>
-                <span className="truncate text-[10px] text-muted-foreground">{previewPreset?.label}</span>
+            {previewWidget && (
+              <div className="mt-3 rounded-md border border-border bg-background p-2">
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <Eye className="h-3 w-3" /> Preview
+                  </span>
+                  <span className="truncate text-[10px] text-muted-foreground">{previewPreset?.label}</span>
+                </div>
+                <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
+                  <WidgetRenderer widget={previewWidget} />
+                </div>
               </div>
-              <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
-                <WidgetRenderer widget={previewWidget} />
-              </div>
-            </div>
-          )}
+            )}
+
 
 
             <p className="mt-2 text-[10px] text-muted-foreground">
