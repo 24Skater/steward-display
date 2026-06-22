@@ -65,8 +65,10 @@ export function PropertiesPanel({
   const patchStyle = (s: Partial<NonNullable<WidgetInstance["style"]>>) =>
     updateWidget(screen.id, widget.id, { style: { ...widget.style, ...s } });
   const builtInPresets = getPresetsForWidget(widget.widgetType);
-  const customPresets = usePresetStore((s) =>
-    s.presets.filter((p) => p.widgetType === widget.widgetType),
+  const allPresets = usePresetStore((s) => s.presets);
+  const customPresets = useMemo(
+    () => allPresets.filter((p) => p.widgetType === widget.widgetType),
+    [allPresets, widget.widgetType],
   );
   const createPreset = usePresetStore((s) => s.create);
   const updatePreset = usePresetStore((s) => s.update);
