@@ -1,11 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Pencil, Trash2, Sparkles, Search } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Search, X } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { usePresetStore, type CustomPreset } from "@/store/presetStore";
-import { getWidgetDefinition } from "@/lib/widgetRegistry";
+import { getWidgetDefinition, WIDGET_DEFINITIONS } from "@/lib/widgetRegistry";
 import type { WidgetType } from "@/types";
 import { toast } from "sonner";
 
@@ -40,19 +47,30 @@ function PresetsPage() {
   const updatePreset = usePresetStore((s) => s.update);
   const removePreset = usePresetStore((s) => s.remove);
   const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string | "all">("all");
   const [editing, setEditing] = useState<CustomPreset | null>(null);
   const [deleting, setDeleting] = useState<CustomPreset | null>(null);
 
+  const availableTypes = useMemo(() => {
+    const types = new Set<string>();
+    for (const p of presets) types.add(p.widgetType);
+    return [...types].sort((a, b) => a.localeCompare(b));
+  }, [presets]);
+
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const filtered = q
-      ? presets.filter(
-          (p) =>
-            p.label.toLowerCase().includes(q) ||
-            (p.description ?? "").toLowerCase().includes(q) ||
-            p.widgetType.toLowerCase().includes(q),
-        )
-      : presets;
+    let filtered = presets;
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((p) => p.widgetType === typeFilter);
+    }
+    if (q) {
+      filtered = filtered.filter(
+        (p) =>
+          p.label.toLowerCase().includes(q) ||
+          (p.description ?? "").toLowerCase().includes(q) ||
+          p.widgetType.toLowerCase().includes(q),
+      );
+    }
     const map = new Map<string, CustomPreset[]>();
     for (const p of filtered) {
       const list = map.get(p.widgetType) ?? [];
@@ -60,7 +78,10 @@ function PresetsPage() {
       map.set(p.widgetType, list);
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [presets, query]);
+  }, [presets, query, typeFilter]);
+
+  const activeFilters = query.trim() || typeFilter !== "all";
+
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
@@ -69,14 +90,45 @@ function PresetsPage() {
         subtitle="Manage saved configurations. Presets stay scoped to the widget type they were saved from — edit and delete them all here."
       />
 
-      <div className="relative max-w-sm">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search presets…"
-          className="pl-9"
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search presets…"
+            className="pl-9"
+          />
+        </div>
+        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as string | "all")}>
+          <SelectTrigger className="w-full sm:w-52">
+            <SelectValue placeholder="All widget types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All widget types</SelectItem>
+            {availableTypes.map((type) => {
+              const def = getWidgetDefinition(type as WidgetType);
+              return (
+                <SelectItem key={type} value={type}>
+                  {def?.label ?? type}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        {activeFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setQuery("");
+              setTypeFilter("all");
+            }}
+          >
+            <X className="mr-1 h-3.5 w-3.5" />
+            Clear filters
+          </Button>
+        )}
       </div>
 
       {presets.length === 0 ? (
@@ -86,8 +138,9 @@ function PresetsPage() {
           body="Open a screen, select a widget, then click ‘Save current’ in its settings panel to capture a preset."
         />
       ) : grouped.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No presets match “{query}”.</p>
+        <p className="text-sm text-muted-foreground">No presets match your filters.</p>
       ) : (
+
         <div className="space-y-6">
           {grouped.map(([type, list]) => {
             const def = getWidgetDefinition(type as WidgetType);
