@@ -75,7 +75,11 @@ function SettingsPage() {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
-  >([]);
+  >(() => readJSON(STORAGE_KEYS.gridDefaultsHistory, []));
+
+  useEffect(() => {
+    writeJSON(STORAGE_KEYS.gridDefaultsHistory, gridDefaultsHistory);
+  }, [gridDefaultsHistory]);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
