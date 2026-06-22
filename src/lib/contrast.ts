@@ -151,7 +151,9 @@ let warned = false;
 export function warnOnContrastFailures(): void {
   if (warned || typeof console === "undefined") return;
   warned = true;
-  const failures = auditBrandContrast().filter((r) => !r.passAA);
+  const failures = auditBrandContrast().filter(
+    (r) => r.use !== "decorative" && !r.passAA,
+  );
   if (!failures.length) {
     console.info(
       "%c[Steward contrast] All brand token pairings pass WCAG AA.",
