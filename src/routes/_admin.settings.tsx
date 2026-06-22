@@ -253,6 +253,9 @@ function SettingsPage() {
     warnings: string[];
     filename: string;
   } | null>(null);
+  const [importGridDefaults, setImportGridDefaults] = useState(true);
+  const [importHistory, setImportHistory] = useState(true);
+  
   
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
