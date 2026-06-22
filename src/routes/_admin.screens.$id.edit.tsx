@@ -218,6 +218,25 @@ function EditorPage() {
           )}
         </DragOverlay>
       </DndContext>
+
+      <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Keyboard shortcuts</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <ShortcutRow keys="↑ ↓ ← →" action="Nudge 1 cell" />
+            <ShortcutRow keys="⇧ + arrows" action="Nudge 4 cells" />
+            <ShortcutRow keys="⌘/Ctrl + D" action="Duplicate selected widgets" />
+            <ShortcutRow keys="Delete / Backspace" action="Remove selected widgets" />
+            <ShortcutRow keys="Esc" action="Deselect widgets" />
+            <ShortcutRow keys="⌘/Ctrl + Z" action="Undo" />
+            <ShortcutRow keys="⌘/Ctrl + Y" action="Redo" />
+            <ShortcutRow keys="⇧ + ⌘/Ctrl + Z" action="Redo" />
+            <ShortcutRow keys="?" action="Open this help" />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
