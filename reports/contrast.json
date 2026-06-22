@@ -1,0 +1,322 @@
+{
+  "generatedAt": "2026-06-22T03:37:56.740Z",
+  "totals": {
+    "pairings": 28,
+    "required": 26,
+    "decorative": 2,
+    "passingAA": 26,
+    "passingAAA": 14,
+    "failing": 0
+  },
+  "status": "pass",
+  "results": [
+    {
+      "name": "Body text on parchment",
+      "fg": "#0d1b2e",
+      "bg": "#faf7f2",
+      "use": "body",
+      "theme": "light",
+      "ratio": 16.196040249234294,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Body text on white card",
+      "fg": "#0d1b2e",
+      "bg": "#ffffff",
+      "use": "body",
+      "theme": "light",
+      "ratio": 17.307630747327206,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Body text on warm surface",
+      "fg": "#0d1b2e",
+      "bg": "#f5eed8",
+      "use": "body",
+      "theme": "light",
+      "ratio": 14.920729889766875,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Muted text on parchment",
+      "fg": "#57647a",
+      "bg": "#faf7f2",
+      "use": "body",
+      "theme": "light",
+      "ratio": 5.600016691131491,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Muted text on white card",
+      "fg": "#57647a",
+      "bg": "#ffffff",
+      "use": "body",
+      "theme": "light",
+      "ratio": 5.984365287901481,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Navy text on Kingdom Gold (primary)",
+      "fg": "#1b2a41",
+      "bg": "#e8b847",
+      "use": "body",
+      "theme": "light",
+      "ratio": 7.824906067660492,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Navy text on gold-dark hover",
+      "fg": "#1b2a41",
+      "bg": "#c49a2e",
+      "use": "body",
+      "theme": "light",
+      "ratio": 5.507695841984893,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Parchment text on navy sidebar",
+      "fg": "#f5eed8",
+      "bg": "#1b2a41",
+      "use": "body",
+      "theme": "light",
+      "ratio": 12.450071328092427,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "White text on Steward Blue",
+      "fg": "#ffffff",
+      "bg": "#2563eb",
+      "use": "body",
+      "theme": "light",
+      "ratio": 5.168555560022562,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Blue link on parchment",
+      "fg": "#2563eb",
+      "bg": "#faf7f2",
+      "use": "body",
+      "theme": "light",
+      "ratio": 4.836602716027805,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Blue link on white card",
+      "fg": "#2563eb",
+      "bg": "#ffffff",
+      "use": "body",
+      "theme": "light",
+      "ratio": 5.168555560022562,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "White text on emerald (success)",
+      "fg": "#ffffff",
+      "bg": "#15803d",
+      "use": "body",
+      "theme": "light",
+      "ratio": 5.0155974781114745,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "White text on red (destructive)",
+      "fg": "#ffffff",
+      "bg": "#dc2626",
+      "use": "body",
+      "theme": "light",
+      "ratio": 4.829404522659002,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Navy text on amber (warning)",
+      "fg": "#1b2a41",
+      "bg": "#f59e0b",
+      "use": "body",
+      "theme": "light",
+      "ratio": 6.724396592795765,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Warm border vs parchment (decorative)",
+      "fg": "#b8a778",
+      "bg": "#faf7f2",
+      "use": "decorative",
+      "theme": "light",
+      "ratio": 2.2238065605938817,
+      "threshold": 1.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Focus ring (blue) vs parchment",
+      "fg": "#2563eb",
+      "bg": "#faf7f2",
+      "use": "ui",
+      "theme": "light",
+      "ratio": 4.836602716027805,
+      "threshold": 3,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Gold focus ring vs navy sidebar",
+      "fg": "#e8b847",
+      "bg": "#1b2a41",
+      "use": "ui",
+      "theme": "light",
+      "ratio": 7.824906067660492,
+      "threshold": 3,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Body text on dark bg",
+      "fg": "#f5eed8",
+      "bg": "#060f1a",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 16.594004977039265,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Body text on dark surface",
+      "fg": "#f5eed8",
+      "bg": "#0d1b2e",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 14.920729889766875,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Body text on dark secondary",
+      "fg": "#f5eed8",
+      "bg": "#1e2f4a",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 11.599904841584287,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Muted text on dark bg",
+      "fg": "#a89878",
+      "bg": "#060f1a",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 6.808016661006814,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Muted text on dark surface",
+      "fg": "#a89878",
+      "bg": "#0d1b2e",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 6.1215226718607045,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Navy text on Kingdom Gold (primary)",
+      "fg": "#1b2a41",
+      "bg": "#e8b847",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 7.824906067660492,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Gold link on dark bg",
+      "fg": "#e8b847",
+      "bg": "#060f1a",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 10.42938042761541,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Gold link on dark surface",
+      "fg": "#e8b847",
+      "bg": "#0d1b2e",
+      "use": "body",
+      "theme": "dark",
+      "ratio": 9.377722164925842,
+      "threshold": 4.5,
+      "passAA": true,
+      "passAAA": true
+    },
+    {
+      "name": "Blue accent on dark surface",
+      "fg": "#2563eb",
+      "bg": "#0d1b2e",
+      "use": "large",
+      "theme": "dark",
+      "ratio": 3.348639778818911,
+      "threshold": 3,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Border vs dark bg (decorative)",
+      "fg": "#3d5878",
+      "bg": "#060f1a",
+      "use": "decorative",
+      "theme": "dark",
+      "ratio": 2.6265356829267996,
+      "threshold": 1.5,
+      "passAA": true,
+      "passAAA": false
+    },
+    {
+      "name": "Gold focus ring vs dark bg",
+      "fg": "#e8b847",
+      "bg": "#060f1a",
+      "use": "ui",
+      "theme": "dark",
+      "ratio": 10.42938042761541,
+      "threshold": 3,
+      "passAA": true,
+      "passAAA": true
+    }
+  ]
+}
