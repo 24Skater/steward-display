@@ -60,7 +60,7 @@ function Section({ title, description, children }: { title: string; description?
 interface GridImportPreviewProps {
   filename: string;
   current: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
-  currentHistoryLength: number;
+  currentHistory: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
   imported: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
   importedHistory: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
   warnings: string[];
