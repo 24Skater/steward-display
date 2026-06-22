@@ -20,8 +20,8 @@ interface EditorState {
   setGridSize: (n: number) => void;
   toggleAlignment: () => void;
   pushHistory: (snapshot: WidgetInstance[]) => void;
-  undo: () => WidgetInstance[][] | null;
-  redo: () => WidgetInstance[][] | null;
+  undo: () => WidgetInstance[] | null;
+  redo: () => WidgetInstance[] | null;
   reset: () => void;
 }
 
