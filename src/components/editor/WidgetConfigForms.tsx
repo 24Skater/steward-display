@@ -258,6 +258,33 @@ export function WidgetConfigForm({
               onValueChange={(v) => set("bodySize", v[0])}
             />
           </Field>
+          <Field label={`Title line-height (${(cfg.titleLineHeight ?? 1.1).toFixed(2)})`}>
+            <Slider
+              value={[Math.round((cfg.titleLineHeight ?? 1.1) * 100)]}
+              min={80}
+              max={200}
+              step={5}
+              onValueChange={(v) => set("titleLineHeight", v[0] / 100)}
+            />
+          </Field>
+          <Field label={`Body line-height (${(cfg.bodyLineHeight ?? 1.4).toFixed(2)})`}>
+            <Slider
+              value={[Math.round((cfg.bodyLineHeight ?? 1.4) * 100)]}
+              min={80}
+              max={220}
+              step={5}
+              onValueChange={(v) => set("bodyLineHeight", v[0] / 100)}
+            />
+          </Field>
+          <Field label={`Title-to-body spacing (${cfg.spacing ?? 12}px)`}>
+            <Slider
+              value={[cfg.spacing ?? 12]}
+              min={0}
+              max={80}
+              step={1}
+              onValueChange={(v) => set("spacing", v[0])}
+            />
+          </Field>
         </div>
       );
     case "countdown":
