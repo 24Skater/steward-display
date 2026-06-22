@@ -54,6 +54,7 @@ function SettingsPage() {
     defaultGridSize,
     defaultSnapStep,
     update,
+    resetGridDefaults,
   } = useSettingsStore();
   const screens = useScreenStore((s) => s.screens);
   const importScreens = useScreenStore((s) => s.importScreens);
