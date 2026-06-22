@@ -97,13 +97,12 @@ function SettingsPage() {
 
   const handleImportSettings = async (file: File) => {
     try {
+      setSettingsWarnings([]);
       const text = await file.text();
       const { settings: incoming, warnings } = parseImportedSettings(text);
       update(incoming);
       if (warnings.length > 0) {
-        toast.warning("Settings imported with warnings", {
-          description: warnings.join(" "),
-        });
+        setSettingsWarnings(warnings);
       } else {
         toast.success("Settings imported.");
       }
