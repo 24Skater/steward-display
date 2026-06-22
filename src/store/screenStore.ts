@@ -135,6 +135,46 @@ export const useScreenStore = create<ScreenState>((set, get) => ({
     set({ screens });
     persist(screens);
   },
+  duplicateWidget: (screenId, widgetId) => {
+    const screen = get().screens.find((s) => s.id === screenId);
+    const src = screen?.widgets.find((w) => w.id === widgetId);
+    if (!screen || !src) return undefined;
+    const copy: WidgetInstance = {
+      ...src,
+      id: uid(),
+      x: Math.min(src.x + 1, 23),
+      y: Math.min(src.y + 1, 15),
+      config: { ...src.config },
+      style: src.style ? { ...src.style } : undefined,
+    };
+    const screens = get().screens.map((s) =>
+      s.id === screenId
+        ? { ...s, widgets: [...s.widgets, copy], updatedAt: new Date().toISOString() }
+        : s,
+    );
+    set({ screens });
+    persist(screens);
+    return copy;
+  },
+  reorderWidget: (screenId, widgetId, direction) => {
+    const screen = get().screens.find((s) => s.id === screenId);
+    if (!screen) return;
+    const idx = screen.widgets.findIndex((w) => w.id === widgetId);
+    if (idx < 0) return;
+    const widgets = [...screen.widgets];
+    const [item] = widgets.splice(idx, 1);
+    let newIdx = idx;
+    if (direction === "front") newIdx = widgets.length;
+    else if (direction === "back") newIdx = 0;
+    else if (direction === "forward") newIdx = Math.min(widgets.length, idx + 1);
+    else if (direction === "backward") newIdx = Math.max(0, idx - 1);
+    widgets.splice(newIdx, 0, item);
+    const screens = get().screens.map((s) =>
+      s.id === screenId ? { ...s, widgets, updatedAt: new Date().toISOString() } : s,
+    );
+    set({ screens });
+    persist(screens);
+  },
   setWidgets: (screenId, widgets) => {
     const screens = get().screens.map((s) =>
       s.id === screenId ? { ...s, widgets, updatedAt: new Date().toISOString() } : s,
