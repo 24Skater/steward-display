@@ -277,6 +277,16 @@ export function Canvas({ screen }: { screen: Screen }) {
         if (next) setWidgets(screen.id, next);
         return;
       }
+      if (meta && (e.key === "0" || e.key === ")")) {
+        e.preventDefault();
+        setZoom(autoZoom);
+        return;
+      }
+      if (meta && (e.key === "1" || e.key === "!")) {
+        e.preventDefault();
+        setZoom(1);
+        return;
+      }
 
       if (selectedIds.length === 0) return;
       const step = e.shiftKey ? 4 : 1;
