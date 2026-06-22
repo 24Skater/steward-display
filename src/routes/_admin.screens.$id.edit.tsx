@@ -24,11 +24,11 @@ import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { MonitorOff } from "lucide-react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_admin/screens/$id/edit")({
   head: () => ({ meta: [{ title: "Editor — Steward Display" }] }),
@@ -53,8 +53,21 @@ function EditorPage() {
   const [draftName, setDraftName] = useState("");
   const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(null);
   const [skipTemplates, setSkipTemplates] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   useEffect(() => () => reset(), [reset]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
+      if (e.key === "?" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setShortcutsOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
@@ -171,26 +184,9 @@ function EditorPage() {
           <span className="text-xs text-muted-foreground">Auto-saved</span>
         </div>
         <div className="flex items-center gap-2">
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Keyboard className="h-4 w-4" /> Shortcuts
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                <div className="space-y-1">
-                  <div><kbd>↑ ↓ ← →</kbd> Nudge 1 cell</div>
-                  <div><kbd>⇧ + arrows</kbd> Nudge 4 cells</div>
-                  <div><kbd>⌘/Ctrl + D</kbd> Duplicate</div>
-                  <div><kbd>Delete</kbd> Remove</div>
-                  <div><kbd>Esc</kbd> Deselect</div>
-                  <div><kbd>⌘/Ctrl + Z</kbd> Undo</div>
-                  <div><kbd>⌘/Ctrl + Y / ⇧ + ⌘/Ctrl + Z</kbd> Redo</div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
+            <Keyboard className="h-4 w-4" /> Shortcuts
+          </Button>
           <Button variant="outline" size="sm" onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}>
             <Eye className="h-4 w-4" /> Preview
           </Button>
@@ -222,6 +218,34 @@ function EditorPage() {
           )}
         </DragOverlay>
       </DndContext>
+
+      <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Keyboard shortcuts</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <ShortcutRow keys="↑ ↓ ← →" action="Nudge 1 cell" />
+            <ShortcutRow keys="⇧ + arrows" action="Nudge 4 cells" />
+            <ShortcutRow keys="⌘/Ctrl + D" action="Duplicate selected widgets" />
+            <ShortcutRow keys="Delete / Backspace" action="Remove selected widgets" />
+            <ShortcutRow keys="Esc" action="Deselect widgets" />
+            <ShortcutRow keys="⌘/Ctrl + Z" action="Undo" />
+            <ShortcutRow keys="⌘/Ctrl + Y" action="Redo" />
+            <ShortcutRow keys="⇧ + ⌘/Ctrl + Z" action="Redo" />
+            <ShortcutRow keys="?" action="Open this help" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function ShortcutRow({ keys, action }: { keys: string; action: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-sm text-muted-foreground">{action}</span>
+      <kbd className="rounded-md border border-border bg-muted px-2 py-1 text-xs font-mono text-foreground">{keys}</kbd>
     </div>
   );
 }
