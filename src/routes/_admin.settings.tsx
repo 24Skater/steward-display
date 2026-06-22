@@ -720,11 +720,23 @@ function SettingsPage() {
                   <p className="text-sm font-medium">Import options</p>
                   <Label className="flex items-center justify-between gap-4 text-sm font-normal">
                     Grid defaults
-                    <Switch checked={importGridDefaults} onCheckedChange={setImportGridDefaults} />
+                    <Switch
+                      checked={importGridDefaults}
+                      onCheckedChange={(checked) => {
+                        setImportGridDefaults(checked);
+                        update({ gridImportIncludeDefaults: checked });
+                      }}
+                    />
                   </Label>
                   <Label className="flex items-center justify-between gap-4 text-sm font-normal">
                     Undo history
-                    <Switch checked={importHistory} onCheckedChange={setImportHistory} />
+                    <Switch
+                      checked={importHistory}
+                      onCheckedChange={(checked) => {
+                        setImportHistory(checked);
+                        update({ gridImportIncludeHistory: checked });
+                      }}
+                    />
                   </Label>
                 </div>
               )}
