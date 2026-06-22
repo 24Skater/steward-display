@@ -155,15 +155,11 @@ function CanvasStage({
   screen,
   cellW,
   cellH,
-  stageW,
-  stageH,
   effective,
 }: {
   screen: Screen;
   cellW: number;
   cellH: number;
-  stageW: number;
-  stageH: number;
   effective: number;
 }) {
   const { setNodeRef } = useDroppable({ id: "canvas-stage" });
@@ -171,6 +167,7 @@ function CanvasStage({
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const toggleSelect = useEditorStore((s) => s.toggleSelect);
   const select = useEditorStore((s) => s.select);
+  const dims = getScreenDimensions(screen);
 
   return (
     <div
@@ -179,27 +176,21 @@ function CanvasStage({
       onPointerDown={() => select([])}
       className="relative shrink-0 overflow-hidden shadow-steward-lg"
       style={{
-        width: stageW,
-        height: stageH,
+        width: dims.w,
+        height: dims.h,
         backgroundColor: screen.backgroundColor,
         backgroundImage: screen.backgroundImage ? `url(${screen.backgroundImage})` : undefined,
         backgroundSize: "cover",
       }}
     >
       {showGrid && (
-        <>
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)`,
-              backgroundSize: `${cellW * effective}px ${cellH * effective}px`,
-              transform: `scale(${1 / effective})`,
-              transformOrigin: "top left",
-              width: stageW / (1 / effective),
-              height: stageH / (1 / effective),
-            }}
-          />
-        </>
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)`,
+            backgroundSize: `${cellW}px ${cellH}px`,
+          }}
+        />
       )}
       <div className="absolute inset-0 text-white">
         {screen.widgets.map((w) => (
@@ -252,8 +243,6 @@ export function Canvas({ screen }: { screen: Screen }) {
   }, [dims.w, dims.h]);
 
   const effective = zoom || autoZoom;
-  const stageW = dims.w * effective;
-  const stageH = dims.h * effective;
   const cellW = dims.w / GRID_COLS;
   const cellH = dims.h / GRID_ROWS;
 
@@ -298,15 +287,25 @@ export function Canvas({ screen }: { screen: Screen }) {
 
   return (
     <div ref={containerRef} className="relative flex flex-1 flex-col items-center justify-center overflow-auto bg-subtle p-8">
-      <div style={{ transformOrigin: "top left" }}>
+      <div
+        style={{
+          width: dims.w * effective,
+          height: dims.h * effective,
+        }}
+      >
+        <div
+          style={{
+            transform: `scale(${effective})`,
+            transformOrigin: "top left",
+          }}
+        >
         <CanvasStage
           screen={screen}
           cellW={cellW}
           cellH={cellH}
-          stageW={stageW}
-          stageH={stageH}
           effective={effective}
         />
+        </div>
       </div>
 
       <div className="pointer-events-auto absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs shadow-steward-md">
