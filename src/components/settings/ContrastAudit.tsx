@@ -403,6 +403,7 @@ export function ContrastAudit() {
 
       <TokenReference
         tokens={tokens}
+        visibleVars={visibleVars}
         sourcePath={sourcePath}
         failingVars={failingVars}
         highlightVar={highlightVar}
