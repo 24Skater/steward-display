@@ -35,6 +35,7 @@ import {
   parseImportedScreens,
   exportSettingsToJSON,
   parseImportedSettings,
+  exportGridDefaultsToJSON,
 } from "@/lib/export";
 import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
 import { toast } from "sonner";
@@ -135,6 +136,17 @@ function SettingsPage() {
       exportSettingsToJSON(current),
     );
     toast.success("Settings exported.");
+  };
+
+  const handleExportGridDefaults = () => {
+    downloadJSON(
+      `steward-grid-defaults-${new Date().toISOString().slice(0, 10)}.json`,
+      exportGridDefaultsToJSON(
+        { defaultGridSize, defaultSnapStep, maxGridHistorySize },
+        gridDefaultsHistory,
+      ),
+    );
+    toast.success("Grid defaults and history exported.");
   };
 
   const handleImportSettings = async (file: File) => {
@@ -366,6 +378,7 @@ function SettingsPage() {
           <Button variant="outline" onClick={handleExport}><Download className="h-4 w-4" /> Export screens</Button>
           <Button variant="outline" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4" /> Import screens</Button>
           <Button variant="outline" onClick={handleExportSettings}><Download className="h-4 w-4" /> Export settings</Button>
+          <Button variant="outline" onClick={handleExportGridDefaults}><Download className="h-4 w-4" /> Export grid defaults</Button>
           <Button variant="outline" onClick={() => settingsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import settings</Button>
           <input
             ref={fileRef}
