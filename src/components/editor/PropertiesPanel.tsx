@@ -158,6 +158,8 @@ export function PropertiesPanel({
                     key={p.id}
                     type="button"
                     onClick={() => applyPreset(p)}
+                    onMouseEnter={() => setPreviewPreset(p)}
+                    onMouseLeave={() => setPreviewPreset(null)}
                     title={p.description}
                     className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:border-blue hover:bg-blue/10 hover:text-blue"
                   >
