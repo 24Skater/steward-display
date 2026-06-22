@@ -1,15 +1,32 @@
-import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles } from "lucide-react";
+import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 import type { Screen, WidgetInstance } from "@/types";
 import { useScreenStore } from "@/store/screenStore";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetConfigForm } from "./WidgetConfigForms";
 import { getPresetsForWidget, type WidgetPreset } from "@/lib/widgetPresets";
+import { usePresetStore, type CustomPreset } from "@/store/presetStore";
 
 const BG_SWATCHES = ["", "#0B1220", "#111827", "#FFFFFF", "#FEF3C7", "#DBEAFE", "#FCE7F3"];
 const TEXT_SWATCHES = ["#FFFFFF", "#0B1220", "#F59E0B", "#DC2626", "#2563EB", "#16A34A"];
@@ -35,11 +52,26 @@ export function PropertiesPanel({
     updateWidget(screen.id, widget.id, { config: { ...widget.config, ...c } });
   const patchStyle = (s: Partial<NonNullable<WidgetInstance["style"]>>) =>
     updateWidget(screen.id, widget.id, { style: { ...widget.style, ...s } });
-  const presets = getPresetsForWidget(widget.widgetType);
+  const builtInPresets = getPresetsForWidget(widget.widgetType);
+  const customPresets = usePresetStore((s) =>
+    s.presets.filter((p) => p.widgetType === widget.widgetType),
+  );
+  const createPreset = usePresetStore((s) => s.create);
+  const updatePreset = usePresetStore((s) => s.update);
+  const removePreset = usePresetStore((s) => s.remove);
+
+  const [editorPreset, setEditorPreset] = useState<
+    | { mode: "create" }
+    | { mode: "edit"; preset: CustomPreset }
+    | null
+  >(null);
+
   const applyPreset = (preset: WidgetPreset) => {
     if (preset.config) patchConfig(preset.config);
     if (preset.style) patchStyle(preset.style);
   };
+
+  const hasAnyPresets = builtInPresets.length > 0 || customPresets.length > 0;
 
   return (
     <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
@@ -86,14 +118,24 @@ export function PropertiesPanel({
         </TabsList>
 
         <TabsContent value="content" className="mt-0 flex-1 overflow-y-auto p-4">
-          {presets.length > 0 && (
-            <div className="mb-5 rounded-md border border-border bg-muted/40 p-3">
-              <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="mb-5 rounded-md border border-border bg-muted/40 p-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 <Sparkles className="h-3 w-3" />
                 Presets
               </div>
+              <button
+                type="button"
+                onClick={() => setEditorPreset({ mode: "create" })}
+                className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-foreground hover:border-blue hover:text-blue"
+              >
+                <Plus className="h-3 w-3" /> Save current
+              </button>
+            </div>
+
+            {builtInPresets.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {presets.map((p) => (
+                {builtInPresets.map((p) => (
                   <button
                     key={p.id}
                     type="button"
@@ -105,9 +147,72 @@ export function PropertiesPanel({
                   </button>
                 ))}
               </div>
-              <p className="mt-2 text-[10px] text-muted-foreground">Applies common settings — you can still tweak below.</p>
-            </div>
-          )}
+            )}
+
+            {customPresets.length > 0 && (
+              <div className="mt-2">
+                <div className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <User className="h-2.5 w-2.5" /> My presets
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {customPresets.map((p) => (
+                    <div
+                      key={p.id}
+                      className="group inline-flex items-stretch overflow-hidden rounded-full border border-border bg-background text-[11px] font-medium text-foreground transition-colors hover:border-blue"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => applyPreset(p)}
+                        title={p.description}
+                        className="px-2.5 py-1 hover:text-blue"
+                      >
+                        {p.label}
+                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label="Preset options"
+                            className="border-l border-border px-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <MoreHorizontal className="h-3 w-3" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => setEditorPreset({ mode: "edit", preset: p })}>
+                            <Pencil className="h-3.5 w-3.5" /> Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => {
+                              updatePreset(p.id, {
+                                config: { ...widget.config },
+                                style: widget.style ? { ...widget.style } : undefined,
+                              });
+                            }}
+                          >
+                            <Sparkles className="h-3.5 w-3.5" /> Update from current
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => removePreset(p.id)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="mt-2 text-[10px] text-muted-foreground">
+              {hasAnyPresets
+                ? "Apply a preset, then keep tweaking — or save your current setup."
+                : "No presets yet. Save your current setup to reuse it later."}
+            </p>
+          </div>
+
           <WidgetConfigForm widget={widget} onChange={patchConfig} />
         </TabsContent>
 
@@ -195,7 +300,99 @@ export function PropertiesPanel({
           <Trash2 className="h-4 w-4" /> Delete widget
         </Button>
       </div>
+
+      <PresetEditorDialog
+        state={editorPreset}
+        onClose={() => setEditorPreset(null)}
+        onSave={(label, description) => {
+          if (!editorPreset) return;
+          if (editorPreset.mode === "create") {
+            createPreset(
+              widget.widgetType,
+              label,
+              widget.config ?? {},
+              widget.style,
+              description || undefined,
+            );
+          } else {
+            updatePreset(editorPreset.preset.id, { label, description: description || undefined });
+          }
+          setEditorPreset(null);
+        }}
+      />
     </aside>
+  );
+}
+
+function PresetEditorDialog({
+  state,
+  onClose,
+  onSave,
+}: {
+  state: { mode: "create" } | { mode: "edit"; preset: CustomPreset } | null;
+  onClose: () => void;
+  onSave: (label: string, description: string) => void;
+}) {
+  const isEdit = state?.mode === "edit";
+  const [label, setLabel] = useState("");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (state?.mode === "edit") {
+      setLabel(state.preset.label);
+      setDescription(state.preset.description ?? "");
+    } else if (state?.mode === "create") {
+      setLabel("");
+      setDescription("");
+    }
+  }, [state]);
+
+  return (
+    <Dialog
+      open={state !== null}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? "Edit preset" : "Save as preset"}</DialogTitle>
+          <DialogDescription>
+            {isEdit
+              ? "Rename this preset or update its description."
+              : "Save the current widget settings so you can reapply them later."}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="preset-label" className="text-xs font-medium">Name</Label>
+            <Input
+              id="preset-label"
+              autoFocus
+              value={label}
+              placeholder="e.g. Sunday service"
+              onChange={(e) => setLabel(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="preset-desc" className="text-xs font-medium">Description (optional)</Label>
+            <Textarea
+              id="preset-desc"
+              value={description}
+              rows={2}
+              placeholder="Shown as a tooltip"
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => onSave(label.trim(), description.trim())} disabled={!label.trim()}>
+            {isEdit ? "Save changes" : "Save preset"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
