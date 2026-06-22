@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { warnOnContrastFailures } from "../lib/contrast";
 
 function NotFoundComponent() {
   return (
@@ -115,6 +116,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (import.meta.env.DEV) warnOnContrastFailures();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
