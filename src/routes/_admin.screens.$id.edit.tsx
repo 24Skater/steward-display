@@ -115,7 +115,10 @@ function EditorPage() {
       const dy = Math.round(e.delta.y / effective / cellH);
       const nx = Math.max(0, Math.min(GRID_COLS - w.w, w.x + dx));
       const ny = Math.max(0, Math.min(GRID_ROWS - w.h, w.y + dy));
-      updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
+      if (nx !== w.x || ny !== w.y) {
+        pushHistory(screen.widgets);
+        updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
+      }
     }
   };
 
