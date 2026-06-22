@@ -242,8 +242,6 @@ export function PropertiesPanel({
               </div>
             )}
 
-
-
             <p className="mt-2 text-[10px] text-muted-foreground">
               {hasAnyPresets
                 ? "Apply a preset, then keep tweaking — or save your current setup."
