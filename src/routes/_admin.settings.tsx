@@ -72,6 +72,7 @@ function SettingsPage() {
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [previousGridSettings, setPreviousGridSettings] = useState<{ defaultGridSize: number; defaultSnapStep: number } | null>(null);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
@@ -128,9 +129,19 @@ function SettingsPage() {
   };
 
   const confirmResetGridDefaults = () => {
+    const previous = { defaultGridSize, defaultSnapStep };
+    setPreviousGridSettings(previous);
     resetGridDefaults();
     setResetDialogOpen(false);
-    toast.success("Grid defaults reset to safe values.");
+    toast.success("Grid defaults reset to safe values.", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          update(previous);
+          toast.success("Previous grid defaults restored.");
+        },
+      },
+    });
   };
 
   return (
