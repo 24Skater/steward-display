@@ -74,7 +74,9 @@ function SettingsPage() {
   const importScreens = useScreenStore((s) => s.importScreens);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
+  const gridDefaultsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
+  const [gridDefaultsWarnings, setGridDefaultsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [clearHistoryDialogOpen, setClearHistoryDialogOpen] = useState(false);
   
