@@ -23,4 +23,5 @@ export function writeJSON(key: string, value: unknown): void {
 export const STORAGE_KEYS = {
   screens: "steward.screens",
   settings: "steward.settings",
+  customPresets: "steward.customPresets",
 } as const;
