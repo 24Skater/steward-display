@@ -252,6 +252,20 @@ function SettingsPage() {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="maxGridHistorySize">Max undo snapshots</Label>
+            <Input
+              id="maxGridHistorySize"
+              type="number"
+              min={1}
+              max={100}
+              value={maxGridHistorySize}
+              onChange={(e) => {
+                const value = Math.max(1, Math.min(100, Number(e.target.value) || 1));
+                update({ maxGridHistorySize: value });
+              }}
+            />
+          </div>
         </div>
         <div className="pt-2">
           <Button variant="outline" size="sm" onClick={handleResetGridDefaults}>
