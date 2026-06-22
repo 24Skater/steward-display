@@ -1,5 +1,5 @@
-import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User, Eye } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetConfigForm } from "./WidgetConfigForms";
 import { getPresetsForWidget, type WidgetPreset } from "@/lib/widgetPresets";
 import { usePresetStore, type CustomPreset } from "@/store/presetStore";
+import { WidgetRenderer } from "./WidgetRenderer";
+
 
 const BG_SWATCHES = ["", "#0B1220", "#111827", "#FFFFFF", "#FEF3C7", "#DBEAFE", "#FCE7F3"];
 const TEXT_SWATCHES = ["#FFFFFF", "#0B1220", "#F59E0B", "#DC2626", "#2563EB", "#16A34A"];
@@ -65,13 +67,35 @@ export function PropertiesPanel({
     | { mode: "edit"; preset: CustomPreset }
     | null
   >(null);
+  const [previewPreset, setPreviewPreset] = useState<WidgetPreset | null>(null);
 
   const applyPreset = (preset: WidgetPreset) => {
     if (preset.config) patchConfig(preset.config);
     if (preset.style) patchStyle(preset.style);
   };
 
+  const previewWidget = useMemo<WidgetInstance>(() => {
+    const base = {
+      id: "preset-preview",
+      widgetType: widget.widgetType,
+      x: 0,
+      y: 0,
+      w: 12,
+      h: 6,
+      config: widget.config,
+      style: widget.style,
+    };
+    if (!previewPreset) return base;
+    return {
+      ...base,
+      config: { ...widget.config, ...(previewPreset.config ?? {}) },
+      style: { ...widget.style, ...(previewPreset.style ?? {}) },
+    };
+  }, [previewPreset, widget]);
+
   const hasAnyPresets = builtInPresets.length > 0 || customPresets.length > 0;
+
+
 
   return (
     <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
@@ -140,6 +164,8 @@ export function PropertiesPanel({
                     key={p.id}
                     type="button"
                     onClick={() => applyPreset(p)}
+                    onMouseEnter={() => setPreviewPreset(p)}
+                    onMouseLeave={() => setPreviewPreset(null)}
                     title={p.description}
                     className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:border-blue hover:bg-blue/10 hover:text-blue"
                   >
@@ -159,6 +185,8 @@ export function PropertiesPanel({
                     <div
                       key={p.id}
                       className="group inline-flex items-stretch overflow-hidden rounded-full border border-border bg-background text-[11px] font-medium text-foreground transition-colors hover:border-blue"
+                      onMouseEnter={() => setPreviewPreset(p)}
+                      onMouseLeave={() => setPreviewPreset(null)}
                     >
                       <button
                         type="button"
@@ -202,6 +230,22 @@ export function PropertiesPanel({
                       </DropdownMenu>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {hasAnyPresets && (
+              <div className="mt-3 rounded-md border border-border bg-background p-2">
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <Eye className="h-3 w-3" /> Preview
+                  </span>
+                  <span className="truncate text-[10px] text-muted-foreground">
+                    {previewPreset ? previewPreset.label : "Current widget"}
+                  </span>
+                </div>
+                <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
+                  <WidgetRenderer widget={previewWidget} />
                 </div>
               </div>
             )}
