@@ -247,6 +247,8 @@ function SettingsPage() {
     defaultGridSize,
     defaultSnapStep,
     maxGridHistorySize,
+    gridImportIncludeDefaults,
+    gridImportIncludeHistory,
     update,
     resetGridDefaults,
   } = useSettingsStore();
