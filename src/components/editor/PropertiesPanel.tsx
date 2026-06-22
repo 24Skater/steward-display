@@ -1,5 +1,5 @@
 import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -334,20 +334,24 @@ function PresetEditorDialog({
   onSave: (label: string, description: string) => void;
 }) {
   const isEdit = state?.mode === "edit";
-  const initialLabel = isEdit ? state.preset.label : "";
-  const initialDescription = isEdit ? state.preset.description ?? "" : "";
-  const [label, setLabel] = useState(initialLabel);
-  const [description, setDescription] = useState(initialDescription);
+  const [label, setLabel] = useState("");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (state?.mode === "edit") {
+      setLabel(state.preset.label);
+      setDescription(state.preset.description ?? "");
+    } else if (state?.mode === "create") {
+      setLabel("");
+      setDescription("");
+    }
+  }, [state]);
 
   return (
     <Dialog
       open={state !== null}
       onOpenChange={(open) => {
         if (!open) onClose();
-        else {
-          setLabel(initialLabel);
-          setDescription(initialDescription);
-        }
       }}
     >
       <DialogContent className="sm:max-w-md">
