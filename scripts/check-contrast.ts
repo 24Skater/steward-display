@@ -135,8 +135,20 @@ function renderHtml(s: typeof summary): string {
 
   const statusBanner =
     s.status === "pass"
-      ? `<div class="banner pass">✓ All ${s.totals.required} required brand pairings meet WCAG AA</div>`
-      : `<div class="banner fail">✗ ${s.totals.failing} of ${s.totals.required} required pairings fail WCAG AA</div>`;
+      ? `<div class="banner pass">✓ All ${s.totals.required} required brand pairings meet WCAG ${s.config.requireAAA ? "AAA" : "AA"}</div>`
+      : `<div class="banner fail">✗ ${s.totals.failing} of ${s.totals.required} required pairings fail WCAG ${s.config.requireAAA ? "AAA" : "AA"}</div>`;
+
+  const cfgChips = [
+    `Mode: <strong>${s.config.requireAAA ? "AAA" : "AA"}</strong>`,
+    `body ≥ ${s.config.thresholds.body}:1`,
+    `large ≥ ${s.config.thresholds.large}:1`,
+    `ui ≥ ${s.config.thresholds.ui}:1`,
+    `decorative ${s.config.failOnDecorative ? "enforced" : "informational"} (≥ ${s.config.thresholds.decorative}:1)`,
+    s.config.source.jsonPath ? `config: <code>${esc(s.config.source.jsonPath)}</code>` : null,
+    s.config.source.envOverrides.length
+      ? `env: <code>${esc(s.config.source.envOverrides.join(", "))}</code>`
+      : null,
+  ].filter(Boolean).join(" · ");
 
   return `<!doctype html>
 <html lang="en">
@@ -180,7 +192,8 @@ function renderHtml(s: typeof summary): string {
 <body>
 <div class="wrap">
   <h1>Steward · Brand contrast report</h1>
-  <div class="meta">Generated ${esc(s.generatedAt)} · WCAG 2.1 (AA 4.5:1 body, 3:1 large/UI)</div>
+  <div class="meta">Generated ${esc(s.generatedAt)} · WCAG 2.1</div>
+  <div class="meta">${cfgChips}</div>
   ${statusBanner}
   <div class="stats">
     <div class="stat"><div class="n">${s.totals.required}</div><div class="l">Required</div></div>
@@ -208,9 +221,11 @@ function renderHtml(s: typeof summary): string {
 }
 
 function renderMarkdown(s: typeof summary): string {
+  const level = s.config.requireAAA ? "AAA" : "AA";
   const head = s.status === "pass"
-    ? `### ✓ Steward contrast — all ${s.totals.required} required pairings meet WCAG AA`
-    : `### ✗ Steward contrast — ${s.totals.failing} of ${s.totals.required} required pairings fail WCAG AA`;
+    ? `### ✓ Steward contrast — all ${s.totals.required} required pairings meet WCAG ${level}`
+    : `### ✗ Steward contrast — ${s.totals.failing} of ${s.totals.required} required pairings fail WCAG ${level}`;
+  const cfgLine = `**Mode:** ${level} · body ≥ ${s.config.thresholds.body}:1 · large ≥ ${s.config.thresholds.large}:1 · ui ≥ ${s.config.thresholds.ui}:1 · decorative ${s.config.failOnDecorative ? "enforced" : "informational"} (≥ ${s.config.thresholds.decorative}:1)`;
   const sect = (theme: "light" | "dark") => {
     const rows = s.results
       .filter((r) => r.theme === theme)
@@ -218,5 +233,5 @@ function renderMarkdown(s: typeof summary): string {
       .join("\n");
     return `\n#### ${theme[0].toUpperCase()}${theme.slice(1)} theme\n\n| Status | Pairing | Tokens | Use | Ratio | Threshold |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n`;
   };
-  return `${head}\n\n_Generated ${s.generatedAt}_\n${sect("light")}${sect("dark")}`;
+  return `${head}\n\n${cfgLine}\n\n_Generated ${s.generatedAt}_\n${sect("light")}${sect("dark")}`;
 }
