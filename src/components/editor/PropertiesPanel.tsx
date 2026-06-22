@@ -459,6 +459,7 @@ function _UNUSED({screen, widget, onClose}: any) {
     </aside>
   </TooltipProvider>
   );
+  );
 }
 
 function PresetEditorDialog({
