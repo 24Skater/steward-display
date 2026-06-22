@@ -112,6 +112,11 @@ function SettingsPage() {
     }
   };
 
+  const handleResetGridDefaults = () => {
+    resetGridDefaults();
+    toast.success("Grid defaults reset to safe values.");
+  };
+
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 px-6 py-10">
       <PageHeader title="Settings" subtitle="Configure your organization and defaults." />
