@@ -71,6 +71,7 @@ function SettingsPage() {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const handleExport = () => {
     downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
