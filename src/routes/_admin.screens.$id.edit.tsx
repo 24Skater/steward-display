@@ -201,9 +201,17 @@ function EditorPage() {
           <span className="text-xs text-muted-foreground">Auto-saved</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
-            <Keyboard className="h-4 w-4" /> Shortcuts
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
+                <Keyboard className="h-4 w-4" /> Shortcuts
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+              <span>Keyboard shortcuts</span>
+              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">?</kbd>
+            </TooltipContent>
+          </Tooltip>
           <Button variant="outline" size="sm" onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}>
             <Eye className="h-4 w-4" /> Preview
           </Button>
