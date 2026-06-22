@@ -128,6 +128,7 @@ function EditorPage() {
   };
 
   const handleTemplate = (template: LayoutTemplate) => {
+    pushHistory(screen.widgets);
     setWidgets(screen.id, instantiateTemplate(template));
     setSkipTemplates(true);
   };
