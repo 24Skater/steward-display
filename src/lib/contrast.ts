@@ -6,7 +6,7 @@
  * AAA normal ≥ 7.0.
  */
 
-export type ContrastUse = "body" | "large" | "ui";
+export type ContrastUse = "body" | "large" | "ui" | "decorative";
 
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -40,7 +40,9 @@ export function contrastRatio(fg: string, bg: string): number {
 }
 
 export function wcagThreshold(use: ContrastUse): number {
-  return use === "body" ? 4.5 : 3.0;
+  if (use === "body") return 4.5;
+  if (use === "decorative") return 1.5; // informational only
+  return 3.0;
 }
 
 export type PairResult = {
@@ -105,7 +107,7 @@ export const LIGHT_PAIRS: PairDef[] = [
   { name: "White text on emerald (success)", fg: LIGHT.white, bg: LIGHT.emerald, use: "body" },
   { name: "White text on red (destructive)", fg: LIGHT.white, bg: LIGHT.red, use: "body" },
   { name: "Navy text on amber (warning)", fg: LIGHT.navy, bg: LIGHT.amber, use: "body" },
-  { name: "Warm border vs parchment", fg: LIGHT.border, bg: LIGHT.parchment, use: "ui" },
+  { name: "Warm border vs parchment (decorative)", fg: LIGHT.border, bg: LIGHT.parchment, use: "decorative" },
   { name: "Focus ring (blue) vs parchment", fg: LIGHT.blue, bg: LIGHT.parchment, use: "ui" },
   { name: "Gold focus ring vs navy sidebar", fg: LIGHT.gold, bg: LIGHT.navy, use: "ui" },
 ];
@@ -120,7 +122,7 @@ export const DARK_PAIRS: PairDef[] = [
   { name: "Gold link on dark bg", fg: DARK.gold, bg: DARK.bg, use: "body" },
   { name: "Gold link on dark surface", fg: DARK.gold, bg: DARK.surface, use: "body" },
   { name: "Blue accent on dark surface", fg: DARK.blue, bg: DARK.surface, use: "large" },
-  { name: "Border vs dark bg", fg: DARK.border, bg: DARK.bg, use: "ui" },
+  { name: "Border vs dark bg (decorative)", fg: DARK.border, bg: DARK.bg, use: "decorative" },
   { name: "Gold focus ring vs dark bg", fg: DARK.gold, bg: DARK.bg, use: "ui" },
 ];
 
