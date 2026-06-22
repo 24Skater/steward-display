@@ -256,6 +256,22 @@ export function ContrastAudit() {
     return s;
   }, [required]);
 
+  const visiblePairs = useMemo(() => {
+    const list: PairResult[] = [];
+    if (themeFilter !== "dark") list.push(...filteredLight);
+    if (themeFilter !== "light") list.push(...filteredDark);
+    return list;
+  }, [themeFilter, filteredLight, filteredDark]);
+
+  const visibleVars = useMemo(() => {
+    const s = new Set<string>();
+    for (const r of visiblePairs) {
+      s.add(r.fgVar);
+      s.add(r.bgVar);
+    }
+    return s;
+  }, [visiblePairs]);
+
   const [highlightVar, setHighlightVar] = useState<string | null>(null);
   const jumpToVar = useCallback((v: string) => {
     setHighlightVar(v);
@@ -387,6 +403,7 @@ export function ContrastAudit() {
 
       <TokenReference
         tokens={tokens}
+        visibleVars={visibleVars}
         sourcePath={sourcePath}
         failingVars={failingVars}
         highlightVar={highlightVar}
@@ -397,16 +414,20 @@ export function ContrastAudit() {
 
 function TokenReference({
   tokens,
+  visibleVars,
   sourcePath,
   failingVars,
   highlightVar,
 }: {
   tokens: Record<string, TokenLocation[]>;
+  visibleVars: Set<string>;
   sourcePath: string | undefined;
   failingVars: Set<string>;
   highlightVar: string | null;
 }) {
-  const names = Object.keys(tokens).sort();
+  const names = Object.keys(tokens)
+    .filter((n) => visibleVars.has(n))
+    .sort();
   if (!names.length) return null;
   return (
     <section
