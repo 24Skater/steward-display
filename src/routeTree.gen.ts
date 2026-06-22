@@ -9,61 +9,184 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/_admin'
+import { Route as AdminIndexRouteImport } from './routes/_admin.index'
+import { Route as AdminWidgetsRouteImport } from './routes/_admin.widgets'
+import { Route as AdminSettingsRouteImport } from './routes/_admin.settings'
+import { Route as ScreensIdPreviewRouteImport } from './routes/screens.$id.preview'
+import { Route as AdminScreensNewRouteImport } from './routes/_admin.screens.new'
+import { Route as AdminScreensIdEditRouteImport } from './routes/_admin.screens.$id.edit'
 
-const IndexRoute = IndexRouteImport.update({
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminWidgetsRoute = AdminWidgetsRouteImport.update({
+  id: '/widgets',
+  path: '/widgets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ScreensIdPreviewRoute = ScreensIdPreviewRouteImport.update({
+  id: '/screens/$id/preview',
+  path: '/screens/$id/preview',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminScreensNewRoute = AdminScreensNewRouteImport.update({
+  id: '/screens/new',
+  path: '/screens/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminScreensIdEditRoute = AdminScreensIdEditRouteImport.update({
+  id: '/screens/$id/edit',
+  path: '/screens/$id/edit',
+  getParentRoute: () => AdminRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AdminIndexRoute
+  '/settings': typeof AdminSettingsRoute
+  '/widgets': typeof AdminWidgetsRoute
+  '/screens/new': typeof AdminScreensNewRoute
+  '/screens/$id/preview': typeof ScreensIdPreviewRoute
+  '/screens/$id/edit': typeof AdminScreensIdEditRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/settings': typeof AdminSettingsRoute
+  '/widgets': typeof AdminWidgetsRoute
+  '/': typeof AdminIndexRoute
+  '/screens/new': typeof AdminScreensNewRoute
+  '/screens/$id/preview': typeof ScreensIdPreviewRoute
+  '/screens/$id/edit': typeof AdminScreensIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_admin': typeof AdminRouteWithChildren
+  '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/widgets': typeof AdminWidgetsRoute
+  '/_admin/': typeof AdminIndexRoute
+  '/_admin/screens/new': typeof AdminScreensNewRoute
+  '/screens/$id/preview': typeof ScreensIdPreviewRoute
+  '/_admin/screens/$id/edit': typeof AdminScreensIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/settings'
+    | '/widgets'
+    | '/screens/new'
+    | '/screens/$id/preview'
+    | '/screens/$id/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/settings'
+    | '/widgets'
+    | '/'
+    | '/screens/new'
+    | '/screens/$id/preview'
+    | '/screens/$id/edit'
+  id:
+    | '__root__'
+    | '/_admin'
+    | '/_admin/settings'
+    | '/_admin/widgets'
+    | '/_admin/'
+    | '/_admin/screens/new'
+    | '/screens/$id/preview'
+    | '/_admin/screens/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  ScreensIdPreviewRoute: typeof ScreensIdPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin/': {
+      id: '/_admin/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/widgets': {
+      id: '/_admin/widgets'
+      path: '/widgets'
+      fullPath: '/widgets'
+      preLoaderRoute: typeof AdminWidgetsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/settings': {
+      id: '/_admin/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/screens/$id/preview': {
+      id: '/screens/$id/preview'
+      path: '/screens/$id/preview'
+      fullPath: '/screens/$id/preview'
+      preLoaderRoute: typeof ScreensIdPreviewRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_admin/screens/new': {
+      id: '/_admin/screens/new'
+      path: '/screens/new'
+      fullPath: '/screens/new'
+      preLoaderRoute: typeof AdminScreensNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/screens/$id/edit': {
+      id: '/_admin/screens/$id/edit'
+      path: '/screens/$id/edit'
+      fullPath: '/screens/$id/edit'
+      preLoaderRoute: typeof AdminScreensIdEditRouteImport
+      parentRoute: typeof AdminRoute
     }
   }
 }
 
+interface AdminRouteChildren {
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminWidgetsRoute: typeof AdminWidgetsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminScreensNewRoute: typeof AdminScreensNewRoute
+  AdminScreensIdEditRoute: typeof AdminScreensIdEditRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminWidgetsRoute: AdminWidgetsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminScreensNewRoute: AdminScreensNewRoute,
+  AdminScreensIdEditRoute: AdminScreensIdEditRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  ScreensIdPreviewRoute: ScreensIdPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
