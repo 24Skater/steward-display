@@ -249,6 +249,18 @@ function EditorPage() {
   );
 }
 
+const SHORTCUTS = [
+  { keys: "↑ ↓ ← →", action: "Nudge 1 cell" },
+  { keys: "⇧ + arrows", action: "Nudge 4 cells" },
+  { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets" },
+  { keys: "Delete / Backspace", action: "Remove selected widgets" },
+  { keys: "Esc", action: "Deselect widgets" },
+  { keys: "⌘/Ctrl + Z", action: "Undo" },
+  { keys: "⌘/Ctrl + Y", action: "Redo" },
+  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo" },
+  { keys: "?", action: "Open this help" },
+];
+
 function ShortcutRow({ keys, action }: { keys: string; action: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
