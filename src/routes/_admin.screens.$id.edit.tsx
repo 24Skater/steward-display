@@ -53,6 +53,7 @@ function EditorPage() {
   const [draftName, setDraftName] = useState("");
   const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(null);
   const [skipTemplates, setSkipTemplates] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   useEffect(() => () => reset(), [reset]);
 
