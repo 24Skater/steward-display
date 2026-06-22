@@ -36,6 +36,7 @@ import {
   exportSettingsToJSON,
   parseImportedSettings,
   exportGridDefaultsToJSON,
+  parseImportedGridDefaults,
 } from "@/lib/export";
 import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
 import { toast } from "sonner";
@@ -73,7 +74,9 @@ function SettingsPage() {
   const importScreens = useScreenStore((s) => s.importScreens);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const settingsFileRef = useRef<HTMLInputElement | null>(null);
+  const gridDefaultsFileRef = useRef<HTMLInputElement | null>(null);
   const [settingsWarnings, setSettingsWarnings] = useState<string[]>([]);
+  const [gridDefaultsWarnings, setGridDefaultsWarnings] = useState<string[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [clearHistoryDialogOpen, setClearHistoryDialogOpen] = useState(false);
   
@@ -149,6 +152,22 @@ function SettingsPage() {
     toast.success("Grid defaults and history exported.");
   };
 
+  const handleImportGridDefaults = async (file: File) => {
+    try {
+      setGridDefaultsWarnings([]);
+      const text = await file.text();
+      const { gridDefaults, history, warnings } = parseImportedGridDefaults(text);
+      update(gridDefaults);
+      setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
+      if (warnings.length > 0) {
+        setGridDefaultsWarnings(warnings);
+      } else {
+        toast.success("Grid defaults and history imported.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't read that file.");
+    }
+  };
   const handleImportSettings = async (file: File) => {
     try {
       setSettingsWarnings([]);
@@ -217,6 +236,25 @@ function SettingsPage() {
           </AlertDescription>
           <button
             onClick={() => setSettingsWarnings([])}
+            className="absolute right-3 top-3 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label="Dismiss"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </Alert>
+      )}
+
+      {gridDefaultsWarnings.length > 0 && (
+        <Alert variant="destructive" className="relative">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Grid defaults import warnings</AlertTitle>
+          <AlertDescription>
+            {gridDefaultsWarnings.map((warning, i) => (
+              <p key={i}>{warning}</p>
+            ))}
+          </AlertDescription>
+          <button
+            onClick={() => setGridDefaultsWarnings([])}
             className="absolute right-3 top-3 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             aria-label="Dismiss"
           >
@@ -379,6 +417,7 @@ function SettingsPage() {
           <Button variant="outline" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4" /> Import screens</Button>
           <Button variant="outline" onClick={handleExportSettings}><Download className="h-4 w-4" /> Export settings</Button>
           <Button variant="outline" onClick={handleExportGridDefaults}><Download className="h-4 w-4" /> Export grid defaults</Button>
+          <Button variant="outline" onClick={() => gridDefaultsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import grid defaults</Button>
           <Button variant="outline" onClick={() => settingsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import settings</Button>
           <input
             ref={fileRef}
@@ -399,6 +438,17 @@ function SettingsPage() {
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) handleImportSettings(f);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={gridDefaultsFileRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImportGridDefaults(f);
               e.target.value = "";
             }}
           />
