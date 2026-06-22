@@ -346,8 +346,16 @@ function SettingsPage() {
   const confirmReplaceGridImport = () => {
     if (!pendingGridImport) return;
     const { gridDefaults, history, warnings } = pendingGridImport;
-    update(gridDefaults);
-    setGridDefaultsHistory(history.slice(0, gridDefaults.maxGridHistorySize));
+    const patch: Partial<Parameters<typeof update>[0]> = {};
+    if (importGridDefaults) {
+      patch.defaultGridSize = gridDefaults.defaultGridSize;
+      patch.defaultSnapStep = gridDefaults.defaultSnapStep;
+      patch.maxGridHistorySize = gridDefaults.maxGridHistorySize;
+    }
+    update(patch);
+    if (importHistory) {
+      setGridDefaultsHistory(history.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
+    }
     finishGridImport(warnings);
   };
 
