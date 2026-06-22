@@ -255,16 +255,16 @@ function EditorPage() {
 }
 
 const SHORTCUTS = [
-  { keys: "↑ ↓ ← →", action: "Nudge 1 cell" },
-  { keys: "⇧ + arrows", action: "Nudge 4 cells" },
-  { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets" },
-  { keys: "Delete / Backspace", action: "Remove selected widgets" },
-  { keys: "Esc", action: "Deselect widgets" },
-  { keys: "⌘/Ctrl + Z", action: "Undo" },
-  { keys: "⌘/Ctrl + Y", action: "Redo" },
-  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo" },
-  { keys: "?", action: "Open this help" },
-];
+  { keys: "↑ ↓ ← →", action: "Nudge 1 cell", category: "canvas" },
+  { keys: "⇧ + arrows", action: "Nudge 4 cells", category: "canvas" },
+  { keys: "Esc", action: "Deselect widgets", category: "canvas" },
+  { keys: "⌘/Ctrl + Z", action: "Undo", category: "canvas" },
+  { keys: "⌘/Ctrl + Y", action: "Redo", category: "canvas" },
+  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo", category: "canvas" },
+  { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets", category: "widgets" },
+  { keys: "Delete / Backspace", action: "Remove selected widgets", category: "widgets" },
+  { keys: "?", action: "Open this help", category: "presets" },
+] as const;
 
 function ShortcutRow({ keys, action }: { keys: string; action: string }) {
   return (
