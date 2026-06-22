@@ -241,8 +241,9 @@ function EditorPage() {
             className="mb-2"
           />
           <Tabs value={shortcutTab} onValueChange={setShortcutTab}>
-            <TabsList className="mb-3 grid w-full grid-cols-5">
+            <TabsList className="mb-3 grid w-full grid-cols-6">
               <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="edit">Edit</TabsTrigger>
               <TabsTrigger value="canvas">Canvas</TabsTrigger>
               <TabsTrigger value="widgets">Widgets</TabsTrigger>
               <TabsTrigger value="media">Media</TabsTrigger>
@@ -266,12 +267,17 @@ function EditorPage() {
 }
 
 const SHORTCUTS = [
-  { keys: "↑ ↓ ← →", action: "Nudge 1 cell", category: "canvas" },
-  { keys: "⇧ + arrows", action: "Nudge 4 cells", category: "canvas" },
-  { keys: "Esc", action: "Deselect widgets", category: "canvas" },
-  { keys: "⌘/Ctrl + Z", action: "Undo", category: "canvas" },
-  { keys: "⌘/Ctrl + Y", action: "Redo", category: "canvas" },
-  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo", category: "canvas" },
+  { keys: "↑ ↓ ← →", action: "Nudge 1 cell", category: "edit" },
+  { keys: "⇧ + arrows", action: "Nudge 4 cells", category: "edit" },
+  { keys: "Esc", action: "Deselect widgets", category: "edit" },
+  { keys: "⌘/Ctrl + Z", action: "Undo", category: "edit" },
+  { keys: "⌘/Ctrl + Y", action: "Redo", category: "edit" },
+  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo", category: "edit" },
+  { keys: "Click", action: "Select widget", category: "canvas" },
+  { keys: "⇧ + Click", action: "Add to selection", category: "canvas" },
+  { keys: "Drag", action: "Move widget", category: "canvas" },
+  { keys: "Drag handle", action: "Resize widget", category: "canvas" },
+  { keys: "Scroll", action: "Pan canvas", category: "canvas" },
   { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets", category: "widgets" },
   { keys: "Delete / Backspace", action: "Remove selected widgets", category: "widgets" },
   { keys: "?", action: "Open this help", category: "presets" },
