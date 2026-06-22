@@ -247,6 +247,8 @@ function SettingsPage() {
     defaultGridSize,
     defaultSnapStep,
     maxGridHistorySize,
+    gridImportIncludeDefaults,
+    gridImportIncludeHistory,
     update,
     resetGridDefaults,
   } = useSettingsStore();
@@ -266,8 +268,8 @@ function SettingsPage() {
     warnings: string[];
     filename: string;
   } | null>(null);
-  const [importGridDefaults, setImportGridDefaults] = useState(true);
-  const [importHistory, setImportHistory] = useState(true);
+  const [importGridDefaults, setImportGridDefaults] = useState(gridImportIncludeDefaults ?? true);
+  const [importHistory, setImportHistory] = useState(gridImportIncludeHistory ?? true);
   
   
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
@@ -348,8 +350,8 @@ function SettingsPage() {
       const text = await file.text();
       const { gridDefaults, history, warnings } = parseImportedGridDefaults(text);
       setPendingGridImport({ gridDefaults, history, warnings, filename: file.name });
-      setImportGridDefaults(true);
-      setImportHistory(true);
+      setImportGridDefaults(gridImportIncludeDefaults ?? true);
+      setImportHistory(gridImportIncludeHistory ?? true);
       setImportDialogOpen(true);
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
@@ -718,11 +720,23 @@ function SettingsPage() {
                   <p className="text-sm font-medium">Import options</p>
                   <Label className="flex items-center justify-between gap-4 text-sm font-normal">
                     Grid defaults
-                    <Switch checked={importGridDefaults} onCheckedChange={setImportGridDefaults} />
+                    <Switch
+                      checked={importGridDefaults}
+                      onCheckedChange={(checked) => {
+                        setImportGridDefaults(checked);
+                        update({ gridImportIncludeDefaults: checked });
+                      }}
+                    />
                   </Label>
                   <Label className="flex items-center justify-between gap-4 text-sm font-normal">
                     Undo history
-                    <Switch checked={importHistory} onCheckedChange={setImportHistory} />
+                    <Switch
+                      checked={importHistory}
+                      onCheckedChange={(checked) => {
+                        setImportHistory(checked);
+                        update({ gridImportIncludeHistory: checked });
+                      }}
+                    />
                   </Label>
                 </div>
               )}

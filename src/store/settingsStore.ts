@@ -11,6 +11,8 @@ const DEFAULT_SETTINGS: Settings = {
   defaultGridSize: 1,
   defaultSnapStep: 4,
   maxGridHistorySize: 10,
+  gridImportIncludeDefaults: true,
+  gridImportIncludeHistory: true,
 };
 
 interface SettingsState extends Settings {
