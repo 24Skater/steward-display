@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Eye, Grid3x3 } from "lucide-react";
+import { ArrowLeft, Eye, Keyboard } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DndContext,
@@ -15,12 +15,20 @@ import { Input } from "@/components/ui/input";
 import { Canvas, GRID_COLS, GRID_ROWS } from "@/components/editor/Canvas";
 import { WidgetPanel } from "@/components/editor/WidgetPanel";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
+import { LayoutTemplatePicker } from "@/components/editor/LayoutTemplates";
+import { instantiateTemplate, type LayoutTemplate } from "@/lib/layoutTemplates";
 import { useScreenStore } from "@/store/screenStore";
 import { useEditorStore } from "@/store/editorStore";
 import { getScreenDimensions, type WidgetType } from "@/types";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { MonitorOff } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/_admin/screens/$id/edit")({
   head: () => ({ meta: [{ title: "Editor — Steward Display" }] }),
@@ -34,16 +42,16 @@ function EditorPage() {
   const updateScreen = useScreenStore((s) => s.updateScreen);
   const addWidget = useScreenStore((s) => s.addWidget);
   const updateWidget = useScreenStore((s) => s.updateWidget);
+  const setWidgets = useScreenStore((s) => s.setWidgets);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const select = useEditorStore((s) => s.select);
-  const toggleGrid = useEditorStore((s) => s.toggleGrid);
-  const showGrid = useEditorStore((s) => s.showGrid);
   const zoom = useEditorStore((s) => s.zoom);
   const reset = useEditorStore((s) => s.reset);
 
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(null);
+  const [skipTemplates, setSkipTemplates] = useState(false);
 
   useEffect(() => () => reset(), [reset]);
 
@@ -115,6 +123,13 @@ function EditorPage() {
     if (w) select([w.id]);
   };
 
+  const handleTemplate = (template: LayoutTemplate) => {
+    setWidgets(screen.id, instantiateTemplate(template));
+    setSkipTemplates(true);
+  };
+
+  const showTemplates = !skipTemplates && screen.widgets.length === 0;
+
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
@@ -151,15 +166,24 @@ function EditorPage() {
           <span className="text-xs text-muted-foreground">Auto-saved</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleGrid}
-            aria-pressed={showGrid}
-            className={showGrid ? "text-blue" : ""}
-          >
-            <Grid3x3 className="h-4 w-4" /> Grid
-          </Button>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Keyboard className="h-4 w-4" /> Shortcuts
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                <div className="space-y-1">
+                  <div><kbd>↑ ↓ ← →</kbd> Nudge 1 cell</div>
+                  <div><kbd>⇧ + arrows</kbd> Nudge 4 cells</div>
+                  <div><kbd>⌘/Ctrl + D</kbd> Duplicate</div>
+                  <div><kbd>Delete</kbd> Remove</div>
+                  <div><kbd>Esc</kbd> Deselect</div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button variant="outline" size="sm" onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}>
             <Eye className="h-4 w-4" /> Preview
           </Button>
@@ -169,8 +193,14 @@ function EditorPage() {
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex flex-1 overflow-hidden">
           <WidgetPanel onAdd={handleAdd} />
-          <div data-stage-root className="flex flex-1 flex-col">
-            <Canvas screen={screen} />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {showTemplates ? (
+              <div className="flex-1 overflow-y-auto bg-subtle">
+                <LayoutTemplatePicker onChoose={handleTemplate} onBlank={() => setSkipTemplates(true)} />
+              </div>
+            ) : (
+              <Canvas screen={screen} />
+            )}
           </div>
           {selected && (
             <PropertiesPanel screen={screen} widget={selected} onClose={() => select([])} />

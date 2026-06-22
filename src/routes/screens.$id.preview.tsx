@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useScreenStore } from "@/store/screenStore";
 import { getScreenDimensions, type Screen } from "@/types";
-import { GRID_COLS, GRID_ROWS } from "@/components/editor/Canvas";
+import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetRenderer } from "@/components/editor/WidgetRenderer";
 
 export const Route = createFileRoute("/screens/$id/preview")({

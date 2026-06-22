@@ -1,31 +1,44 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import type { Screen, WidgetInstance, WidgetType } from "@/types";
+import { Maximize2, Minimize2 } from "lucide-react";
+import type { Screen, WidgetInstance } from "@/types";
 import { getScreenDimensions } from "@/types";
+import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetRenderer } from "./WidgetRenderer";
 import { useEditorStore } from "@/store/editorStore";
 import { useScreenStore } from "@/store/screenStore";
 
-export const GRID_COLS = 24;
-export const GRID_ROWS = 16;
+export { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
+
+type ResizeDir = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
+
+function clamp(v: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, v));
+}
 
 function WidgetTile({
   widget,
   cellW,
   cellH,
+  effective,
   selected,
+  screenId,
   onSelect,
 }: {
   widget: WidgetInstance;
   cellW: number;
   cellH: number;
+  effective: number;
   selected: boolean;
+  screenId: string;
   onSelect: (id: string, additive: boolean) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: widget.id,
     data: { source: "canvas", widgetId: widget.id },
   });
+  const updateWidget = useScreenStore((s) => s.updateWidget);
+  const [resizing, setResizing] = useState<ResizeDir | null>(null);
 
   const style: React.CSSProperties = {
     position: "absolute",
@@ -38,19 +51,102 @@ function WidgetTile({
     opacity: isDragging ? 0.6 : 1,
   };
 
+  const startResize = (dir: ResizeDir) => (e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setResizing(dir);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const start = { x: widget.x, y: widget.y, w: widget.w, h: widget.h };
+    const onMove = (ev: PointerEvent) => {
+      const dx = (ev.clientX - startX) / effective / cellW;
+      const dy = (ev.clientY - startY) / effective / cellH;
+      let { x, y, w, h } = start;
+      if (dir.includes("e")) w = clamp(Math.round(start.w + dx), 1, GRID_COLS - start.x);
+      if (dir.includes("s")) h = clamp(Math.round(start.h + dy), 1, GRID_ROWS - start.y);
+      if (dir.includes("w")) {
+        const nx = clamp(Math.round(start.x + dx), 0, start.x + start.w - 1);
+        w = start.w + (start.x - nx);
+        x = nx;
+      }
+      if (dir.includes("n")) {
+        const ny = clamp(Math.round(start.y + dy), 0, start.y + start.h - 1);
+        h = start.h + (start.y - ny);
+        y = ny;
+      }
+      updateWidget(screenId, widget.id, { x, y, w, h });
+    };
+    const onUp = () => {
+      setResizing(null);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
+  const handleCursors: Record<ResizeDir, string> = {
+    n: "cursor-ns-resize",
+    s: "cursor-ns-resize",
+    e: "cursor-ew-resize",
+    w: "cursor-ew-resize",
+    ne: "cursor-nesw-resize",
+    sw: "cursor-nesw-resize",
+    nw: "cursor-nwse-resize",
+    se: "cursor-nwse-resize",
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       onPointerDown={(e) => {
+        if (resizing) return;
         e.stopPropagation();
         onSelect(widget.id, e.shiftKey);
       }}
-      className={`cursor-move outline-none ${selected ? "ring-2 ring-blue ring-offset-2" : "ring-1 ring-white/15 hover:ring-blue/60"}`}
-      {...listeners}
-      {...attributes}
+      className={
+        "outline-none transition-shadow " +
+        (selected
+          ? "ring-2 ring-blue ring-offset-2 ring-offset-transparent shadow-steward-md"
+          : "ring-1 ring-white/15 hover:ring-blue/60")
+      }
     >
-      <WidgetRenderer widget={widget} />
+      <div
+        className="h-full w-full cursor-move"
+        {...listeners}
+        {...attributes}
+      >
+        <WidgetRenderer widget={widget} />
+      </div>
+      {selected && (
+        <>
+          {(["nw", "n", "ne", "e", "se", "s", "sw", "w"] as ResizeDir[]).map((dir) => {
+            const pos: Record<ResizeDir, React.CSSProperties> = {
+              nw: { left: -5, top: -5 },
+              n: { left: "50%", top: -5, transform: "translateX(-50%)" },
+              ne: { right: -5, top: -5 },
+              e: { right: -5, top: "50%", transform: "translateY(-50%)" },
+              se: { right: -5, bottom: -5 },
+              s: { left: "50%", bottom: -5, transform: "translateX(-50%)" },
+              sw: { left: -5, bottom: -5 },
+              w: { left: -5, top: "50%", transform: "translateY(-50%)" },
+            };
+            return (
+              <span
+                key={dir}
+                onPointerDown={startResize(dir)}
+                className={
+                  "absolute z-20 h-2.5 w-2.5 rounded-sm border border-blue bg-card " +
+                  handleCursors[dir]
+                }
+                style={pos[dir]}
+                aria-label={`Resize ${dir}`}
+              />
+            );
+          })}
+        </>
+      )}
     </div>
   );
 }
@@ -59,29 +155,29 @@ function CanvasStage({
   screen,
   cellW,
   cellH,
-  stageW,
-  stageH,
+  effective,
 }: {
   screen: Screen;
   cellW: number;
   cellH: number;
-  stageW: number;
-  stageH: number;
+  effective: number;
 }) {
   const { setNodeRef } = useDroppable({ id: "canvas-stage" });
   const showGrid = useEditorStore((s) => s.showGrid);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const toggleSelect = useEditorStore((s) => s.toggleSelect);
   const select = useEditorStore((s) => s.select);
+  const dims = getScreenDimensions(screen);
 
   return (
     <div
       ref={setNodeRef}
+      data-stage-root
       onPointerDown={() => select([])}
       className="relative shrink-0 overflow-hidden shadow-steward-lg"
       style={{
-        width: stageW,
-        height: stageH,
+        width: dims.w,
+        height: dims.h,
         backgroundColor: screen.backgroundColor,
         backgroundImage: screen.backgroundImage ? `url(${screen.backgroundImage})` : undefined,
         backgroundSize: "cover",
@@ -91,7 +187,7 @@ function CanvasStage({
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)`,
             backgroundSize: `${cellW}px ${cellH}px`,
           }}
         />
@@ -103,7 +199,9 @@ function CanvasStage({
             widget={w}
             cellW={cellW}
             cellH={cellH}
+            effective={effective}
             selected={selectedIds.includes(w.id)}
+            screenId={screen.id}
             onSelect={(id, additive) => toggleSelect(id, additive)}
           />
         ))}
@@ -115,21 +213,22 @@ function CanvasStage({
 export function Canvas({ screen }: { screen: Screen }) {
   const dims = getScreenDimensions(screen);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const stageRef = useRef<HTMLDivElement | null>(null);
   const [autoZoom, setAutoZoom] = useState(0.5);
   const zoom = useEditorStore((s) => s.zoom);
   const setZoom = useEditorStore((s) => s.setZoom);
+  const showGrid = useEditorStore((s) => s.showGrid);
+  const toggleGrid = useEditorStore((s) => s.toggleGrid);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const select = useEditorStore((s) => s.select);
   const updateWidget = useScreenStore((s) => s.updateWidget);
   const removeWidget = useScreenStore((s) => s.removeWidget);
+  const duplicateWidget = useScreenStore((s) => s.duplicateWidget);
 
-  // Fit to container on mount / resize
   useEffect(() => {
     if (!containerRef.current) return;
     const el = containerRef.current;
     const fit = () => {
-      const padding = 64;
+      const padding = 80;
       const w = (el.clientWidth - padding) / dims.w;
       const h = (el.clientHeight - padding) / dims.h;
       const z = Math.max(0.1, Math.min(1, Math.min(w, h)));
@@ -144,12 +243,9 @@ export function Canvas({ screen }: { screen: Screen }) {
   }, [dims.w, dims.h]);
 
   const effective = zoom || autoZoom;
-  const stageW = dims.w * effective;
-  const stageH = dims.h * effective;
   const cellW = dims.w / GRID_COLS;
   const cellH = dims.h / GRID_ROWS;
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
@@ -159,6 +255,16 @@ export function Canvas({ screen }: { screen: Screen }) {
         selectedIds.forEach((id) => removeWidget(screen.id, id));
         select([]);
         e.preventDefault();
+      } else if ((e.key === "d" || e.key === "D") && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        const newIds: string[] = [];
+        selectedIds.forEach((id) => {
+          const c = duplicateWidget(screen.id, id);
+          if (c) newIds.push(c.id);
+        });
+        if (newIds.length) select(newIds);
+      } else if (e.key === "Escape") {
+        select([]);
       } else if (e.key.startsWith("Arrow")) {
         e.preventDefault();
         selectedIds.forEach((id) => {
@@ -175,41 +281,71 @@ export function Canvas({ screen }: { screen: Screen }) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [selectedIds, screen.id, screen.widgets, removeWidget, updateWidget, select]);
-
-  void selectedIds; void select; void updateWidget; void removeWidget;
+  }, [selectedIds, screen.id, screen.widgets, removeWidget, updateWidget, select, duplicateWidget]);
 
   const zoomOptions = useMemo(() => [0.25, 0.5, 0.75, 1], []);
 
   return (
-      <div ref={containerRef} className="relative flex flex-1 flex-col items-center justify-center overflow-auto bg-subtle p-8">
-        <div ref={stageRef} style={{ transformOrigin: "top left" }}>
-          <CanvasStage screen={screen} cellW={cellW} cellH={cellH} stageW={stageW} stageH={stageH} />
-        </div>
-
-        <div className="pointer-events-auto absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs shadow-steward-md">
-          <span className="font-medium text-muted-foreground">{dims.w}×{dims.h}</span>
-          <span className="text-border">|</span>
-          {zoomOptions.map((z) => (
-            <button
-              key={z}
-              onClick={() => setZoom(z)}
-              className={`rounded-full px-2 py-0.5 ${Math.abs(zoom - z) < 0.01 ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted"}`}
-            >
-              {Math.round(z * 100)}%
-            </button>
-          ))}
+    <div ref={containerRef} className="relative flex flex-1 flex-col items-center justify-center overflow-auto bg-subtle p-8">
+      <div
+        style={{
+          width: dims.w * effective,
+          height: dims.h * effective,
+        }}
+      >
+        <div
+          style={{
+            transform: `scale(${effective})`,
+            transformOrigin: "top left",
+          }}
+        >
+        <CanvasStage
+          screen={screen}
+          cellW={cellW}
+          cellH={cellH}
+          effective={effective}
+        />
         </div>
       </div>
-  );
-}
 
-export function canvasGeometry(screen: Screen, zoom: number) {
-  const dims = getScreenDimensions(screen);
-  return {
-    cellW: dims.w / GRID_COLS,
-    cellH: dims.h / GRID_ROWS,
-    dims,
-    zoom,
-  };
+      <div className="pointer-events-auto absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs shadow-steward-md">
+        <span className="font-medium text-muted-foreground">{dims.w}×{dims.h}</span>
+        <span className="text-border">|</span>
+        <button
+          onClick={toggleGrid}
+          className={
+            "rounded-full px-2 py-0.5 " +
+            (showGrid ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
+          }
+          title="Toggle grid"
+        >
+          Grid
+        </button>
+        <span className="text-border">|</span>
+        {zoomOptions.map((z) => (
+          <button
+            key={z}
+            onClick={() => setZoom(z)}
+            className={`rounded-full px-2 py-0.5 ${Math.abs(zoom - z) < 0.01 ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted"}`}
+          >
+            {Math.round(z * 100)}%
+          </button>
+        ))}
+        <button
+          onClick={() => setZoom(autoZoom)}
+          className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
+          title="Fit to screen"
+        >
+          <Maximize2 className="inline h-3 w-3" />
+        </button>
+        <button
+          onClick={() => setZoom(1)}
+          className="rounded-full px-2 py-0.5 text-muted-foreground hover:bg-muted"
+          title="Actual size"
+        >
+          <Minimize2 className="inline h-3 w-3" />
+        </button>
+      </div>
+    </div>
+  );
 }
