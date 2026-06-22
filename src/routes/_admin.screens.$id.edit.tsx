@@ -54,8 +54,13 @@ function EditorPage() {
   const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(null);
   const [skipTemplates, setSkipTemplates] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [shortcutQuery, setShortcutQuery] = useState("");
 
   useEffect(() => () => reset(), [reset]);
+
+  useEffect(() => {
+    if (!shortcutsOpen) setShortcutQuery("");
+  }, [shortcutsOpen]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -224,22 +229,37 @@ function EditorPage() {
           <DialogHeader>
             <DialogTitle>Keyboard shortcuts</DialogTitle>
           </DialogHeader>
+          <Input
+            placeholder="Search shortcuts…"
+            value={shortcutQuery}
+            onChange={(e) => setShortcutQuery(e.target.value)}
+            className="mb-2"
+          />
           <div className="grid gap-3 py-2">
-            <ShortcutRow keys="↑ ↓ ← →" action="Nudge 1 cell" />
-            <ShortcutRow keys="⇧ + arrows" action="Nudge 4 cells" />
-            <ShortcutRow keys="⌘/Ctrl + D" action="Duplicate selected widgets" />
-            <ShortcutRow keys="Delete / Backspace" action="Remove selected widgets" />
-            <ShortcutRow keys="Esc" action="Deselect widgets" />
-            <ShortcutRow keys="⌘/Ctrl + Z" action="Undo" />
-            <ShortcutRow keys="⌘/Ctrl + Y" action="Redo" />
-            <ShortcutRow keys="⇧ + ⌘/Ctrl + Z" action="Redo" />
-            <ShortcutRow keys="?" action="Open this help" />
+            {SHORTCUTS.filter((s) => {
+              const q = shortcutQuery.toLowerCase();
+              return s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
+            }).map((s) => (
+              <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
+            ))}
           </div>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
+
+const SHORTCUTS = [
+  { keys: "↑ ↓ ← →", action: "Nudge 1 cell" },
+  { keys: "⇧ + arrows", action: "Nudge 4 cells" },
+  { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets" },
+  { keys: "Delete / Backspace", action: "Remove selected widgets" },
+  { keys: "Esc", action: "Deselect widgets" },
+  { keys: "⌘/Ctrl + Z", action: "Undo" },
+  { keys: "⌘/Ctrl + Y", action: "Redo" },
+  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo" },
+  { keys: "?", action: "Open this help" },
+];
 
 function ShortcutRow({ keys, action }: { keys: string; action: string }) {
   return (
