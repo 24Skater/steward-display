@@ -12,6 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Canvas, GRID_COLS, GRID_ROWS } from "@/components/editor/Canvas";
 import { WidgetPanel } from "@/components/editor/WidgetPanel";
 import { PropertiesPanel } from "@/components/editor/PropertiesPanel";
@@ -55,11 +56,15 @@ function EditorPage() {
   const [skipTemplates, setSkipTemplates] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [shortcutQuery, setShortcutQuery] = useState("");
+  const [shortcutTab, setShortcutTab] = useState("all");
 
   useEffect(() => () => reset(), [reset]);
 
   useEffect(() => {
-    if (!shortcutsOpen) setShortcutQuery("");
+    if (!shortcutsOpen) {
+      setShortcutQuery("");
+      setShortcutTab("all");
+    }
   }, [shortcutsOpen]);
 
   useEffect(() => {
@@ -235,14 +240,25 @@ function EditorPage() {
             onChange={(e) => setShortcutQuery(e.target.value)}
             className="mb-2"
           />
-          <div className="grid gap-3 py-2">
-            {SHORTCUTS.filter((s) => {
-              const q = shortcutQuery.toLowerCase();
-              return s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
-            }).map((s) => (
-              <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
-            ))}
-          </div>
+          <Tabs value={shortcutTab} onValueChange={setShortcutTab}>
+            <TabsList className="mb-3 grid w-full grid-cols-5">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="canvas">Canvas</TabsTrigger>
+              <TabsTrigger value="widgets">Widgets</TabsTrigger>
+              <TabsTrigger value="media">Media</TabsTrigger>
+              <TabsTrigger value="presets">Presets</TabsTrigger>
+            </TabsList>
+            <div className="grid gap-3 py-2">
+              {SHORTCUTS.filter((s) => {
+                const matchesTab = shortcutTab === "all" || s.category === shortcutTab;
+                const q = shortcutQuery.toLowerCase();
+                const matchesQuery = s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
+                return matchesTab && matchesQuery;
+              }).map((s) => (
+                <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
+              ))}
+            </div>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
@@ -250,16 +266,16 @@ function EditorPage() {
 }
 
 const SHORTCUTS = [
-  { keys: "↑ ↓ ← →", action: "Nudge 1 cell" },
-  { keys: "⇧ + arrows", action: "Nudge 4 cells" },
-  { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets" },
-  { keys: "Delete / Backspace", action: "Remove selected widgets" },
-  { keys: "Esc", action: "Deselect widgets" },
-  { keys: "⌘/Ctrl + Z", action: "Undo" },
-  { keys: "⌘/Ctrl + Y", action: "Redo" },
-  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo" },
-  { keys: "?", action: "Open this help" },
-];
+  { keys: "↑ ↓ ← →", action: "Nudge 1 cell", category: "canvas" },
+  { keys: "⇧ + arrows", action: "Nudge 4 cells", category: "canvas" },
+  { keys: "Esc", action: "Deselect widgets", category: "canvas" },
+  { keys: "⌘/Ctrl + Z", action: "Undo", category: "canvas" },
+  { keys: "⌘/Ctrl + Y", action: "Redo", category: "canvas" },
+  { keys: "⇧ + ⌘/Ctrl + Z", action: "Redo", category: "canvas" },
+  { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets", category: "widgets" },
+  { keys: "Delete / Backspace", action: "Remove selected widgets", category: "widgets" },
+  { keys: "?", action: "Open this help", category: "presets" },
+] as const;
 
 function ShortcutRow({ keys, action }: { keys: string; action: string }) {
   return (
