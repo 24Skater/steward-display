@@ -61,7 +61,10 @@ function EditorPage() {
   useEffect(() => () => reset(), [reset]);
 
   useEffect(() => {
-    if (!shortcutsOpen) setShortcutQuery("");
+    if (!shortcutsOpen) {
+      setShortcutQuery("");
+      setShortcutTab("all");
+    }
   }, [shortcutsOpen]);
 
   useEffect(() => {
