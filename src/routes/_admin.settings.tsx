@@ -717,7 +717,12 @@ function SettingsPage() {
               )}
               {pendingGridImport && (
                 <div className="space-y-3 rounded-md border border-border p-4">
-                  <p className="text-sm font-medium">Import options</p>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Import options</p>
+                    <p className="text-xs text-muted-foreground">
+                      Saved choices: Grid defaults {(gridImportIncludeDefaults ?? true) ? "on" : "off"} · Undo history {(gridImportIncludeHistory ?? true) ? "on" : "off"}
+                    </p>
+                  </div>
                   <Label className="flex items-center justify-between gap-4 text-sm font-normal">
                     Grid defaults
                     <Switch
