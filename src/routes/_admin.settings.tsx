@@ -590,19 +590,21 @@ function SettingsPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Import grid defaults</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {pendingGridImport && (
-                    <>
-                      <p>
-                        <strong>{pendingGridImport.filename}</strong> contains {pendingGridImport.history.length} snapshot
-                        {pendingGridImport.history.length === 1 ? "" : "s"} with grid size {pendingGridImport.gridDefaults.defaultGridSize} and snap step {pendingGridImport.gridDefaults.defaultSnapStep}.
-                      </p>
-                      <p className="mt-2">
-                        Choose <strong>Replace</strong> to overwrite your current grid defaults and history with the imported values, or <strong>Merge</strong> to keep your current grid defaults active and add the imported snapshots to your history.
-                      </p>
-                    </>
-                  )}
+                  Review the changes below before choosing how to apply the import.
                 </AlertDialogDescription>
               </AlertDialogHeader>
+              {pendingGridImport ? (
+                <GridImportPreview
+                  filename={pendingGridImport.filename}
+                  current={{ defaultGridSize, defaultSnapStep, maxGridHistorySize }}
+                  currentHistoryLength={gridDefaultsHistory.length}
+                  imported={pendingGridImport.gridDefaults}
+                  importedHistory={pendingGridImport.history}
+                  warnings={pendingGridImport.warnings}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">No import is currently pending.</p>
+              )}
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
