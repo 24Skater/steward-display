@@ -168,6 +168,7 @@ function SettingsPage() {
       toast.error(e?.message ?? "Couldn't read that file.");
     }
   };
+  const handleImportSettings = async (file: File) => {
     try {
       setSettingsWarnings([]);
       const text = await file.text();
@@ -178,6 +179,10 @@ function SettingsPage() {
       } else {
         toast.success("Settings imported.");
       }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't read that file.");
+    }
+  };
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't read that file.");
     }
