@@ -27,6 +27,11 @@
 
   /* Steward brand colors */
   --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-gold: var(--gold);
+  --color-gold-dark: var(--gold-dark);
+  --color-parchment: var(--parchment);
+  --color-warm-surface: var(--warm-surface);
   --color-blue: var(--blue);
   --color-emerald: var(--emerald);
   --color-amber: var(--amber);
@@ -85,37 +90,42 @@
 :root {
   --radius: 0.75rem;
 
-  /* Steward palette */
-  --navy: #1b2a41;
-  --blue: #2563eb;
-  --emerald: #16a34a;
-  --amber: #f59e0b;
-  --red: #dc2626;
-  --ink: #0b1220;
-  --slate: #334155;
-  --muted-fg: #64748b;
-  --surface: #ffffff;
-  --subtle: #f8fafc;
+  /* Steward palette — from @steward-apps/tokens (DTCG) */
+  --navy: #1b2a41;          /* Steward Navy — sidebar / header */
+  --navy-deep: #0d1b2e;     /* Deeper navy for foreground/marks */
+  --gold: #e8b847;          /* Kingdom Gold — brand primary */
+  --gold-dark: #c49a2e;     /* Kingdom Gold hover */
+  --blue: #2563eb;          /* Action / links */
+  --emerald: #16a34a;       /* Success */
+  --amber: #f59e0b;         /* Warning */
+  --red: #dc2626;           /* Danger */
+  --ink: #0b1220;           /* Darkest text */
+  --slate: #334155;         /* Secondary text */
+  --muted-fg: #6b7a8d;      /* Muted text on parchment */
+  --surface: #ffffff;       /* Card / panel surface */
+  --subtle: #f8fafc;        /* Cool subtle background */
+  --parchment: #faf7f2;     /* Warm parchment — ChMS default bg */
+  --warm-surface: #f5eed8;  /* Warm golden surface */
 
-  /* Shadcn aliases → Steward */
-  --background: #f8fafc;
-  --foreground: #0b1220;
+  /* Shadcn aliases → Steward (warm parchment + Kingdom Gold primary) */
+  --background: #faf7f2;
+  --foreground: #0d1b2e;
   --card: #ffffff;
-  --card-foreground: #0b1220;
+  --card-foreground: #0d1b2e;
   --popover: #ffffff;
-  --popover-foreground: #0b1220;
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
+  --popover-foreground: #0d1b2e;
+  --primary: #e8b847;
+  --primary-foreground: #1b2a41;
+  --secondary: #f5eed8;
   --secondary-foreground: #1b2a41;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #eff6ff;
+  --muted: #f1ead6;
+  --muted-foreground: #6b7a8d;
+  --accent: #f5eed8;
   --accent-foreground: #1b2a41;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
+  --border: #ddd0a8;
+  --input: #ddd0a8;
   --ring: #2563eb;
 
   --chart-1: oklch(0.646 0.222 41.116);
@@ -123,57 +133,57 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: #f8fafc;
-  --sidebar-foreground: #0b1220;
-  --sidebar-primary: #2563eb;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eff6ff;
-  --sidebar-accent-foreground: #1b2a41;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #2563eb;
+  --sidebar: #1b2a41;
+  --sidebar-foreground: #f5eed8;
+  --sidebar-primary: #e8b847;
+  --sidebar-primary-foreground: #1b2a41;
+  --sidebar-accent: #0d1b2e;
+  --sidebar-accent-foreground: #f5eed8;
+  --sidebar-border: #1a2f4a;
+  --sidebar-ring: #e8b847;
 }
 
 .dark,
 [data-theme="dark"] {
-  --surface: #1b2a41;
-  --subtle: #0b1220;
-  --ink: #f8fafc;
-  --slate: #e2e8f0;
-  --muted-fg: #94a3b8;
+  --surface: #0d1b2e;
+  --subtle: #060f1a;
+  --ink: #f5eed8;
+  --slate: #cbd5e1;
+  --muted-fg: #8a7a5c;
 
-  --background: #0b1220;
-  --foreground: #f8fafc;
-  --card: #1b2a41;
-  --card-foreground: #f8fafc;
-  --popover: #1b2a41;
-  --popover-foreground: #f8fafc;
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #334155;
-  --secondary-foreground: #f8fafc;
-  --muted: #1b2a41;
-  --muted-foreground: #94a3b8;
-  --accent: #334155;
-  --accent-foreground: #f8fafc;
+  --background: #060f1a;
+  --foreground: #f5eed8;
+  --card: #0d1b2e;
+  --card-foreground: #f5eed8;
+  --popover: #0d1b2e;
+  --popover-foreground: #f5eed8;
+  --primary: #e8b847;
+  --primary-foreground: #1b2a41;
+  --secondary: #1e2f4a;
+  --secondary-foreground: #f5eed8;
+  --muted: #1a2740;
+  --muted-foreground: #8a7a5c;
+  --accent: #1e2f4a;
+  --accent-foreground: #f5eed8;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #334155;
-  --input: #334155;
-  --ring: #2563eb;
+  --border: #1a2f4a;
+  --input: #1a2f4a;
+  --ring: #e8b847;
 
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: #1b2a41;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #2563eb;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #334155;
-  --sidebar-ring: #2563eb;
+  --sidebar: #0d1b2e;
+  --sidebar-foreground: #f5eed8;
+  --sidebar-primary: #e8b847;
+  --sidebar-primary-foreground: #1b2a41;
+  --sidebar-accent: #1e2f4a;
+  --sidebar-accent-foreground: #f5eed8;
+  --sidebar-border: #1a2f4a;
+  --sidebar-ring: #e8b847;
 }
 
 @layer base {
