@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
 import type { Screen, WidgetInstance, WidgetType } from "@/types";
 import { getScreenDimensions } from "@/types";
 import { WidgetRenderer } from "./WidgetRenderer";
 import { useEditorStore } from "@/store/editorStore";
 import { useScreenStore } from "@/store/screenStore";
 
-const GRID_COLS = 24;
-const GRID_ROWS = 16;
+export const GRID_COLS = 24;
+export const GRID_ROWS = 16;
 
 function WidgetTile({
   widget,
@@ -112,7 +112,7 @@ function CanvasStage({
   );
 }
 
-export function Canvas({ screen, onAddAt }: { screen: Screen; onAddAt: (type: WidgetType, x: number, y: number) => void }) {
+export function Canvas({ screen }: { screen: Screen }) {
   const dims = getScreenDimensions(screen);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -177,41 +177,11 @@ export function Canvas({ screen, onAddAt }: { screen: Screen; onAddAt: (type: Wi
     return () => window.removeEventListener("keydown", handler);
   }, [selectedIds, screen.id, screen.widgets, removeWidget, updateWidget, select]);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
-
-  const handleDragEnd = (e: DragEndEvent) => {
-    const data = e.active.data.current as { source: string; widgetId?: string; widgetType?: WidgetType } | undefined;
-    if (!data) return;
-
-    if (data.source === "palette" && data.widgetType) {
-      // compute drop position from stage center
-      const stage = stageRef.current;
-      if (!stage) return onAddAt(data.widgetType, 6, 4);
-      const rect = stage.getBoundingClientRect();
-      const e2 = (e.activatorEvent as PointerEvent | undefined);
-      const dx = (e.delta?.x ?? 0);
-      const dy = (e.delta?.y ?? 0);
-      const px = ((e2?.clientX ?? rect.left + rect.width / 2) + dx - rect.left) / effective;
-      const py = ((e2?.clientY ?? rect.top + rect.height / 2) + dy - rect.top) / effective;
-      const gx = Math.max(0, Math.round(px / cellW));
-      const gy = Math.max(0, Math.round(py / cellH));
-      onAddAt(data.widgetType, Math.min(GRID_COLS - 2, gx), Math.min(GRID_ROWS - 2, gy));
-    } else if (data.source === "canvas" && data.widgetId) {
-      const w = screen.widgets.find((x) => x.id === data.widgetId);
-      if (!w) return;
-      const dx = Math.round(e.delta.x / effective / cellW);
-      const dy = Math.round(e.delta.y / effective / cellH);
-      const nx = Math.max(0, Math.min(GRID_COLS - w.w, w.x + dx));
-      const ny = Math.max(0, Math.min(GRID_ROWS - w.h, w.y + dy));
-      updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
-    }
-  };
+  void selectedIds; void select; void updateWidget; void removeWidget;
 
   const zoomOptions = useMemo(() => [0.25, 0.5, 0.75, 1], []);
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      {/* Palette droppable area is implicit — we drop on stage; palette drag computes via delta from pointer */}
       <div ref={containerRef} className="relative flex flex-1 flex-col items-center justify-center overflow-auto bg-subtle p-8">
         <div ref={stageRef} style={{ transformOrigin: "top left" }}>
           <CanvasStage screen={screen} cellW={cellW} cellH={cellH} stageW={stageW} stageH={stageH} />
@@ -231,6 +201,15 @@ export function Canvas({ screen, onAddAt }: { screen: Screen; onAddAt: (type: Wi
           ))}
         </div>
       </div>
-    </DndContext>
   );
+}
+
+export function canvasGeometry(screen: Screen, zoom: number) {
+  const dims = getScreenDimensions(screen);
+  return {
+    cellW: dims.w / GRID_COLS,
+    cellH: dims.h / GRID_ROWS,
+    dims,
+    zoom,
+  };
 }
