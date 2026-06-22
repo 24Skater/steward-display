@@ -177,19 +177,19 @@ export function PropertiesPanel({
       </div>
 
       <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5">
-        <ToolbarButton title="Duplicate" onClick={() => duplicateWidget(screen.id, widget.id)}>
+        <ToolbarButton tooltip="Duplicate" shortcut="⌘/Ctrl + D" onClick={() => duplicateWidget(screen.id, widget.id)}>
           <Copy className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Bring to front" onClick={() => reorderWidget(screen.id, widget.id, "front")}>
+        <ToolbarButton tooltip="Bring to front" onClick={() => reorderWidget(screen.id, widget.id, "front")}>
           <ChevronsUp className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Bring forward" onClick={() => reorderWidget(screen.id, widget.id, "forward")}>
+        <ToolbarButton tooltip="Bring forward" onClick={() => reorderWidget(screen.id, widget.id, "forward")}>
           <ChevronUp className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Send backward" onClick={() => reorderWidget(screen.id, widget.id, "backward")}>
+        <ToolbarButton tooltip="Send backward" onClick={() => reorderWidget(screen.id, widget.id, "backward")}>
           <ChevronDown className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <ToolbarButton title="Send to back" onClick={() => reorderWidget(screen.id, widget.id, "back")}>
+        <ToolbarButton tooltip="Send to back" onClick={() => reorderWidget(screen.id, widget.id, "back")}>
           <ChevronsDown className="h-3.5 w-3.5" />
         </ToolbarButton>
       </div>
