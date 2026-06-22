@@ -1,9 +1,26 @@
 {
-  "generatedAt": "2026-06-22T03:37:56.740Z",
+  "generatedAt": "2026-06-22T03:41:06.900Z",
+  "config": {
+    "requireAAA": false,
+    "failOnDecorative": false,
+    "thresholds": {
+      "body": 4.5,
+      "large": 3,
+      "ui": 3,
+      "decorative": 1.5
+    },
+    "source": {
+      "jsonPath": "/tmp/strict.json",
+      "envOverrides": [
+        "CONTRAST_REQUIRE_AAA",
+        "CONTRAST_FAIL_ON_DECORATIVE"
+      ]
+    }
+  },
   "totals": {
     "pairings": 28,
     "required": 26,
-    "decorative": 2,
+    "informational": 2,
     "passingAA": 26,
     "passingAAA": 14,
     "failing": 0
@@ -19,7 +36,8 @@
       "ratio": 16.196040249234294,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Body text on white card",
@@ -30,7 +48,8 @@
       "ratio": 17.307630747327206,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Body text on warm surface",
@@ -41,7 +60,8 @@
       "ratio": 14.920729889766875,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Muted text on parchment",
@@ -52,7 +72,8 @@
       "ratio": 5.600016691131491,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Muted text on white card",
@@ -63,7 +84,8 @@
       "ratio": 5.984365287901481,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Navy text on Kingdom Gold (primary)",
@@ -74,7 +96,8 @@
       "ratio": 7.824906067660492,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Navy text on gold-dark hover",
@@ -85,7 +108,8 @@
       "ratio": 5.507695841984893,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Parchment text on navy sidebar",
@@ -96,7 +120,8 @@
       "ratio": 12.450071328092427,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "White text on Steward Blue",
@@ -107,7 +132,8 @@
       "ratio": 5.168555560022562,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Blue link on parchment",
@@ -118,7 +144,8 @@
       "ratio": 4.836602716027805,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Blue link on white card",
@@ -129,7 +156,8 @@
       "ratio": 5.168555560022562,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "White text on emerald (success)",
@@ -140,7 +168,8 @@
       "ratio": 5.0155974781114745,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "White text on red (destructive)",
@@ -151,7 +180,8 @@
       "ratio": 4.829404522659002,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Navy text on amber (warning)",
@@ -162,7 +192,8 @@
       "ratio": 6.724396592795765,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Warm border vs parchment (decorative)",
@@ -173,7 +204,8 @@
       "ratio": 2.2238065605938817,
       "threshold": 1.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": true,
+      "required": false
     },
     {
       "name": "Focus ring (blue) vs parchment",
@@ -184,7 +216,8 @@
       "ratio": 4.836602716027805,
       "threshold": 3,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Gold focus ring vs navy sidebar",
@@ -195,7 +228,8 @@
       "ratio": 7.824906067660492,
       "threshold": 3,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Body text on dark bg",
@@ -206,7 +240,8 @@
       "ratio": 16.594004977039265,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Body text on dark surface",
@@ -217,7 +252,8 @@
       "ratio": 14.920729889766875,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Body text on dark secondary",
@@ -228,7 +264,8 @@
       "ratio": 11.599904841584287,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Muted text on dark bg",
@@ -239,7 +276,8 @@
       "ratio": 6.808016661006814,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Muted text on dark surface",
@@ -250,7 +288,8 @@
       "ratio": 6.1215226718607045,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Navy text on Kingdom Gold (primary)",
@@ -261,7 +300,8 @@
       "ratio": 7.824906067660492,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Gold link on dark bg",
@@ -272,7 +312,8 @@
       "ratio": 10.42938042761541,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Gold link on dark surface",
@@ -283,7 +324,8 @@
       "ratio": 9.377722164925842,
       "threshold": 4.5,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     },
     {
       "name": "Blue accent on dark surface",
@@ -294,7 +336,8 @@
       "ratio": 3.348639778818911,
       "threshold": 3,
       "passAA": true,
-      "passAAA": false
+      "passAAA": false,
+      "required": true
     },
     {
       "name": "Border vs dark bg (decorative)",
@@ -305,7 +348,8 @@
       "ratio": 2.6265356829267996,
       "threshold": 1.5,
       "passAA": true,
-      "passAAA": false
+      "passAAA": true,
+      "required": false
     },
     {
       "name": "Gold focus ring vs dark bg",
@@ -316,7 +360,8 @@
       "ratio": 10.42938042761541,
       "threshold": 3,
       "passAA": true,
-      "passAAA": true
+      "passAAA": true,
+      "required": true
     }
   ]
 }

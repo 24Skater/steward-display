@@ -1,6 +1,8 @@
 ### ✓ Steward contrast — all 26 required pairings meet WCAG AA
 
-_Generated 2026-06-22T03:37:56.740Z_
+**Mode:** AA · body ≥ 4.5:1 · large ≥ 3:1 · ui ≥ 3:1 · decorative informational (≥ 1.5:1)
+
+_Generated 2026-06-22T03:41:06.900Z_
 
 #### Light theme
 
