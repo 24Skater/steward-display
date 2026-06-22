@@ -7,6 +7,7 @@ import { useEffect } from "react";
 const NAV = [
   { to: "/", label: "Screens" },
   { to: "/widgets", label: "Widgets" },
+  { to: "/presets", label: "Presets" },
   { to: "/settings", label: "Settings" },
 ] as const;
 
