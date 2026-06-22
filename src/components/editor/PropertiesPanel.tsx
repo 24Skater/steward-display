@@ -439,6 +439,7 @@ export function PropertiesPanel({
         }}
       />
     </aside>
+  </TooltipProvider>
   );
 }
 
