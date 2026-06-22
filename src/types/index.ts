@@ -55,6 +55,8 @@ export interface Screen {
   showWatermark?: boolean;
   widgets: WidgetInstance[];
   schedule?: Schedule;
+  gridSize?: number;
+  snapStep?: number;
   createdAt: string;
   updatedAt: string;
 }
