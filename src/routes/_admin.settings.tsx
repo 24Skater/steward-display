@@ -65,6 +65,8 @@ interface GridImportPreviewProps {
   imported: { defaultGridSize: number; defaultSnapStep: number; maxGridHistorySize: number };
   importedHistory: { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[];
   warnings: string[];
+  importGridDefaults: boolean;
+  importHistory: boolean;
 }
 
 function DiffValue({
@@ -118,11 +120,26 @@ function GridImportPreview({
   imported,
   importedHistory,
   warnings,
+  importGridDefaults,
+  importHistory,
 }: GridImportPreviewProps) {
   const currentHistoryLength = currentHistory.length;
   const importedHistoryLength = importedHistory.length;
-  const replaceHistoryCount = importedHistoryLength;
-  const mergeHistoryCount = Math.min(1 + currentHistoryLength + importedHistoryLength, imported.maxGridHistorySize);
+
+  const replaceGridSize = importGridDefaults ? imported.defaultGridSize : current.defaultGridSize;
+  const replaceSnapStep = importGridDefaults ? imported.defaultSnapStep : current.defaultSnapStep;
+  const replaceMax = importGridDefaults ? imported.maxGridHistorySize : current.maxGridHistorySize;
+  const replaceHistoryCount = importHistory ? importedHistoryLength : currentHistoryLength;
+
+  const mergeGridSize = current.defaultGridSize;
+  const mergeSnapStep = current.defaultSnapStep;
+  const mergeMax = importGridDefaults ? imported.maxGridHistorySize : current.maxGridHistorySize;
+  const mergeHistoryCount = Math.min(
+    currentHistoryLength +
+      (importGridDefaults ? 1 : 0) +
+      (importHistory ? importedHistoryLength : 0),
+    mergeMax,
+  );
 
   const formatCell = (n: number) => `${n} cell${n === 1 ? "" : "s"}`;
   const formatCount = (n: number) => String(n);
@@ -162,30 +179,30 @@ function GridImportPreview({
                 <td className="px-3 py-2">Default grid size</td>
                 <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultGridSize)}</td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.defaultGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                  <DiffValue value={replaceGridSize} baseline={current.defaultGridSize} format={formatCell} />
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={current.defaultGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                  <DiffValue value={mergeGridSize} baseline={current.defaultGridSize} format={formatCell} />
                 </td>
               </tr>
               <tr>
                 <td className="px-3 py-2">Default snap step</td>
                 <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultSnapStep)}</td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.defaultSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                  <DiffValue value={replaceSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={current.defaultSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                  <DiffValue value={mergeSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
                 </td>
               </tr>
               <tr>
                 <td className="px-3 py-2">Max undo snapshots</td>
                 <td className="px-3 py-2 text-muted-foreground">{formatCount(current.maxGridHistorySize)}</td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.maxGridHistorySize} baseline={current.maxGridHistorySize} format={formatCount} />
+                  <DiffValue value={replaceMax} baseline={current.maxGridHistorySize} format={formatCount} />
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={imported.maxGridHistorySize} baseline={current.maxGridHistorySize} format={formatCount} />
+                  <DiffValue value={mergeMax} baseline={current.maxGridHistorySize} format={formatCount} />
                 </td>
               </tr>
               <tr>
@@ -216,10 +233,6 @@ function GridImportPreview({
           </div>
         </div>
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        Choose <strong>Replace</strong> to overwrite your current grid defaults and history with the imported values, or <strong>Merge</strong> to keep your current defaults active and combine the imported snapshots into your history.
-      </p>
     </div>
   );
 }
@@ -686,6 +699,8 @@ function SettingsPage() {
                   imported={pendingGridImport.gridDefaults}
                   importedHistory={pendingGridImport.history}
                   warnings={pendingGridImport.warnings}
+                  importGridDefaults={importGridDefaults}
+                  importHistory={importHistory}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">No import is currently pending.</p>
