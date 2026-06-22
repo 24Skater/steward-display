@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS: Settings = {
   maxGridHistorySize: 10,
   gridImportIncludeDefaults: true,
   gridImportIncludeHistory: true,
+  lastGridImport: undefined,
 };
 
 interface SettingsState extends Settings {

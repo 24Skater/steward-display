@@ -237,6 +237,18 @@ function GridImportPreview({
   );
 }
 
+function formatRelativeTime(timestamp: number): string {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+  return new Date(timestamp).toLocaleString();
+}
+
 function SettingsPage() {
   const {
     orgName,
@@ -249,6 +261,7 @@ function SettingsPage() {
     maxGridHistorySize,
     gridImportIncludeDefaults,
     gridImportIncludeHistory,
+    lastGridImport,
     update,
     resetGridDefaults,
   } = useSettingsStore();
@@ -367,6 +380,12 @@ function SettingsPage() {
       patch.defaultSnapStep = gridDefaults.defaultSnapStep;
       patch.maxGridHistorySize = gridDefaults.maxGridHistorySize;
     }
+    patch.lastGridImport = {
+      timestamp: Date.now(),
+      mode: "replace",
+      includedDefaults: importGridDefaults,
+      includedHistory: importHistory,
+    };
     update(patch);
     if (importHistory) {
       setGridDefaultsHistory(history.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
@@ -381,9 +400,17 @@ function SettingsPage() {
   const confirmMergeGridImport = () => {
     if (!pendingGridImport) return;
     const { gridDefaults, history, warnings } = pendingGridImport;
+    const patch: Partial<Parameters<typeof update>[0]> = {};
     if (importGridDefaults) {
-      update({ maxGridHistorySize: gridDefaults.maxGridHistorySize });
+      patch.maxGridHistorySize = gridDefaults.maxGridHistorySize;
     }
+    patch.lastGridImport = {
+      timestamp: Date.now(),
+      mode: "merge",
+      includedDefaults: importGridDefaults,
+      includedHistory: importHistory,
+    };
+    update(patch);
     const mergedHistory = [
       ...(importGridDefaults
         ? [{ defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() }]
@@ -700,6 +727,11 @@ function SettingsPage() {
                 <AlertDialogDescription>
                   Review the changes below before choosing how to apply the import.
                 </AlertDialogDescription>
+                {lastGridImport && (
+                  <p className="text-xs text-muted-foreground">
+                    Last import: {formatRelativeTime(lastGridImport.timestamp)} · {lastGridImport.mode === "replace" ? "Replace" : "Merge"} · Grid defaults {lastGridImport.includedDefaults ? "on" : "off"} · Undo history {lastGridImport.includedHistory ? "on" : "off"}
+                  </p>
+                )}
               </AlertDialogHeader>
               {pendingGridImport ? (
                 <GridImportPreview
