@@ -369,7 +369,11 @@ function SettingsPage() {
     if (importHistory) {
       setGridDefaultsHistory(history.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
     }
-    finishGridImport(warnings);
+    const importedParts = [
+      importGridDefaults && "grid defaults",
+      importHistory && "undo history",
+    ].filter(Boolean);
+    finishGridImport(warnings, importedParts.length > 0 ? `Replaced ${importedParts.join(" and ")}.` : "Nothing to import.");
   };
 
   const confirmMergeGridImport = () => {
