@@ -1,0 +1,11 @@
+{
+  "$schema": "./contrast.config.schema.json",
+  "thresholds": {
+    "body": 4.5,
+    "large": 3.0,
+    "ui": 3.0,
+    "decorative": 1.5
+  },
+  "requireAAA": false,
+  "failOnDecorative": false
+}
