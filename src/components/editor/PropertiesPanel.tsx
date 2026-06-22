@@ -76,6 +76,29 @@ export function PropertiesPanel({
     if (preset.style) patchStyle(preset.style);
   };
 
+  const previousWidgetState = useRef<{ config: Record<string, unknown>; style?: WidgetInstance["style"] } | null>(null);
+
+  const applyPresetWithUndo = (preset: WidgetPreset) => {
+    previousWidgetState.current = {
+      config: { ...widget.config },
+      style: widget.style ? { ...widget.style } : undefined,
+    };
+    applyPreset(preset);
+    toast.success(`Applied preset “${preset.label}”`, {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          if (!previousWidgetState.current) return;
+          patchConfig(previousWidgetState.current.config);
+          if (previousWidgetState.current.style) {
+            patchStyle(previousWidgetState.current.style);
+          }
+          toast.success(`Reverted “${preset.label}”`);
+        },
+      },
+    });
+  };
+
   const previewWidget = useMemo<WidgetInstance>(() => {
     const base = {
       id: "preset-preview",
