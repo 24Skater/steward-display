@@ -229,16 +229,19 @@ function EditorPage() {
           <DialogHeader>
             <DialogTitle>Keyboard shortcuts</DialogTitle>
           </DialogHeader>
+          <Input
+            placeholder="Search shortcuts…"
+            value={shortcutQuery}
+            onChange={(e) => setShortcutQuery(e.target.value)}
+            className="mb-2"
+          />
           <div className="grid gap-3 py-2">
-            <ShortcutRow keys="↑ ↓ ← →" action="Nudge 1 cell" />
-            <ShortcutRow keys="⇧ + arrows" action="Nudge 4 cells" />
-            <ShortcutRow keys="⌘/Ctrl + D" action="Duplicate selected widgets" />
-            <ShortcutRow keys="Delete / Backspace" action="Remove selected widgets" />
-            <ShortcutRow keys="Esc" action="Deselect widgets" />
-            <ShortcutRow keys="⌘/Ctrl + Z" action="Undo" />
-            <ShortcutRow keys="⌘/Ctrl + Y" action="Redo" />
-            <ShortcutRow keys="⇧ + ⌘/Ctrl + Z" action="Redo" />
-            <ShortcutRow keys="?" action="Open this help" />
+            {SHORTCUTS.filter((s) => {
+              const q = shortcutQuery.toLowerCase();
+              return s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
+            }).map((s) => (
+              <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
+            ))}
           </div>
         </DialogContent>
       </Dialog>
