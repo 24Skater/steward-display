@@ -256,6 +256,22 @@ export function ContrastAudit() {
     return s;
   }, [required]);
 
+  const visiblePairs = useMemo(() => {
+    const list: PairResult[] = [];
+    if (themeFilter !== "dark") list.push(...filteredLight);
+    if (themeFilter !== "light") list.push(...filteredDark);
+    return list;
+  }, [themeFilter, filteredLight, filteredDark]);
+
+  const visibleVars = useMemo(() => {
+    const s = new Set<string>();
+    for (const r of visiblePairs) {
+      s.add(r.fgVar);
+      s.add(r.bgVar);
+    }
+    return s;
+  }, [visiblePairs]);
+
   const [highlightVar, setHighlightVar] = useState<string | null>(null);
   const jumpToVar = useCallback((v: string) => {
     setHighlightVar(v);
