@@ -10,6 +10,8 @@ export interface AnnouncementConfig {
   spacing?: number; // px gap between title and body, default 12
   titleLineHeight?: number; // unitless, default 1.1
   bodyLineHeight?: number; // unitless, default 1.4
+  titleMaxLines?: number; // 0 = unlimited
+  bodyMaxLines?: number; // 0 = unlimited
 }
 
 export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
@@ -27,6 +29,14 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
             color: config.titleColor || undefined,
             fontWeight: config.titleWeight ?? 700,
             lineHeight: config.titleLineHeight ?? 1.1,
+            ...(config.titleMaxLines && config.titleMaxLines > 0
+              ? {
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical" as const,
+                  WebkitLineClamp: config.titleMaxLines,
+                  overflow: "hidden",
+                }
+              : {}),
           }}
         >
           {config.title}
@@ -41,6 +51,14 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
             opacity: config.bodyColor ? 1 : 0.9,
             lineHeight: config.bodyLineHeight ?? 1.4,
             marginTop: config.title ? gap : 0,
+            ...(config.bodyMaxLines && config.bodyMaxLines > 0
+              ? {
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical" as const,
+                  WebkitLineClamp: config.bodyMaxLines,
+                  overflow: "hidden",
+                }
+              : {}),
           }}
         >
           {config.body}
