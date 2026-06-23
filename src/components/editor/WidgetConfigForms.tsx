@@ -285,6 +285,30 @@ export function WidgetConfigForm({
               onValueChange={(v) => set("spacing", v[0])}
             />
           </Field>
+          <Field
+            label={`Title max lines (${cfg.titleMaxLines ? cfg.titleMaxLines : "unlimited"})`}
+            hint="Truncates with ellipsis when exceeded. 0 = unlimited."
+          >
+            <Slider
+              value={[cfg.titleMaxLines ?? 0]}
+              min={0}
+              max={6}
+              step={1}
+              onValueChange={(v) => set("titleMaxLines", v[0])}
+            />
+          </Field>
+          <Field
+            label={`Body max lines (${cfg.bodyMaxLines ? cfg.bodyMaxLines : "unlimited"})`}
+            hint="Truncates with ellipsis when exceeded. 0 = unlimited."
+          >
+            <Slider
+              value={[cfg.bodyMaxLines ?? 0]}
+              min={0}
+              max={12}
+              step={1}
+              onValueChange={(v) => set("bodyMaxLines", v[0])}
+            />
+          </Field>
         </div>
       );
     case "countdown":
