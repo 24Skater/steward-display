@@ -297,6 +297,20 @@ export function WidgetConfigForm({
               onValueChange={(v) => set("titleMaxLines", v[0])}
             />
           </Field>
+          {(cfg.titleMaxLines ?? 0) > 0 && (
+            <Field label="Title truncation mode">
+              <Select
+                value={cfg.titleTruncationMode ?? "ellipsis"}
+                onValueChange={(v) => set("titleTruncationMode", v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ellipsis">Ellipsis (…)</SelectItem>
+                  <SelectItem value="clip">Hard clip</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
           <Field
             label={`Body max lines (${cfg.bodyMaxLines ? cfg.bodyMaxLines : "unlimited"})`}
             hint="Truncates with ellipsis when exceeded. 0 = unlimited."
@@ -309,6 +323,20 @@ export function WidgetConfigForm({
               onValueChange={(v) => set("bodyMaxLines", v[0])}
             />
           </Field>
+          {(cfg.bodyMaxLines ?? 0) > 0 && (
+            <Field label="Body truncation mode">
+              <Select
+                value={cfg.bodyTruncationMode ?? "ellipsis"}
+                onValueChange={(v) => set("bodyTruncationMode", v)}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ellipsis">Ellipsis (…)</SelectItem>
+                  <SelectItem value="clip">Hard clip</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
         </div>
       );
     case "countdown":
