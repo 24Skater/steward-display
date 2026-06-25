@@ -2,7 +2,7 @@
 
 **Mode:** AA · body ≥ 4.5:1 · large ≥ 3:1 · ui ≥ 3:1 · decorative informational (≥ 1.5:1)
 
-_Generated 2026-06-22T03:45:44.171Z_
+_Generated 2026-06-25T04:35:04.929Z_
 
 #### Light theme
 
