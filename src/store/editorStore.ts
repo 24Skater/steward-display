@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import type { WidgetInstance } from "@/types";
 
+export interface DragPreview {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 interface EditorState {
   selectedIds: string[];
   zoom: number;
@@ -9,6 +17,7 @@ interface EditorState {
   snapStep: number;
   gridSize: number;
   showAlignment: boolean;
+  dragPreview: DragPreview | null;
   history: WidgetInstance[][];
   future: WidgetInstance[][];
   select: (ids: string[]) => void;
@@ -19,6 +28,7 @@ interface EditorState {
   setSnapStep: (n: number) => void;
   setGridSize: (n: number) => void;
   toggleAlignment: () => void;
+  setDragPreview: (p: DragPreview | null) => void;
   pushHistory: (snapshot: WidgetInstance[]) => void;
   undo: () => WidgetInstance[] | null;
   redo: () => WidgetInstance[] | null;
@@ -33,6 +43,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   snapStep: 4,
   gridSize: 1,
   showAlignment: false,
+  dragPreview: null,
   history: [],
   future: [],
   select: (ids) => set({ selectedIds: ids }),
@@ -52,6 +63,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setSnapStep: (n) => set({ snapStep: Math.max(1, Math.min(32, Math.round(n))) }),
   setGridSize: (n) => set({ gridSize: Math.max(1, Math.min(32, Math.round(n))) }),
   toggleAlignment: () => set({ showAlignment: !get().showAlignment }),
+  setDragPreview: (p) => set({ dragPreview: p }),
   pushHistory: (snapshot) => {
     const next = [...get().history, snapshot].slice(-50);
     set({ history: next, future: [] });
@@ -70,5 +82,5 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ future: f.slice(1), history: [...get().history, next] });
     return next;
   },
-  reset: () => set({ selectedIds: [], history: [], future: [] }),
+  reset: () => set({ selectedIds: [], history: [], future: [], dragPreview: null }),
 }));
