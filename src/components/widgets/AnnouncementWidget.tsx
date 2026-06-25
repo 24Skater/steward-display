@@ -12,6 +12,8 @@ export interface AnnouncementConfig {
   bodyLineHeight?: number; // unitless, default 1.4
   titleMaxLines?: number; // 0 = unlimited
   bodyMaxLines?: number; // 0 = unlimited
+  titleTruncationMode?: "ellipsis" | "clip"; // default ellipsis
+  bodyTruncationMode?: "ellipsis" | "clip"; // default ellipsis
 }
 
 export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
@@ -35,6 +37,10 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
                   WebkitBoxOrient: "vertical" as const,
                   WebkitLineClamp: config.titleMaxLines,
                   overflow: "hidden",
+                  textOverflow:
+                    (config.titleTruncationMode ?? "ellipsis") === "clip"
+                      ? "clip"
+                      : "ellipsis",
                 }
               : {}),
           }}
@@ -57,6 +63,10 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
                   WebkitBoxOrient: "vertical" as const,
                   WebkitLineClamp: config.bodyMaxLines,
                   overflow: "hidden",
+                  textOverflow:
+                    (config.bodyTruncationMode ?? "ellipsis") === "clip"
+                      ? "clip"
+                      : "ellipsis",
                 }
               : {}),
           }}
