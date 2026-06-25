@@ -183,7 +183,34 @@ function CanvasStage({
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const toggleSelect = useEditorStore((s) => s.toggleSelect);
   const select = useEditorStore((s) => s.select);
+  const dragPreview = useEditorStore((s) => s.dragPreview);
   const dims = getScreenDimensions(screen);
+
+  // Compute snap-alignment guides: when the dragged widget's edges/centers match
+  // another widget's edges/centers (or the canvas edges/center) within the snap grid,
+  // surface a guide line.
+  const guides = (() => {
+    if (!dragPreview) return { v: [] as number[], h: [] as number[] };
+    const a = dragPreview;
+    const aEdgesX = [a.x, a.x + a.w / 2, a.x + a.w];
+    const aEdgesY = [a.y, a.y + a.h / 2, a.y + a.h];
+    const targetsX = new Set<number>([0, GRID_COLS / 2, GRID_COLS]);
+    const targetsY = new Set<number>([0, GRID_ROWS / 2, GRID_ROWS]);
+    for (const w of screen.widgets) {
+      if (w.id === a.id) continue;
+      targetsX.add(w.x);
+      targetsX.add(w.x + w.w / 2);
+      targetsX.add(w.x + w.w);
+      targetsY.add(w.y);
+      targetsY.add(w.y + w.h / 2);
+      targetsY.add(w.y + w.h);
+    }
+    const v: number[] = [];
+    const h: number[] = [];
+    aEdgesX.forEach((e) => targetsX.forEach((t) => { if (Math.abs(e - t) < 0.001) v.push(t); }));
+    aEdgesY.forEach((e) => targetsY.forEach((t) => { if (Math.abs(e - t) < 0.001) h.push(t); }));
+    return { v: Array.from(new Set(v)), h: Array.from(new Set(h)) };
+  })();
 
   return (
     <div
@@ -216,6 +243,79 @@ function CanvasStage({
           <div className="absolute left-2/3 top-0 h-full w-px bg-blue/25" />
           <div className="absolute left-0 top-1/3 h-px w-full bg-blue/25" />
           <div className="absolute left-0 top-2/3 h-px w-full bg-blue/25" />
+        </div>
+      )}
+      {/* Rulers along the top and left edge of the stage */}
+      <div
+        className="pointer-events-none absolute left-0 top-0 flex w-full items-end overflow-hidden border-b border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
+        style={{ height: 16 / effective }}
+      >
+        {Array.from({ length: Math.floor(GRID_COLS / gridSize) + 1 }).map((_, i) => {
+          const col = i * gridSize;
+          return (
+            <div
+              key={`rx-${i}`}
+              className="absolute bottom-0 border-l border-white/25"
+              style={{ left: col * cellW, height: 6 / effective }}
+            >
+              <span
+                className="absolute left-1 bottom-0 leading-none"
+                style={{ fontSize: 9 / effective, transform: `translateY(${-2 / effective}px)` }}
+              >
+                {col}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="pointer-events-none absolute left-0 top-0 flex h-full flex-col overflow-hidden border-r border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
+        style={{ width: 16 / effective }}
+      >
+        {Array.from({ length: Math.floor(GRID_ROWS / gridSize) + 1 }).map((_, i) => {
+          const row = i * gridSize;
+          return (
+            <div
+              key={`ry-${i}`}
+              className="absolute right-0 border-t border-white/25"
+              style={{ top: row * cellH, width: 6 / effective }}
+            >
+              <span
+                className="absolute right-1 top-0 leading-none"
+                style={{ fontSize: 9 / effective, transform: `translateX(${-2 / effective}px)` }}
+              >
+                {row}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {/* Live snap-alignment guides while dragging */}
+      {dragPreview && (
+        <div className="pointer-events-none absolute inset-0 z-30">
+          {guides.v.map((c) => (
+            <div
+              key={`gv-${c}`}
+              className="absolute top-0 h-full bg-[#FF3B82]"
+              style={{ left: c * cellW, width: Math.max(1, 1 / effective) }}
+            />
+          ))}
+          {guides.h.map((r) => (
+            <div
+              key={`gh-${r}`}
+              className="absolute left-0 w-full bg-[#FF3B82]"
+              style={{ top: r * cellH, height: Math.max(1, 1 / effective) }}
+            />
+          ))}
+          <div
+            className="absolute border border-blue/70 bg-blue/10"
+            style={{
+              left: dragPreview.x * cellW,
+              top: dragPreview.y * cellH,
+              width: dragPreview.w * cellW,
+              height: dragPreview.h * cellH,
+            }}
+          />
         </div>
       )}
       <div className="absolute inset-0 text-white">
