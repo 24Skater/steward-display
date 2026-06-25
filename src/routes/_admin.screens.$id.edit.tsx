@@ -9,6 +9,7 @@ import {
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  type DragMoveEvent,
   type Modifier,
 } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,7 @@ function EditorPage() {
   const pushHistory = useEditorStore((s) => s.pushHistory);
   const snapToGrid = useEditorStore((s) => s.snapToGrid);
   const snapStep = useEditorStore((s) => s.snapStep);
+  const setDragPreview = useEditorStore((s) => s.setDragPreview);
 
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState("");
@@ -135,6 +137,7 @@ function EditorPage() {
 
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveDrag(null);
+    setDragPreview(null);
     const data = e.active.data.current as { source: string; widgetId?: string; widgetType?: WidgetType } | undefined;
     if (!data) return;
     const step = snapToGrid ? snapStep : 1;
@@ -168,6 +171,20 @@ function EditorPage() {
         updateWidget(screen.id, data.widgetId, { x: nx, y: ny });
       }
     }
+  };
+
+  const handleDragMove = (e: DragMoveEvent) => {
+    const data = e.active.data.current as { source?: string; widgetId?: string } | undefined;
+    if (data?.source !== "canvas" || !data.widgetId) return;
+    const w = screen.widgets.find((x) => x.id === data.widgetId);
+    if (!w) return;
+    const step = snapToGrid ? snapStep : 1;
+    const snap = (v: number) => Math.round(v / step) * step;
+    const dx = Math.round(e.delta.x / effective / cellW);
+    const dy = Math.round(e.delta.y / effective / cellH);
+    const nx = Math.max(0, Math.min(GRID_COLS - w.w, snap(w.x + dx)));
+    const ny = Math.max(0, Math.min(GRID_ROWS - w.h, snap(w.y + dy)));
+    setDragPreview({ id: w.id, x: nx, y: ny, w: w.w, h: w.h });
   };
 
   const handleAdd = (type: WidgetType) => {
@@ -240,7 +257,9 @@ function EditorPage() {
       <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
+        onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
+        onDragCancel={() => { setActiveDrag(null); setDragPreview(null); }}
         modifiers={[snapModifier]}
       >
         <div className="flex flex-1 overflow-hidden">
