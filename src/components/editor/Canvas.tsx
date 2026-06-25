@@ -53,8 +53,11 @@ function WidgetTile({
     width: widget.w * cellW,
     height: widget.h * cellH,
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    zIndex: selected ? 10 : 1,
-    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 20 : selected ? 10 : 1,
+    opacity: isDragging ? 0.92 : 1,
+    transition: isDragging ? "none" : "box-shadow 120ms ease, opacity 120ms ease",
+    willChange: isDragging ? "transform" : undefined,
+    cursor: isDragging ? "grabbing" : undefined,
   };
 
   const startResize = (dir: ResizeDir) => (e: React.PointerEvent) => {
@@ -112,18 +115,22 @@ function WidgetTile({
         onSelect(widget.id, e.shiftKey);
       }}
       className={
-        "outline-none transition-shadow " +
-        (selected
+        "outline-none " +
+        (isDragging
+          ? "ring-2 ring-blue shadow-steward-lg"
+          : selected
           ? "ring-2 ring-blue ring-offset-2 ring-offset-transparent shadow-steward-md"
           : "ring-1 ring-white/15 hover:ring-blue/60")
       }
     >
       <div
-        className="h-full w-full cursor-move"
+        className={"h-full w-full " + (isDragging ? "cursor-grabbing" : "cursor-grab")}
         {...listeners}
         {...attributes}
       >
-        <WidgetRenderer widget={widget} />
+        <div className={isDragging ? "pointer-events-none select-none h-full w-full" : "h-full w-full"}>
+          <WidgetRenderer widget={widget} />
+        </div>
       </div>
       {selected && (
         <>

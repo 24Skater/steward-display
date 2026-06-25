@@ -9,6 +9,7 @@ import {
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
+  type Modifier,
 } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +112,20 @@ function EditorPage() {
   const cellH = dims.h / GRID_ROWS;
   const effective = zoom || 0.5;
   const selected = screen.widgets.find((w) => selectedIds.includes(w.id));
+
+  // Live snap-to-grid while dragging a canvas widget so the tile glides cell-by-cell
+  // instead of drifting pixel-perfect and jumping on drop.
+  const snapModifier: Modifier = ({ transform, active }) => {
+    if (!active || (active.data.current as any)?.source !== "canvas") return transform;
+    const step = snapToGrid ? snapStep : 1;
+    const sx = cellW * effective * step;
+    const sy = cellH * effective * step;
+    return {
+      ...transform,
+      x: Math.round(transform.x / sx) * sx,
+      y: Math.round(transform.y / sy) * sy,
+    };
+  };
 
   const handleDragStart = (e: DragStartEvent) => {
     const data = e.active.data.current as any;
@@ -222,7 +237,12 @@ function EditorPage() {
         </div>
       </div>
 
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        modifiers={[snapModifier]}
+      >
         <div className="flex flex-1 overflow-hidden">
           <WidgetPanel onAdd={handleAdd} />
           <div className="flex flex-1 flex-col overflow-hidden">
