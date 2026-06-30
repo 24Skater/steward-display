@@ -357,6 +357,8 @@ export function Canvas({ screen }: { screen: Screen }) {
   const setGridSize = useEditorStore((s) => s.setGridSize);
   const showAlignment = useEditorStore((s) => s.showAlignment);
   const toggleAlignment = useEditorStore((s) => s.toggleAlignment);
+  const showRulers = useEditorStore((s) => s.showRulers);
+  const toggleRulers = useEditorStore((s) => s.toggleRulers);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const select = useEditorStore((s) => s.select);
   const pushHistory = useEditorStore((s) => s.pushHistory);
@@ -453,6 +455,11 @@ export function Canvas({ screen }: { screen: Screen }) {
       if (e.key === "a" || e.key === "A") {
         e.preventDefault();
         toggleAlignment();
+        return;
+      }
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        toggleRulers();
         return;
       }
 
@@ -607,6 +614,23 @@ export function Canvas({ screen }: { screen: Screen }) {
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Alignment guides</span>
             <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">A</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggleRulers}
+              className={
+                "inline-flex h-6 w-6 items-center justify-center rounded-full " +
+                (showRulers ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
+              }
+            >
+              <Ruler className="h-3.5 w-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Rulers &amp; snap guides</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">R</kbd>
           </TooltipContent>
         </Tooltip>
         <span className="text-border">|</span>
