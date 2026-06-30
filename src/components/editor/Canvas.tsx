@@ -13,6 +13,7 @@ import { WidgetRenderer } from "./WidgetRenderer";
 import { useEditorStore } from "@/store/editorStore";
 import { useScreenStore } from "@/store/screenStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { INTERACTIVE_GUARD_SELECTOR } from "@/lib/keyboardGuard";
 
 export { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 
@@ -412,7 +413,7 @@ export function Canvas({ screen }: { screen: Screen }) {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
+      if ((e.target as HTMLElement)?.closest(INTERACTIVE_GUARD_SELECTOR)) return;
       const meta = e.metaKey || e.ctrlKey;
 
       if (meta && (e.key === "z" || e.key === "Z")) {
