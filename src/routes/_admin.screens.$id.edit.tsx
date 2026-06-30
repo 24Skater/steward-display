@@ -342,6 +342,7 @@ const SHORTCUTS = [
   { keys: "G", action: "Toggle grid", category: "canvas" },
   { keys: "S", action: "Toggle snap to grid", category: "canvas" },
   { keys: "A", action: "Toggle alignment guides", category: "canvas" },
+  { keys: "R", action: "Toggle rulers & snap guides", category: "canvas" },
   { keys: "⌘/Ctrl + D", action: "Duplicate selected widgets", category: "widgets" },
   { keys: "Delete / Backspace", action: "Remove selected widgets", category: "widgets" },
   { keys: "?", action: "Open this help", category: "presets" },
