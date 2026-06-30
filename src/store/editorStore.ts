@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { WidgetInstance } from "@/types";
 
 export interface DragPreview {
@@ -37,7 +38,9 @@ interface EditorState {
   reset: () => void;
 }
 
-export const useEditorStore = create<EditorState>((set, get) => ({
+export const useEditorStore = create<EditorState>()(
+  persist(
+    (set, get) => ({
   selectedIds: [],
   zoom: 0.5,
   showGrid: true,
@@ -87,4 +90,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     return next;
   },
   reset: () => set({ selectedIds: [], history: [], future: [], dragPreview: null }),
-}));
+    }),
+    {
+      name: "steward.editor",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({
+        showGrid: s.showGrid,
+        showAlignment: s.showAlignment,
+        showRulers: s.showRulers,
+        snapToGrid: s.snapToGrid,
+      }),
+    },
+  ),
+);
