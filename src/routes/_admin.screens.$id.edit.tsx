@@ -26,6 +26,7 @@ import { getScreenDimensions, type WidgetType } from "@/types";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { MonitorOff } from "lucide-react";
+import { INTERACTIVE_GUARD_SELECTOR } from "@/lib/keyboardGuard";
 import {
   Dialog,
   DialogContent,
@@ -80,7 +81,7 @@ function EditorPage() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
+      if ((e.target as HTMLElement)?.closest(INTERACTIVE_GUARD_SELECTOR)) return;
       if (e.key === "?" && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
         setShortcutsOpen(true);
