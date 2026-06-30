@@ -13,6 +13,7 @@ import { WidgetRenderer } from "./WidgetRenderer";
 import { useEditorStore } from "@/store/editorStore";
 import { useScreenStore } from "@/store/screenStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { INTERACTIVE_GUARD_SELECTOR } from "@/lib/keyboardGuard";
 
 export { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 
