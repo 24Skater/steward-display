@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Maximize2, Minimize2, Undo2, Redo2, Grid3x3, Magnet, AlignCenterVertical } from "lucide-react";
+import { Maximize2, Minimize2, Undo2, Redo2, Grid3x3, Magnet, AlignCenterVertical, Ruler } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -180,6 +180,7 @@ function CanvasStage({
   const { setNodeRef } = useDroppable({ id: "canvas-stage" });
   const showGrid = useEditorStore((s) => s.showGrid);
   const showAlignment = useEditorStore((s) => s.showAlignment);
+  const showRulers = useEditorStore((s) => s.showRulers);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const toggleSelect = useEditorStore((s) => s.toggleSelect);
   const select = useEditorStore((s) => s.select);
@@ -246,6 +247,8 @@ function CanvasStage({
         </div>
       )}
       {/* Rulers along the top and left edge of the stage */}
+      {showRulers && (
+      <>
       <div
         className="pointer-events-none absolute left-0 top-0 flex w-full items-end overflow-hidden border-b border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
         style={{ height: 16 / effective }}
@@ -290,8 +293,10 @@ function CanvasStage({
           );
         })}
       </div>
+      </>
+      )}
       {/* Live snap-alignment guides while dragging */}
-      {dragPreview && (
+      {dragPreview && showRulers && (
         <div className="pointer-events-none absolute inset-0 z-30">
           {guides.v.map((c) => (
             <div
