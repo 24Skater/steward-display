@@ -17,6 +17,7 @@ interface EditorState {
   snapStep: number;
   gridSize: number;
   showAlignment: boolean;
+  showRulers: boolean;
   dragPreview: DragPreview | null;
   history: WidgetInstance[][];
   future: WidgetInstance[][];
@@ -28,6 +29,7 @@ interface EditorState {
   setSnapStep: (n: number) => void;
   setGridSize: (n: number) => void;
   toggleAlignment: () => void;
+  toggleRulers: () => void;
   setDragPreview: (p: DragPreview | null) => void;
   pushHistory: (snapshot: WidgetInstance[]) => void;
   undo: () => WidgetInstance[] | null;
@@ -43,6 +45,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   snapStep: 4,
   gridSize: 1,
   showAlignment: false,
+  showRulers: true,
   dragPreview: null,
   history: [],
   future: [],
@@ -63,6 +66,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setSnapStep: (n) => set({ snapStep: Math.max(1, Math.min(32, Math.round(n))) }),
   setGridSize: (n) => set({ gridSize: Math.max(1, Math.min(32, Math.round(n))) }),
   toggleAlignment: () => set({ showAlignment: !get().showAlignment }),
+  toggleRulers: () => set({ showRulers: !get().showRulers }),
   setDragPreview: (p) => set({ dragPreview: p }),
   pushHistory: (snapshot) => {
     const next = [...get().history, snapshot].slice(-50);

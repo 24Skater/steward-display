@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Maximize2, Minimize2, Undo2, Redo2, Grid3x3, Magnet, AlignCenterVertical } from "lucide-react";
+import { Maximize2, Minimize2, Undo2, Redo2, Grid3x3, Magnet, AlignCenterVertical, Ruler } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -180,6 +180,7 @@ function CanvasStage({
   const { setNodeRef } = useDroppable({ id: "canvas-stage" });
   const showGrid = useEditorStore((s) => s.showGrid);
   const showAlignment = useEditorStore((s) => s.showAlignment);
+  const showRulers = useEditorStore((s) => s.showRulers);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const toggleSelect = useEditorStore((s) => s.toggleSelect);
   const select = useEditorStore((s) => s.select);
@@ -246,6 +247,8 @@ function CanvasStage({
         </div>
       )}
       {/* Rulers along the top and left edge of the stage */}
+      {showRulers && (
+      <>
       <div
         className="pointer-events-none absolute left-0 top-0 flex w-full items-end overflow-hidden border-b border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
         style={{ height: 16 / effective }}
@@ -290,8 +293,10 @@ function CanvasStage({
           );
         })}
       </div>
+      </>
+      )}
       {/* Live snap-alignment guides while dragging */}
-      {dragPreview && (
+      {dragPreview && showRulers && (
         <div className="pointer-events-none absolute inset-0 z-30">
           {guides.v.map((c) => (
             <div
@@ -352,6 +357,8 @@ export function Canvas({ screen }: { screen: Screen }) {
   const setGridSize = useEditorStore((s) => s.setGridSize);
   const showAlignment = useEditorStore((s) => s.showAlignment);
   const toggleAlignment = useEditorStore((s) => s.toggleAlignment);
+  const showRulers = useEditorStore((s) => s.showRulers);
+  const toggleRulers = useEditorStore((s) => s.toggleRulers);
   const selectedIds = useEditorStore((s) => s.selectedIds);
   const select = useEditorStore((s) => s.select);
   const pushHistory = useEditorStore((s) => s.pushHistory);
@@ -448,6 +455,11 @@ export function Canvas({ screen }: { screen: Screen }) {
       if (e.key === "a" || e.key === "A") {
         e.preventDefault();
         toggleAlignment();
+        return;
+      }
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        toggleRulers();
         return;
       }
 
@@ -602,6 +614,23 @@ export function Canvas({ screen }: { screen: Screen }) {
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Alignment guides</span>
             <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">A</kbd>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={toggleRulers}
+              className={
+                "inline-flex h-6 w-6 items-center justify-center rounded-full " +
+                (showRulers ? "bg-blue text-white" : "text-muted-foreground hover:bg-muted")
+              }
+            >
+              <Ruler className="h-3.5 w-3.5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex items-center gap-2 text-xs">
+            <span>Rulers &amp; snap guides</span>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">R</kbd>
           </TooltipContent>
         </Tooltip>
         <span className="text-border">|</span>
