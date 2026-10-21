@@ -382,8 +382,8 @@ function SettingsPage() {
       const incoming = parseImportedScreens(text);
       importScreens(incoming);
       toast.success(`Imported ${incoming.length} screen${incoming.length === 1 ? "" : "s"}.`);
-    } catch (e: any) {
-      toast.error(e?.message ?? "Couldn't read that file.");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Couldn't read that file.");
     }
   };
 
@@ -426,8 +426,8 @@ function SettingsPage() {
       setImportGridDefaults(gridImportIncludeDefaults ?? true);
       setImportHistory(gridImportIncludeHistory ?? true);
       setImportDialogOpen(true);
-    } catch (e: any) {
-      toast.error(e?.message ?? "Couldn't read that file.");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Couldn't read that file.");
     }
   };
 
@@ -528,8 +528,8 @@ function SettingsPage() {
       } else {
         toast.success("Settings imported.");
       }
-    } catch (e: any) {
-      toast.error(e?.message ?? "Couldn't read that file.");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Couldn't read that file.");
     }
   };
 
@@ -632,7 +632,7 @@ function SettingsPage() {
             <Label>Default orientation</Label>
             <Select
               value={defaultOrientation}
-              onValueChange={(v) => update({ defaultOrientation: v as any })}
+              onValueChange={(v) => update({ defaultOrientation: v as "landscape" | "portrait" })}
             >
               <SelectTrigger>
                 <SelectValue />

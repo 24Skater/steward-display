@@ -162,6 +162,7 @@ export function WidgetConfigForm({
   widget: WidgetInstance;
   onChange: (patch: Record<string, unknown>) => void;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- per-widget config is untyped until the P1 widget schema lands
   const cfg = widget.config as Record<string, any>;
   const set = (k: string, v: unknown) => onChange({ [k]: v });
 
@@ -208,6 +209,7 @@ export function WidgetConfigForm({
                 containerType: "size",
               }}
             >
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- see cfg above */}
               <AnnouncementWidget config={cfg as any} />
             </div>
           </div>

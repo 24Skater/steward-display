@@ -93,7 +93,10 @@ function NewScreenPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Orientation</Label>
-              <Select value={orientation} onValueChange={(v) => setOrientation(v as any)}>
+              <Select
+                value={orientation}
+                onValueChange={(v) => setOrientation(v as "landscape" | "portrait")}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

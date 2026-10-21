@@ -30,6 +30,8 @@ import { INTERACTIVE_GUARD_SELECTOR } from "@/lib/keyboardGuard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+type DragData = { source: string; widgetId?: string; widgetType?: WidgetType };
+
 export const Route = createFileRoute("/_admin/screens/$id/edit")({
   head: () => ({ meta: [{ title: "Editor — Steward Display" }] }),
   component: EditorPage,
@@ -115,7 +117,8 @@ function EditorPage() {
   // Live snap-to-grid while dragging a canvas widget so the tile glides cell-by-cell
   // instead of drifting pixel-perfect and jumping on drop.
   const snapModifier: Modifier = ({ transform, active }) => {
-    if (!active || (active.data.current as any)?.source !== "canvas") return transform;
+    if (!active || (active.data.current as DragData | undefined)?.source !== "canvas")
+      return transform;
     const step = snapToGrid ? snapStep : 1;
     const sx = cellW * effective * step;
     const sy = cellH * effective * step;
@@ -127,8 +130,8 @@ function EditorPage() {
   };
 
   const handleDragStart = (e: DragStartEvent) => {
-    const data = e.active.data.current as any;
-    if (data?.source === "palette")
+    const data = e.active.data.current as DragData | undefined;
+    if (data?.source === "palette" && data.widgetType)
       setActiveDrag({ source: "palette", widgetType: data.widgetType });
     else setActiveDrag({ source: data?.source ?? "canvas" });
   };

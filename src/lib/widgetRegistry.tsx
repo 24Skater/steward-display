@@ -36,6 +36,7 @@ export interface WidgetDefinition {
   icon: LucideIcon;
   defaultSize: { w: number; h: number };
   defaultConfig: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- per-widget config is untyped until the P1 widget schema lands
   Component: ComponentType<{ config: any }>;
 }
 
