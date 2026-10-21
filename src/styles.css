@@ -1,4 +1,5 @@
 @import "tailwindcss" source(none);
+@import "@steward-apps/tokens/css" layer(steward-tokens);
 @source "../src";
 @import "tw-animate-css";
 @import "@fontsource-variable/inter";
@@ -9,7 +10,8 @@
 /*
  * Steward Display design system.
  *
- * Brand tokens defined on :root, dark mode under [data-theme="dark"].
+ * Brand primitives come from @steward-apps/tokens; Display's palette and the
+ * shadcn aliases are defined on :root, dark mode under [data-theme="dark"].
  * @theme inline maps them to Tailwind utilities (bg-navy, text-ink, etc.).
  * Hex values appear ONLY in this file — components reference utilities/tokens.
  */
@@ -90,57 +92,68 @@
 :root {
   --radius: 0.75rem;
 
-  /* Steward palette — from @steward-apps/tokens (DTCG) */
-  --navy: #1b2a41; /* Steward Navy — sidebar / header */
-  --navy-deep: #0d1b2e; /* Deeper navy for foreground/marks */
-  --gold: #e8b847; /* Kingdom Gold — brand primary */
-  --gold-dark: #c49a2e; /* Kingdom Gold hover */
-  --blue: #2563eb; /* Action / links */
-  --emerald: #15803d; /* Success — AA white-on-emerald */
-  --amber: #f59e0b; /* Warning */
-  --red: #dc2626; /* Danger */
-  --ink: #0b1220; /* Darkest text */
-  --slate: #334155; /* Secondary text */
-  --muted-fg: #57647a; /* Muted text on parchment — AA on #faf7f2 */
-  --surface: #ffffff; /* Card / panel surface */
-  --subtle: #f8fafc; /* Cool subtle background */
-  --parchment: #faf7f2; /* Warm parchment — ChMS default bg */
-  --warm-surface: #f5eed8; /* Warm golden surface */
+  /*
+   * Steward palette. Brand primitives come from @steward-apps/tokens (imported
+   * above into the steward-tokens layer, so these unlayered declarations always
+   * win where the package's unprefixed names collide with shadcn's).
+   *
+   * The literals below are Display's own values: the ones the Display product
+   * theme in steward-brand carries (themes/products/display.json). Once a
+   * tokens release with that theme is out, they become --st-border,
+   * --st-muted and --st-success.
+   */
+  --navy: var(--st-color-brand-navy);
+  --navy-deep: #0d1b2e; /* foreground and marks; the theme's --st-fg */
+  --gold: var(--st-color-brand-gold);
+  --gold-dark: var(--st-color-brand-goldDark);
+  --blue: var(--st-color-brand-blue);
+  --emerald: #15803d; /* brand emerald darkened so white text on it is AA */
+  --amber: var(--st-color-brand-amber);
+  --red: var(--st-color-brand-red);
+  --ink: var(--st-color-neutral-ink);
+  --slate: var(--st-color-neutral-slate);
+  --muted-fg: #57647a; /* AA on parchment */
+  --surface: var(--st-color-neutral-surface);
+  --subtle: var(--st-color-neutral-subtle);
+  --parchment: var(--st-color-neutral-warmSubtle);
+  --warm-surface: var(--st-color-neutral-warmSurface);
+  --line: #b8a778; /* borders that delimit drop zones: 3:1 on parchment */
+  --wash: #f1ead6; /* shadcn "muted" fill, between parchment and warm surface */
 
-  /* Shadcn aliases → Steward (warm parchment + Kingdom Gold primary) */
-  --background: #faf7f2;
-  --foreground: #0d1b2e;
-  --card: #ffffff;
-  --card-foreground: #0d1b2e;
-  --popover: #ffffff;
-  --popover-foreground: #0d1b2e;
-  --primary: #e8b847;
-  --primary-foreground: #1b2a41;
-  --secondary: #f5eed8;
-  --secondary-foreground: #1b2a41;
-  --muted: #f1ead6;
-  --muted-foreground: #57647a;
-  --accent: #f5eed8;
-  --accent-foreground: #1b2a41;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: #b8a778;
-  --input: #b8a778;
-  --ring: #2563eb;
+  /* Shadcn aliases mapped to the palette above */
+  --background: var(--parchment);
+  --foreground: var(--navy-deep);
+  --card: var(--surface);
+  --card-foreground: var(--navy-deep);
+  --popover: var(--surface);
+  --popover-foreground: var(--navy-deep);
+  --primary: var(--gold);
+  --primary-foreground: var(--navy);
+  --secondary: var(--warm-surface);
+  --secondary-foreground: var(--navy);
+  --muted: var(--wash);
+  --muted-foreground: var(--muted-fg);
+  --accent: var(--warm-surface);
+  --accent-foreground: var(--navy);
+  --destructive: var(--red);
+  --destructive-foreground: var(--surface);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--blue);
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: #1b2a41;
-  --sidebar-foreground: #f5eed8;
-  --sidebar-primary: #e8b847;
-  --sidebar-primary-foreground: #1b2a41;
-  --sidebar-accent: #0d1b2e;
-  --sidebar-accent-foreground: #f5eed8;
+  --sidebar: var(--navy);
+  --sidebar-foreground: var(--warm-surface);
+  --sidebar-primary: var(--gold);
+  --sidebar-primary-foreground: var(--navy);
+  --sidebar-accent: var(--navy-deep);
+  --sidebar-accent-foreground: var(--warm-surface);
   --sidebar-border: #1a2f4a;
-  --sidebar-ring: #e8b847;
+  --sidebar-ring: var(--gold);
 }
 
 .dark,
