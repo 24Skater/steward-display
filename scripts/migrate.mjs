@@ -25,8 +25,28 @@ const migrations = readdirSync(dir, { withFileTypes: true })
   .map((entry) => entry.name)
   .sort();
 
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
-await client.connect();
+/**
+ * Waits for the database to accept connections. On a fresh volume Postgres
+ * starts a temporary, socket-only server to initialise itself, then restarts,
+ * so "the database container is up" can be true for a while before it listens.
+ */
+async function connectWithRetry(deadlineMs = 60_000) {
+  const started = Date.now();
+  for (let attempt = 1; ; attempt++) {
+    const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+    try {
+      await client.connect();
+      return client;
+    } catch (error) {
+      await client.end().catch(() => {});
+      if (Date.now() - started > deadlineMs) throw error;
+      if (attempt === 1) console.log("Waiting for the database to accept connections...");
+      await new Promise((resolve) => setTimeout(resolve, Math.min(500 * attempt, 3000)));
+    }
+  }
+}
+
+const client = await connectWithRetry();
 try {
   await client.query("SELECT pg_advisory_lock($1)", [LOCK_KEY]);
   await client.query(`CREATE TABLE IF NOT EXISTS "_prisma_migrations" (

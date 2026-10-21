@@ -64,7 +64,8 @@ jobs:
         run: |
           docker network create sd
           docker run -d --name sd-db --network sd -e POSTGRES_USER=display             -e POSTGRES_PASSWORD=smoke -e POSTGRES_DB=display postgres:16-alpine
-          for i in $(seq 1 30); do docker exec sd-db pg_isready -U display -d display && break; sleep 1; done
+          # Over TCP: while initialising, Postgres answers on its socket only.
+          for i in $(seq 1 30); do docker exec sd-db pg_isready -h 127.0.0.1 -U display -d display && break; sleep 1; done
           docker run -d --name sd --network sd -p 3000:3000             -e DATABASE_URL=postgresql://display:smoke@sd-db:5432/display steward-display:ci
           ready=""
           for i in $(seq 1 30); do
