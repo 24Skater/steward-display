@@ -31,11 +31,7 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between bg-navy px-6 text-white shadow-steward-sm">
       <Link to="/" className="flex items-center gap-3" aria-label="Steward Display home">
-        <img
-          src="https://raw.githubusercontent.com/24Skater/steward-brand/main/assets/logo/steward-mark-light.svg"
-          alt=""
-          className="h-7 w-7"
-        />
+        <img src="/brand/steward-mark-light.svg" alt="" className="h-7 w-7" />
         <span className="text-sm font-semibold tracking-tight">
           Steward <span className="opacity-60">·</span> Display
         </span>

@@ -117,11 +117,7 @@ function DisplayStage({ screen }: { screen: Screen }) {
 
       {screen.showWatermark !== false && (
         <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 text-white/30">
-          <img
-            src="https://raw.githubusercontent.com/24Skater/steward-brand/main/assets/logo/steward-mark-light.svg"
-            alt=""
-            className="h-4 w-4"
-          />
+          <img src="/brand/steward-mark-light.svg" alt="" className="h-4 w-4" />
           <span className="text-xs font-medium">Steward · Display</span>
         </div>
       )}

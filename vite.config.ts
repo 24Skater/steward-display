@@ -31,7 +31,19 @@ export default defineConfig(({ command }) => ({
         client: { files: ["**/server/**"], specifiers: ["server-only"] },
       },
     }),
-    ...(command === "build" ? [nitro({ preset: "node-server" })] : []),
+    ...(command === "build"
+      ? [
+          nitro({
+            preset: "node-server",
+            routeRules: {
+              // Static files bypass src/server.ts, so the noindex header is set here too.
+              "/**": { headers: { "x-robots-tag": "noindex, nofollow" } },
+              // Vite's hashed build output never changes under the same name.
+              "/assets/**": { headers: { "cache-control": "public, max-age=31536000, immutable" } },
+            },
+          }),
+        ]
+      : []),
     viteReact(),
   ],
 }));
