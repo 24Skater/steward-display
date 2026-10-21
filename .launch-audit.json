@@ -1,0 +1,9 @@
+{
+  "surfaces": ["admin", "kiosk"],
+  "srcDirs": ["src"],
+  "publicDir": "public",
+  "deploy": "docker",
+  "forbiddenDomains": ["stewardgrace.com", "stewardgrace.app"],
+  "fakeDataPatterns": ["72°", "Add an API key", "Lorem ipsum"],
+  "ecosystem": { "name": "steward", "boundaryScript": "scripts/ci/check-platform-boundaries.sh" }
+}
