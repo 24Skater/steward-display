@@ -1,3 +1,5 @@
+import { SetupHint } from "./SetupHint";
+
 export interface ImageConfig {
   src?: string;
   fit?: "cover" | "contain" | "fill";
@@ -5,11 +7,7 @@ export interface ImageConfig {
 }
 
 export function ImageWidget({ config }: { config: ImageConfig }) {
-  if (!config.src) {
-    return (
-      <div className="flex h-full w-full items-center justify-center opacity-60">No image</div>
-    );
-  }
+  if (!config.src) return <SetupHint>Choose an image</SetupHint>;
   return (
     <img
       src={config.src}

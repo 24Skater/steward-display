@@ -309,7 +309,6 @@ function SettingsPage() {
     timezone,
     defaultOrientation,
     defaultBackground,
-    weatherApiKey,
     defaultGridSize,
     defaultSnapStep,
     maxGridHistorySize,
@@ -394,7 +393,6 @@ function SettingsPage() {
       theme: "light" as const,
       defaultOrientation,
       defaultBackground,
-      weatherApiKey,
       defaultGridSize,
       defaultSnapStep,
       maxGridHistorySize,
@@ -778,21 +776,6 @@ function SettingsPage() {
           </AlertDialog>
         </Section>
       )}
-
-      <Section
-        title="Data sources"
-        description="Connect external services. Wiring lands in a future release."
-      >
-        <div className="space-y-1.5">
-          <Label htmlFor="weather">OpenWeatherMap API key</Label>
-          <Input
-            id="weather"
-            value={weatherApiKey ?? ""}
-            onChange={(e) => update({ weatherApiKey: e.target.value })}
-            placeholder="Optional"
-          />
-        </div>
-      </Section>
 
       <Section
         title="Export & import"

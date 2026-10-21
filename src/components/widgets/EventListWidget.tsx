@@ -1,3 +1,5 @@
+import { SetupHint } from "./SetupHint";
+
 export interface EventEntry {
   name: string;
   date: string;
@@ -10,6 +12,7 @@ export interface EventListConfig {
 
 export function EventListWidget({ config }: { config: EventListConfig }) {
   const events = config.events ?? [];
+  if (events.length === 0) return <SetupHint>Add events</SetupHint>;
   return (
     <div className="flex h-full w-full flex-col gap-3 p-5">
       {config.title && (
@@ -18,7 +21,6 @@ export function EventListWidget({ config }: { config: EventListConfig }) {
         </h3>
       )}
       <ul className="flex flex-col gap-2 overflow-hidden">
-        {events.length === 0 && <li className="opacity-60">No events</li>}
         {events.map((e, i) => (
           <li
             key={i}

@@ -67,7 +67,6 @@ export interface Settings {
   theme: "light" | "dark";
   defaultOrientation: "landscape" | "portrait";
   defaultBackground: string;
-  weatherApiKey?: string;
   defaultGridSize: number;
   defaultSnapStep: number;
   maxGridHistorySize: number;

@@ -13,7 +13,6 @@ const otherSettingsSchema = z.object({
   theme: z.enum(["light", "dark"]).optional(),
   defaultOrientation: z.enum(["landscape", "portrait"]).optional(),
   defaultBackground: z.string().optional(),
-  weatherApiKey: z.string().optional(),
   maxGridHistorySize: z.number().int().min(1).max(100).optional(),
 });
 
@@ -169,7 +168,6 @@ export function parseImportedSettings(text: string): {
     theme: record.theme,
     defaultOrientation: record.defaultOrientation,
     defaultBackground: record.defaultBackground,
-    weatherApiKey: record.weatherApiKey,
   };
   Object.assign(settings, otherSettingsSchema.parse(otherFields));
 

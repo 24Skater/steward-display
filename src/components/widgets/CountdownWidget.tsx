@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SetupHint } from "./SetupHint";
 
 export interface CountdownConfig {
   target?: string; // ISO datetime
@@ -27,11 +28,7 @@ export function CountdownWidget({ config }: { config: CountdownConfig }) {
   void tick;
 
   if (!target || Number.isNaN(target.getTime())) {
-    return (
-      <div className="flex h-full w-full items-center justify-center opacity-60">
-        Set a target date
-      </div>
-    );
+    return <SetupHint>Set a target date</SetupHint>;
   }
   const d = diff(target);
   const units = config.units ?? ["days", "hours", "minutes"];
