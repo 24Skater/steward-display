@@ -1,0 +1,4 @@
+# Steward Display is a private admin app plus unattended TV views.
+# Neither should be crawled or indexed. Product marketing lives elsewhere.
+User-agent: *
+Disallow: /

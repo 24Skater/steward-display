@@ -67,7 +67,6 @@ export interface Settings {
   theme: "light" | "dark";
   defaultOrientation: "landscape" | "portrait";
   defaultBackground: string;
-  weatherApiKey?: string;
   defaultGridSize: number;
   defaultSnapStep: number;
   maxGridHistorySize: number;
@@ -81,7 +80,10 @@ export interface Settings {
   };
 }
 
-export const RESOLUTION_DIMENSIONS: Record<Exclude<ScreenResolution, "custom">, { w: number; h: number }> = {
+export const RESOLUTION_DIMENSIONS: Record<
+  Exclude<ScreenResolution, "custom">,
+  { w: number; h: number }
+> = {
   "1920x1080": { w: 1920, h: 1080 },
   "1280x720": { w: 1280, h: 720 },
   "3840x2160": { w: 3840, h: 2160 },

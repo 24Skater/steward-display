@@ -147,37 +147,121 @@ const DARK = {
 } as const;
 
 export const LIGHT_PAIRS: PairDef[] = [
-  p("Body text on parchment",            LIGHT.ink,        LIGHT.parchment,   "body",       "--ink",         "--parchment"),
-  p("Body text on white card",           LIGHT.ink,        LIGHT.surface,     "body",       "--ink",         "--surface"),
-  p("Body text on warm surface",         LIGHT.ink,        LIGHT.warmSurface, "body",       "--ink",         "--warm-surface"),
-  p("Muted text on parchment",           LIGHT.mutedFg,    LIGHT.parchment,   "body",       "--muted-fg",    "--parchment"),
-  p("Muted text on white card",          LIGHT.mutedFg,    LIGHT.surface,     "body",       "--muted-fg",    "--surface"),
-  p("Navy text on Kingdom Gold (primary)", LIGHT.navy,     LIGHT.gold,        "body",       "--primary-foreground", "--primary"),
-  p("Navy text on gold-dark hover",      LIGHT.navy,       LIGHT.goldDark,    "body",       "--primary-foreground", "--gold-dark"),
-  p("Parchment text on navy sidebar",    LIGHT.warmSurface,LIGHT.navy,        "body",       "--sidebar-foreground", "--sidebar"),
-  p("White text on Steward Blue",        LIGHT.white,      LIGHT.blue,        "body",       "--primary-foreground", "--blue"),
-  p("Blue link on parchment",            LIGHT.blue,       LIGHT.parchment,   "body",       "--blue",        "--parchment"),
-  p("Blue link on white card",           LIGHT.blue,       LIGHT.surface,     "body",       "--blue",        "--surface"),
-  p("White text on emerald (success)",   LIGHT.white,      LIGHT.emerald,     "body",       "--destructive-foreground", "--emerald"),
-  p("White text on red (destructive)",   LIGHT.white,      LIGHT.red,         "body",       "--destructive-foreground", "--destructive"),
-  p("Navy text on amber (warning)",      LIGHT.navy,       LIGHT.amber,       "body",       "--primary-foreground", "--amber"),
-  p("Warm border vs parchment (decorative)", LIGHT.border, LIGHT.parchment,   "decorative", "--border",      "--parchment"),
-  p("Focus ring (blue) vs parchment",    LIGHT.blue,       LIGHT.parchment,   "ui",         "--ring",        "--parchment"),
-  p("Gold focus ring vs navy sidebar",   LIGHT.gold,       LIGHT.navy,        "ui",         "--sidebar-ring","--sidebar"),
+  p("Body text on parchment", LIGHT.ink, LIGHT.parchment, "body", "--ink", "--parchment"),
+  p("Body text on white card", LIGHT.ink, LIGHT.surface, "body", "--ink", "--surface"),
+  p("Body text on warm surface", LIGHT.ink, LIGHT.warmSurface, "body", "--ink", "--warm-surface"),
+  p("Muted text on parchment", LIGHT.mutedFg, LIGHT.parchment, "body", "--muted-fg", "--parchment"),
+  p("Muted text on white card", LIGHT.mutedFg, LIGHT.surface, "body", "--muted-fg", "--surface"),
+  p(
+    "Navy text on Kingdom Gold (primary)",
+    LIGHT.navy,
+    LIGHT.gold,
+    "body",
+    "--primary-foreground",
+    "--primary",
+  ),
+  p(
+    "Navy text on gold-dark hover",
+    LIGHT.navy,
+    LIGHT.goldDark,
+    "body",
+    "--primary-foreground",
+    "--gold-dark",
+  ),
+  p(
+    "Parchment text on navy sidebar",
+    LIGHT.warmSurface,
+    LIGHT.navy,
+    "body",
+    "--sidebar-foreground",
+    "--sidebar",
+  ),
+  p(
+    "White text on Steward Blue",
+    LIGHT.white,
+    LIGHT.blue,
+    "body",
+    "--primary-foreground",
+    "--blue",
+  ),
+  p("Blue link on parchment", LIGHT.blue, LIGHT.parchment, "body", "--blue", "--parchment"),
+  p("Blue link on white card", LIGHT.blue, LIGHT.surface, "body", "--blue", "--surface"),
+  p(
+    "White text on emerald (success)",
+    LIGHT.white,
+    LIGHT.emerald,
+    "body",
+    "--destructive-foreground",
+    "--emerald",
+  ),
+  p(
+    "White text on red (destructive)",
+    LIGHT.white,
+    LIGHT.red,
+    "body",
+    "--destructive-foreground",
+    "--destructive",
+  ),
+  p(
+    "Navy text on amber (warning)",
+    LIGHT.navy,
+    LIGHT.amber,
+    "body",
+    "--primary-foreground",
+    "--amber",
+  ),
+  p(
+    "Warm border vs parchment (decorative)",
+    LIGHT.border,
+    LIGHT.parchment,
+    "decorative",
+    "--border",
+    "--parchment",
+  ),
+  p("Focus ring (blue) vs parchment", LIGHT.blue, LIGHT.parchment, "ui", "--ring", "--parchment"),
+  p("Gold focus ring vs navy sidebar", LIGHT.gold, LIGHT.navy, "ui", "--sidebar-ring", "--sidebar"),
 ];
 
 export const DARK_PAIRS: PairDef[] = [
-  p("Body text on dark bg",              DARK.parchmentText, DARK.bg,        "body",       "--foreground",  "--background"),
-  p("Body text on dark surface",         DARK.parchmentText, DARK.surface,   "body",       "--foreground",  "--surface"),
-  p("Body text on dark secondary",       DARK.parchmentText, DARK.secondary, "body",       "--foreground",  "--secondary"),
-  p("Muted text on dark bg",             DARK.mutedFg,       DARK.bg,        "body",       "--muted-fg",    "--background"),
-  p("Muted text on dark surface",        DARK.mutedFg,       DARK.surface,   "body",       "--muted-fg",    "--surface"),
-  p("Navy text on Kingdom Gold (primary)", DARK.navy,        DARK.gold,      "body",       "--primary-foreground", "--primary"),
-  p("Gold link on dark bg",              DARK.gold,          DARK.bg,        "body",       "--primary",     "--background"),
-  p("Gold link on dark surface",         DARK.gold,          DARK.surface,   "body",       "--primary",     "--surface"),
-  p("Blue accent on dark surface",       DARK.blue,          DARK.surface,   "large",      "--blue",        "--surface"),
-  p("Border vs dark bg (decorative)",    DARK.border,        DARK.bg,        "decorative", "--border",      "--background"),
-  p("Gold focus ring vs dark bg",        DARK.gold,          DARK.bg,        "ui",         "--ring",        "--background"),
+  p("Body text on dark bg", DARK.parchmentText, DARK.bg, "body", "--foreground", "--background"),
+  p(
+    "Body text on dark surface",
+    DARK.parchmentText,
+    DARK.surface,
+    "body",
+    "--foreground",
+    "--surface",
+  ),
+  p(
+    "Body text on dark secondary",
+    DARK.parchmentText,
+    DARK.secondary,
+    "body",
+    "--foreground",
+    "--secondary",
+  ),
+  p("Muted text on dark bg", DARK.mutedFg, DARK.bg, "body", "--muted-fg", "--background"),
+  p("Muted text on dark surface", DARK.mutedFg, DARK.surface, "body", "--muted-fg", "--surface"),
+  p(
+    "Navy text on Kingdom Gold (primary)",
+    DARK.navy,
+    DARK.gold,
+    "body",
+    "--primary-foreground",
+    "--primary",
+  ),
+  p("Gold link on dark bg", DARK.gold, DARK.bg, "body", "--primary", "--background"),
+  p("Gold link on dark surface", DARK.gold, DARK.surface, "body", "--primary", "--surface"),
+  p("Blue accent on dark surface", DARK.blue, DARK.surface, "large", "--blue", "--surface"),
+  p(
+    "Border vs dark bg (decorative)",
+    DARK.border,
+    DARK.bg,
+    "decorative",
+    "--border",
+    "--background",
+  ),
+  p("Gold focus ring vs dark bg", DARK.gold, DARK.bg, "ui", "--ring", "--background"),
 ];
 
 export function evaluatePair(
@@ -199,9 +283,7 @@ export function evaluatePair(
   };
 }
 
-export function auditBrandContrast(
-  config: ContrastConfig = DEFAULT_CONTRAST_CONFIG,
-): PairResult[] {
+export function auditBrandContrast(config: ContrastConfig = DEFAULT_CONTRAST_CONFIG): PairResult[] {
   return [
     ...LIGHT_PAIRS.map((p) => evaluatePair(p, "light", config)),
     ...DARK_PAIRS.map((p) => evaluatePair(p, "dark", config)),
@@ -226,10 +308,11 @@ export function warnOnContrastFailures(): void {
     "color:#dc2626;font-weight:600;",
   );
   for (const f of failures) {
-    console.warn(
-      `${f.theme} · ${f.name} — ${f.ratio.toFixed(2)}:1 (needs ${f.threshold}:1)`,
-      { fg: f.fg, bg: f.bg, use: f.use },
-    );
+    console.warn(`${f.theme} · ${f.name} — ${f.ratio.toFixed(2)}:1 (needs ${f.threshold}:1)`, {
+      fg: f.fg,
+      bg: f.bg,
+      use: f.use,
+    });
   }
   console.groupEnd();
 }

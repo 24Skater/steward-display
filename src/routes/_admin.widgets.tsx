@@ -17,7 +17,9 @@ function WidgetLibraryPage() {
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           {WIDGET_CATEGORIES.map((c) => (
-            <TabsTrigger key={c} value={c}>{c}</TabsTrigger>
+            <TabsTrigger key={c} value={c}>
+              {c}
+            </TabsTrigger>
           ))}
         </TabsList>
         <TabsContent value="all" className="mt-6">
@@ -39,14 +41,19 @@ function Grid({ items }: { items: typeof WIDGET_DEFINITIONS }) {
       {items.map((d) => {
         const Icon = d.icon;
         return (
-          <div key={d.type} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-steward-sm">
+          <div
+            key={d.type}
+            className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-steward-sm"
+          >
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-md bg-accent text-blue">
                 <Icon className="h-5 w-5" />
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{d.label}</p>
-                <Badge variant="secondary" className="mt-0.5 font-normal">{d.category}</Badge>
+                <Badge variant="secondary" className="mt-0.5 font-normal">
+                  {d.category}
+                </Badge>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">{d.description}</p>

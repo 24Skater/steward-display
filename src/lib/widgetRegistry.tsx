@@ -36,6 +36,7 @@ export interface WidgetDefinition {
   icon: LucideIcon;
   defaultSize: { w: number; h: number };
   defaultConfig: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- per-widget config is untyped until the P1 widget schema lands
   Component: ComponentType<{ config: any }>;
 }
 
@@ -97,7 +98,7 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
     category: "Content",
     icon: TypeIcon,
     defaultSize: { w: 8, h: 3 },
-    defaultConfig: { text: "Hello", align: "left" },
+    defaultConfig: { text: "", align: "left" },
     Component: TextWidget,
   },
   {
@@ -127,7 +128,7 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
     category: "Data",
     icon: HandCoins,
     defaultSize: { w: 10, h: 4 },
-    defaultConfig: { label: "Building fund", goal: 50000, current: 12500, accent: "#16A34A" },
+    defaultConfig: { label: "Building fund", goal: 0, current: 0, accent: "#16A34A" },
     Component: GivingProgressWidget,
   },
   {

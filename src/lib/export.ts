@@ -5,8 +5,7 @@ const GRID_SIZE_OPTIONS = [1, 2, 4, 6, 8, 12, 16] as const;
 const DEFAULT_GRID_SIZE = 1;
 const DEFAULT_SNAP_STEP = 4;
 
-const isValidGridValue = (v: number) =>
-  (GRID_SIZE_OPTIONS as readonly number[]).includes(v);
+const isValidGridValue = (v: number) => (GRID_SIZE_OPTIONS as readonly number[]).includes(v);
 
 const otherSettingsSchema = z.object({
   orgName: z.string().optional(),
@@ -14,7 +13,6 @@ const otherSettingsSchema = z.object({
   theme: z.enum(["light", "dark"]).optional(),
   defaultOrientation: z.enum(["landscape", "portrait"]).optional(),
   defaultBackground: z.string().optional(),
-  weatherApiKey: z.string().optional(),
   maxGridHistorySize: z.number().int().min(1).max(100).optional(),
 });
 
@@ -136,14 +134,13 @@ export function parseImportedGridDefaults(text: string): {
 }
 
 export function exportSettingsToJSON(settings: Settings): string {
-  return JSON.stringify(
-    { version: 1, exportedAt: new Date().toISOString(), settings },
-    null,
-    2,
-  );
+  return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), settings }, null, 2);
 }
 
-export function parseImportedSettings(text: string): { settings: Partial<Settings>; warnings: string[] } {
+export function parseImportedSettings(text: string): {
+  settings: Partial<Settings>;
+  warnings: string[];
+} {
   const parsed = JSON.parse(text);
   const candidate =
     parsed && typeof parsed === "object" && parsed.settings && typeof parsed.settings === "object"
@@ -171,7 +168,6 @@ export function parseImportedSettings(text: string): { settings: Partial<Setting
     theme: record.theme,
     defaultOrientation: record.defaultOrientation,
     defaultBackground: record.defaultBackground,
-    weatherApiKey: record.weatherApiKey,
   };
   Object.assign(settings, otherSettingsSchema.parse(otherFields));
 

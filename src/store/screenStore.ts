@@ -13,11 +13,19 @@ interface ScreenState {
   duplicateScreen: (id: string) => Screen | undefined;
   importScreens: (screens: Screen[]) => void;
   // widget ops
-  addWidget: (screenId: string, type: WidgetType, position?: { x: number; y: number }) => WidgetInstance | undefined;
+  addWidget: (
+    screenId: string,
+    type: WidgetType,
+    position?: { x: number; y: number },
+  ) => WidgetInstance | undefined;
   updateWidget: (screenId: string, widgetId: string, patch: Partial<WidgetInstance>) => void;
   removeWidget: (screenId: string, widgetId: string) => void;
   duplicateWidget: (screenId: string, widgetId: string) => WidgetInstance | undefined;
-  reorderWidget: (screenId: string, widgetId: string, direction: "front" | "back" | "forward" | "backward") => void;
+  reorderWidget: (
+    screenId: string,
+    widgetId: string,
+    direction: "front" | "back" | "forward" | "backward",
+  ) => void;
   setWidgets: (screenId: string, widgets: WidgetInstance[]) => void;
 }
 
@@ -92,7 +100,10 @@ export const useScreenStore = create<ScreenState>((set, get) => ({
     return copy;
   },
   importScreens: (incoming) => {
-    const screens = [...incoming, ...get().screens.filter((s) => !incoming.find((i) => i.id === s.id))];
+    const screens = [
+      ...incoming,
+      ...get().screens.filter((s) => !incoming.find((i) => i.id === s.id)),
+    ];
     set({ screens });
     persist(screens);
   },
@@ -109,7 +120,9 @@ export const useScreenStore = create<ScreenState>((set, get) => ({
       config: { ...def.defaultConfig },
     };
     const screens = get().screens.map((s) =>
-      s.id === screenId ? { ...s, widgets: [...s.widgets, widget], updatedAt: new Date().toISOString() } : s,
+      s.id === screenId
+        ? { ...s, widgets: [...s.widgets, widget], updatedAt: new Date().toISOString() }
+        : s,
     );
     set({ screens });
     persist(screens);
@@ -131,7 +144,11 @@ export const useScreenStore = create<ScreenState>((set, get) => ({
   removeWidget: (screenId, widgetId) => {
     const screens = get().screens.map((s) =>
       s.id === screenId
-        ? { ...s, widgets: s.widgets.filter((w) => w.id !== widgetId), updatedAt: new Date().toISOString() }
+        ? {
+            ...s,
+            widgets: s.widgets.filter((w) => w.id !== widgetId),
+            updatedAt: new Date().toISOString(),
+          }
         : s,
     );
     set({ screens });

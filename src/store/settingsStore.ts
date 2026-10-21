@@ -28,8 +28,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   hydrated: false,
   hydrate: () => {
     if (get().hydrated) return;
-    const loaded = readJSON<Partial<Settings>>(STORAGE_KEYS.settings, {});
+    const stored = readJSON<Partial<Settings> & { weatherApiKey?: unknown }>(
+      STORAGE_KEYS.settings,
+      {},
+    );
+    // Older builds kept a third-party API key here. Drop it so it is never stored or exported.
+    const { weatherApiKey, ...loaded } = stored;
     set({ ...DEFAULT_SETTINGS, ...loaded, hydrated: true });
+    if (weatherApiKey !== undefined) writeJSON(STORAGE_KEYS.settings, loaded);
   },
   update: (patch) => {
     set(patch);

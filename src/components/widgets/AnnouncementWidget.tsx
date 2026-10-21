@@ -1,3 +1,5 @@
+import { SetupHint } from "./SetupHint";
+
 export interface AnnouncementConfig {
   title?: string;
   body?: string;
@@ -17,6 +19,7 @@ export interface AnnouncementConfig {
 }
 
 export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
+  if (!config.title && !config.body) return <SetupHint>Add an announcement</SetupHint>;
   const align = config.align ?? "center";
   const titleCqw = config.titleSize ?? 5;
   const bodyCqw = config.bodySize ?? 3;
@@ -38,9 +41,7 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
                   WebkitLineClamp: config.titleMaxLines,
                   overflow: "hidden",
                   textOverflow:
-                    (config.titleTruncationMode ?? "ellipsis") === "clip"
-                      ? "clip"
-                      : "ellipsis",
+                    (config.titleTruncationMode ?? "ellipsis") === "clip" ? "clip" : "ellipsis",
                 }
               : {}),
           }}
@@ -64,9 +65,7 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
                   WebkitLineClamp: config.bodyMaxLines,
                   overflow: "hidden",
                   textOverflow:
-                    (config.bodyTruncationMode ?? "ellipsis") === "clip"
-                      ? "clip"
-                      : "ellipsis",
+                    (config.bodyTruncationMode ?? "ellipsis") === "clip" ? "clip" : "ellipsis",
                 }
               : {}),
           }}

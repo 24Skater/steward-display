@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SetupHint } from "./SetupHint";
 
 export interface CountdownConfig {
   target?: string; // ISO datetime
@@ -27,21 +28,33 @@ export function CountdownWidget({ config }: { config: CountdownConfig }) {
   void tick;
 
   if (!target || Number.isNaN(target.getTime())) {
-    return <div className="flex h-full w-full items-center justify-center opacity-60">Set a target date</div>;
+    return <SetupHint>Set a target date</SetupHint>;
   }
   const d = diff(target);
   const units = config.units ?? ["days", "hours", "minutes"];
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4">
-      {config.label && <p className="opacity-80" style={{ fontSize: "clamp(0.875rem, 2.5cqw, 1.5rem)" }}>{config.label}</p>}
+      {config.label && (
+        <p className="opacity-80" style={{ fontSize: "clamp(0.875rem, 2.5cqw, 1.5rem)" }}>
+          {config.label}
+        </p>
+      )}
       <div className="flex items-end gap-4">
         {units.map((u) => (
           <div key={u} className="flex flex-col items-center">
-            <span className="font-bold tabular-nums leading-none" style={{ fontSize: "clamp(2rem, 10cqw, 7rem)" }}>
+            <span
+              className="font-bold tabular-nums leading-none"
+              style={{ fontSize: "clamp(2rem, 10cqw, 7rem)" }}
+            >
               {String(d[u]).padStart(2, "0")}
             </span>
-            <span className="mt-1 text-xs uppercase tracking-wider opacity-70" style={{ fontSize: "clamp(0.6rem, 1.5cqw, 1rem)" }}>{u}</span>
+            <span
+              className="mt-1 text-xs uppercase tracking-wider opacity-70"
+              style={{ fontSize: "clamp(0.6rem, 1.5cqw, 1rem)" }}
+            >
+              {u}
+            </span>
           </div>
         ))}
       </div>

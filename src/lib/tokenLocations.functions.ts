@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertDevOnly } from "./dev-only";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -20,6 +21,7 @@ export type TokenLocation = {
  */
 export const getTokenLocations = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ tokens: Record<string, TokenLocation[]>; sourcePath: string }> => {
+    assertDevOnly();
     const sourcePath = "src/styles.css";
     const text = readFileSync(resolve(process.cwd(), sourcePath), "utf8");
     const lines = text.split(/\r?\n/);

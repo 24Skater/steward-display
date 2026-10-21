@@ -13,7 +13,15 @@ import { Slider } from "@/components/ui/slider";
 import type { WidgetInstance } from "@/types";
 import { AnnouncementWidget } from "@/components/widgets/AnnouncementWidget";
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs font-medium text-foreground">{label}</Label>
@@ -119,7 +127,11 @@ function ColorField({
           </button>
         )}
       </div>
-      {swatches && <div className="mt-2"><SwatchRow value={value} onChange={onChange} swatches={swatches} /></div>}
+      {swatches && (
+        <div className="mt-2">
+          <SwatchRow value={value} onChange={onChange} swatches={swatches} />
+        </div>
+      )}
     </Field>
   );
 }
@@ -150,6 +162,7 @@ export function WidgetConfigForm({
   widget: WidgetInstance;
   onChange: (patch: Record<string, unknown>) => void;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- per-widget config is untyped until the P1 widget schema lands
   const cfg = widget.config as Record<string, any>;
   const set = (k: string, v: unknown) => onChange({ [k]: v });
 
@@ -169,10 +182,14 @@ export function WidgetConfigForm({
       return (
         <Field label="Format">
           <Select value={cfg.format ?? "full"} onValueChange={(v) => set("format", v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {DATE_FORMATS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -192,6 +209,7 @@ export function WidgetConfigForm({
                 containerType: "size",
               }}
             >
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- see cfg above */}
               <AnnouncementWidget config={cfg as any} />
             </div>
           </div>
@@ -199,13 +217,23 @@ export function WidgetConfigForm({
             <Input value={cfg.title ?? ""} onChange={(e) => set("title", e.target.value)} />
           </Field>
           <Field label="Body">
-            <Textarea rows={4} value={cfg.body ?? ""} onChange={(e) => set("body", e.target.value)} />
+            <Textarea
+              rows={4}
+              value={cfg.body ?? ""}
+              onChange={(e) => set("body", e.target.value)}
+            />
           </Field>
           <Field label="Alignment">
             <Select value={cfg.align ?? "center"} onValueChange={(v) => set("align", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {ALIGN_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                {ALIGN_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -230,7 +258,9 @@ export function WidgetConfigForm({
               value={String(cfg.titleWeight ?? 700)}
               onValueChange={(v) => set("titleWeight", Number(v))}
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="300">Light (300)</SelectItem>
                 <SelectItem value="400">Regular (400)</SelectItem>
@@ -303,7 +333,9 @@ export function WidgetConfigForm({
                 value={cfg.titleTruncationMode ?? "ellipsis"}
                 onValueChange={(v) => set("titleTruncationMode", v)}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ellipsis">Ellipsis (…)</SelectItem>
                   <SelectItem value="clip">Hard clip</SelectItem>
@@ -329,7 +361,9 @@ export function WidgetConfigForm({
                 value={cfg.bodyTruncationMode ?? "ellipsis"}
                 onValueChange={(v) => set("bodyTruncationMode", v)}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ellipsis">Ellipsis (…)</SelectItem>
                   <SelectItem value="clip">Hard clip</SelectItem>
@@ -358,13 +392,21 @@ export function WidgetConfigForm({
       return (
         <div className="space-y-4">
           <Field label="Verse text">
-            <Textarea rows={4} value={cfg.text ?? ""} onChange={(e) => set("text", e.target.value)} />
+            <Textarea
+              rows={4}
+              value={cfg.text ?? ""}
+              onChange={(e) => set("text", e.target.value)}
+            />
           </Field>
           <Field label="Reference" hint="e.g. John 3:16">
             <Input value={cfg.reference ?? ""} onChange={(e) => set("reference", e.target.value)} />
           </Field>
           <Field label="Translation">
-            <Input value={cfg.version ?? ""} onChange={(e) => set("version", e.target.value)} placeholder="ESV, NIV, KJV…" />
+            <Input
+              value={cfg.version ?? ""}
+              onChange={(e) => set("version", e.target.value)}
+              placeholder="ESV, NIV, KJV…"
+            />
           </Field>
         </div>
       );
@@ -372,13 +414,23 @@ export function WidgetConfigForm({
       return (
         <div className="space-y-4">
           <Field label="Text">
-            <Textarea rows={5} value={cfg.text ?? ""} onChange={(e) => set("text", e.target.value)} />
+            <Textarea
+              rows={5}
+              value={cfg.text ?? ""}
+              onChange={(e) => set("text", e.target.value)}
+            />
           </Field>
           <Field label="Alignment">
             <Select value={cfg.align ?? "left"} onValueChange={(v) => set("align", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {ALIGN_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                {ALIGN_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -388,7 +440,11 @@ export function WidgetConfigForm({
       return (
         <div className="space-y-4">
           <Field label="Image URL">
-            <Input value={cfg.src ?? ""} onChange={(e) => set("src", e.target.value)} placeholder="https://…" />
+            <Input
+              value={cfg.src ?? ""}
+              onChange={(e) => set("src", e.target.value)}
+              placeholder="https://…"
+            />
           </Field>
           {cfg.src && (
             <div className="overflow-hidden rounded-md border border-border bg-muted">
@@ -397,9 +453,15 @@ export function WidgetConfigForm({
           )}
           <Field label="Fit">
             <Select value={cfg.fit ?? "cover"} onValueChange={(v) => set("fit", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {IMAGE_FIT.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                {IMAGE_FIT.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -448,8 +510,13 @@ export function WidgetConfigForm({
       return (
         <div className="space-y-4">
           <Field label="Orientation">
-            <Select value={cfg.orientation ?? "horizontal"} onValueChange={(v) => set("orientation", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={cfg.orientation ?? "horizontal"}
+              onValueChange={(v) => set("orientation", v)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="horizontal">Horizontal</SelectItem>
                 <SelectItem value="vertical">Vertical</SelectItem>
@@ -479,7 +546,11 @@ export function WidgetConfigForm({
     case "weather":
       return (
         <Field label="City" hint="Requires OpenWeatherMap API key in Settings">
-          <Input value={cfg.city ?? ""} onChange={(e) => set("city", e.target.value)} placeholder="Nashville, TN" />
+          <Input
+            value={cfg.city ?? ""}
+            onChange={(e) => set("city", e.target.value)}
+            placeholder="Nashville, TN"
+          />
         </Field>
       );
     case "event-list":

@@ -49,11 +49,14 @@ function DashboardPage() {
         title="Screens"
         subtitle="Manage your display configurations."
         actions={
-          <Button asChild>
-            <Link to="/screens/new">
-              <Plus className="h-4 w-4" /> Add screen
-            </Link>
-          </Button>
+          // One primary action per view: with no screens yet, the empty state owns it.
+          screens.length > 0 ? (
+            <Button asChild>
+              <Link to="/screens/new">
+                <Plus className="h-4 w-4" /> Add screen
+              </Link>
+            </Button>
+          ) : undefined
         }
       />
 
@@ -68,7 +71,9 @@ function DashboardPage() {
           />
         </div>
         <Select value={orientation} onValueChange={setOrientation}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Orientation" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Orientation" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All orientations</SelectItem>
             <SelectItem value="landscape">Landscape</SelectItem>
@@ -76,7 +81,9 @@ function DashboardPage() {
           </SelectContent>
         </Select>
         <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Sort by" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="updated">Last modified</SelectItem>
             <SelectItem value="created">Date created</SelectItem>
@@ -91,6 +98,23 @@ function DashboardPage() {
             <div key={i} className="h-64 animate-pulse rounded-xl bg-muted" />
           ))}
         </div>
+      ) : list.length === 0 && screens.length > 0 ? (
+        <EmptyState
+          icon={Search}
+          title="No screens match"
+          body="Try a different search or orientation."
+          action={
+            <Button
+              variant="outline"
+              onClick={() => {
+                setQ("");
+                setOrientation("all");
+              }}
+            >
+              Clear filters
+            </Button>
+          }
+        />
       ) : list.length === 0 ? (
         <EmptyState
           icon={MonitorPlay}
@@ -98,7 +122,9 @@ function DashboardPage() {
           body="Create one to get started."
           action={
             <Button asChild>
-              <Link to="/screens/new"><Plus className="h-4 w-4" /> Create your first screen</Link>
+              <Link to="/screens/new">
+                <Plus className="h-4 w-4" /> Create your first screen
+              </Link>
             </Button>
           }
         />

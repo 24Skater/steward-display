@@ -1,9 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useScreenStore } from "@/store/screenStore";
 import { getScreenDimensions, type Screen } from "@/types";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { WidgetRenderer } from "@/components/editor/WidgetRenderer";
+import { DisplayModeContext } from "@/lib/displayMode";
 
 export const Route = createFileRoute("/screens/$id/preview")({
   head: () => ({ meta: [{ title: "Display — Steward Display" }] }),
@@ -28,7 +29,6 @@ function useFitScale(screen: Screen) {
 
 function DisplayPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
   const hydrate = useScreenStore((s) => s.hydrate);
   const hydrated = useScreenStore((s) => s.hydrated);
   const screen = useScreenStore((s) => s.screens.find((x) => x.id === id));
@@ -47,25 +47,24 @@ function DisplayPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && id) navigate({ to: "/screens/$id/edit", params: { id } });
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [id, navigate]);
+  // A TV has nobody to click a link or read an error, so both states are a quiet branded slate.
+  if (!hydrated) return <IdleSlate />;
+  if (!screen) return <IdleSlate message="This screen isn't available on this device." />;
 
-  if (!hydrated) return <div className="flex h-screen items-center justify-center bg-black text-white/60">Loading…</div>;
-  if (!screen) {
-    return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-black text-white">
-        <p>Screen not found.</p>
-        <Link to="/" className="text-sm text-blue hover:underline">Back to screens</Link>
-      </div>
-    );
-  }
+  return (
+    <DisplayModeContext.Provider value={true}>
+      <DisplayStage screen={screen} />
+    </DisplayModeContext.Provider>
+  );
+}
 
-  return <DisplayStage screen={screen} />;
+function IdleSlate({ message }: { message?: string }) {
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-navy text-white">
+      <img src="/brand/steward-mark.svg" alt="" className="h-16 w-16 opacity-80" />
+      {message && <p className="max-w-xl px-6 text-center text-2xl text-white/80">{message}</p>}
+    </div>
+  );
 }
 
 function DisplayStage({ screen }: { screen: Screen }) {
@@ -110,11 +109,7 @@ function DisplayStage({ screen }: { screen: Screen }) {
 
       {screen.showWatermark !== false && (
         <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 text-white/30">
-          <img
-            src="https://raw.githubusercontent.com/24Skater/steward-brand/main/assets/logo/steward-mark-light.svg"
-            alt=""
-            className="h-4 w-4"
-          />
+          <img src="/brand/steward-mark.svg" alt="" className="h-4 w-4" />
           <span className="text-xs font-medium">Steward · Display</span>
         </div>
       )}

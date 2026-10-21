@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { warnOnContrastFailures } from "../lib/contrast";
 
@@ -37,10 +36,9 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    console.error(error);
   }, [error]);
 
   return (
@@ -80,18 +78,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Steward Display" },
-      { name: "description", content: "Configurable screen and widget display system for the Steward ecosystem." },
+      {
+        name: "description",
+        content: "Configurable screen and widget display system for the Steward ecosystem.",
+      },
       { name: "author", content: "Steward" },
+      // Admin app and TV views are private: never index them (server.ts also sends X-Robots-Tag).
+      { name: "robots", content: "noindex, nofollow" },
+      { name: "theme-color", content: "#1B2A41" },
       { property: "og:title", content: "Steward Display" },
-      { property: "og:description", content: "Configurable screen and widget display system for the Steward ecosystem." },
+      {
+        property: "og:description",
+        content: "Configurable screen and widget display system for the Steward ecosystem.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:site_name", content: "Steward" },
+      { property: "og:image", content: "/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/site.webmanifest" },
     ],
   }),
   shellComponent: RootShell,

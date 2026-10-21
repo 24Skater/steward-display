@@ -17,6 +17,7 @@ export function WidgetRenderer({ widget }: { widget: WidgetInstance }) {
         containerType: "size",
       }}
     >
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- per-widget config is untyped until the P1 widget schema lands */}
       <Comp config={widget.config as any} />
     </div>
   );

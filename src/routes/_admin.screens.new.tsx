@@ -58,29 +58,48 @@ function NewScreenPage() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-10">
       <Button variant="ghost" size="sm" asChild className="mb-6 -ml-2">
-        <Link to="/"><ArrowLeft className="h-4 w-4" /> Back to screens</Link>
+        <Link to="/">
+          <ArrowLeft className="h-4 w-4" /> Back to screens
+        </Link>
       </Button>
 
       <div className="rounded-xl border border-border bg-card p-8 shadow-steward-sm">
         <h1 className="text-h2 font-semibold">New screen</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Give your screen a name and choose a display size.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Give your screen a name and choose a display size.
+        </p>
 
         <div className="mt-8 space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Lobby screen" />
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Lobby screen"
+            />
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="desc">Description (optional)</Label>
-            <Textarea id="desc" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Textarea
+              id="desc"
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Orientation</Label>
-              <Select value={orientation} onValueChange={(v) => setOrientation(v as any)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={orientation}
+                onValueChange={(v) => setOrientation(v as "landscape" | "portrait")}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="landscape">Landscape</SelectItem>
                   <SelectItem value="portrait">Portrait</SelectItem>
@@ -89,8 +108,13 @@ function NewScreenPage() {
             </div>
             <div className="space-y-1.5">
               <Label>Resolution</Label>
-              <Select value={resolution} onValueChange={(v) => setResolution(v as ScreenResolution)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={resolution}
+                onValueChange={(v) => setResolution(v as ScreenResolution)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1920x1080">1920 × 1080 (Full HD)</SelectItem>
                   <SelectItem value="1280x720">1280 × 720 (HD)</SelectItem>
@@ -105,11 +129,19 @@ function NewScreenPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label>Width</Label>
-                <Input type="number" value={customWidth} onChange={(e) => setCustomWidth(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={customWidth}
+                  onChange={(e) => setCustomWidth(Number(e.target.value))}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Height</Label>
-                <Input type="number" value={customHeight} onChange={(e) => setCustomHeight(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={customHeight}
+                  onChange={(e) => setCustomHeight(Number(e.target.value))}
+                />
               </div>
             </div>
           )}
@@ -124,13 +156,19 @@ function NewScreenPage() {
                 className="h-9 w-12 cursor-pointer rounded-md border border-border bg-background"
                 aria-label="Background color"
               />
-              <Input value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} className="flex-1" />
+              <Input
+                value={backgroundColor}
+                onChange={(e) => setBackgroundColor(e.target.value)}
+                className="flex-1"
+              />
             </div>
           </div>
         </div>
 
         <div className="mt-8 flex justify-end gap-2">
-          <Button variant="outline" asChild><Link to="/">Cancel</Link></Button>
+          <Button variant="outline" asChild>
+            <Link to="/">Cancel</Link>
+          </Button>
           <Button onClick={submit}>Create screen</Button>
         </div>
       </div>

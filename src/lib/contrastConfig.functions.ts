@@ -1,8 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import {
-  loadContrastConfig,
-  type ResolvedContrastConfig,
-} from "./contrast.config";
+import { assertDevOnly } from "./dev-only";
+import { loadContrastConfig, type ResolvedContrastConfig } from "./contrast.config";
 
 /**
  * Returns the exact same ContrastConfig the CI script resolves, including
@@ -11,6 +9,7 @@ import {
  */
 export const getContrastConfig = createServerFn({ method: "GET" }).handler(
   async (): Promise<ResolvedContrastConfig> => {
+    assertDevOnly();
     return loadContrastConfig();
   },
 );

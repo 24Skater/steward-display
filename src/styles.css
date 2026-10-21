@@ -91,21 +91,21 @@
   --radius: 0.75rem;
 
   /* Steward palette — from @steward-apps/tokens (DTCG) */
-  --navy: #1b2a41;          /* Steward Navy — sidebar / header */
-  --navy-deep: #0d1b2e;     /* Deeper navy for foreground/marks */
-  --gold: #e8b847;          /* Kingdom Gold — brand primary */
-  --gold-dark: #c49a2e;     /* Kingdom Gold hover */
-  --blue: #2563eb;          /* Action / links */
-  --emerald: #15803d;       /* Success — AA white-on-emerald */
-  --amber: #f59e0b;         /* Warning */
-  --red: #dc2626;           /* Danger */
-  --ink: #0b1220;           /* Darkest text */
-  --slate: #334155;         /* Secondary text */
-  --muted-fg: #57647a;      /* Muted text on parchment — AA on #faf7f2 */
-  --surface: #ffffff;       /* Card / panel surface */
-  --subtle: #f8fafc;        /* Cool subtle background */
-  --parchment: #faf7f2;     /* Warm parchment — ChMS default bg */
-  --warm-surface: #f5eed8;  /* Warm golden surface */
+  --navy: #1b2a41; /* Steward Navy — sidebar / header */
+  --navy-deep: #0d1b2e; /* Deeper navy for foreground/marks */
+  --gold: #e8b847; /* Kingdom Gold — brand primary */
+  --gold-dark: #c49a2e; /* Kingdom Gold hover */
+  --blue: #2563eb; /* Action / links */
+  --emerald: #15803d; /* Success — AA white-on-emerald */
+  --amber: #f59e0b; /* Warning */
+  --red: #dc2626; /* Danger */
+  --ink: #0b1220; /* Darkest text */
+  --slate: #334155; /* Secondary text */
+  --muted-fg: #57647a; /* Muted text on parchment — AA on #faf7f2 */
+  --surface: #ffffff; /* Card / panel surface */
+  --subtle: #f8fafc; /* Cool subtle background */
+  --parchment: #faf7f2; /* Warm parchment — ChMS default bg */
+  --warm-surface: #f5eed8; /* Warm golden surface */
 
   /* Shadcn aliases → Steward (warm parchment + Kingdom Gold primary) */
   --background: #faf7f2;
@@ -198,13 +198,18 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     color: var(--color-foreground);
     letter-spacing: -0.01em;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -223,8 +228,14 @@
 }
 
 @keyframes steward-fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @utility animate-steward-in {
   animation: steward-fade-in 400ms ease-out both;

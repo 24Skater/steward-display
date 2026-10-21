@@ -27,18 +27,10 @@ import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { MonitorOff } from "lucide-react";
 import { INTERACTIVE_GUARD_SELECTOR } from "@/lib/keyboardGuard";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+type DragData = { source: string; widgetId?: string; widgetType?: WidgetType };
 
 export const Route = createFileRoute("/_admin/screens/$id/edit")({
   head: () => ({ meta: [{ title: "Editor — Steward Display" }] }),
@@ -64,7 +56,9 @@ function EditorPage() {
 
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState("");
-  const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(null);
+  const [activeDrag, setActiveDrag] = useState<{ source: string; widgetType?: WidgetType } | null>(
+    null,
+  );
   const [skipTemplates, setSkipTemplates] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [shortcutQuery, setShortcutQuery] = useState("");
@@ -104,7 +98,11 @@ function EditorPage() {
           icon={MonitorOff}
           title="Screen not found"
           body="It may have been deleted or never existed on this device."
-          action={<Button asChild><Link to="/">Back to screens</Link></Button>}
+          action={
+            <Button asChild>
+              <Link to="/">Back to screens</Link>
+            </Button>
+          }
         />
       </main>
     );
@@ -119,7 +117,8 @@ function EditorPage() {
   // Live snap-to-grid while dragging a canvas widget so the tile glides cell-by-cell
   // instead of drifting pixel-perfect and jumping on drop.
   const snapModifier: Modifier = ({ transform, active }) => {
-    if (!active || (active.data.current as any)?.source !== "canvas") return transform;
+    if (!active || (active.data.current as DragData | undefined)?.source !== "canvas")
+      return transform;
     const step = snapToGrid ? snapStep : 1;
     const sx = cellW * effective * step;
     const sy = cellH * effective * step;
@@ -131,15 +130,18 @@ function EditorPage() {
   };
 
   const handleDragStart = (e: DragStartEvent) => {
-    const data = e.active.data.current as any;
-    if (data?.source === "palette") setActiveDrag({ source: "palette", widgetType: data.widgetType });
+    const data = e.active.data.current as DragData | undefined;
+    if (data?.source === "palette" && data.widgetType)
+      setActiveDrag({ source: "palette", widgetType: data.widgetType });
     else setActiveDrag({ source: data?.source ?? "canvas" });
   };
 
   const handleDragEnd = (e: DragEndEvent) => {
     setActiveDrag(null);
     setDragPreview(null);
-    const data = e.active.data.current as { source: string; widgetId?: string; widgetType?: WidgetType } | undefined;
+    const data = e.active.data.current as
+      | { source: string; widgetId?: string; widgetType?: WidgetType }
+      | undefined;
     if (!data) return;
     const step = snapToGrid ? snapStep : 1;
     const snap = (v: number) => Math.round(v / step) * step;
@@ -204,125 +206,138 @@ function EditorPage() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex h-[calc(100vh-3.5rem)] flex-col">
-      <div className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/"><ArrowLeft className="h-4 w-4" /> Back</Link>
-          </Button>
-          {editingName ? (
-            <Input
-              autoFocus
-              value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
-              onBlur={() => {
-                if (draftName.trim()) updateScreen(screen.id, { name: draftName.trim() });
-                setEditingName(false);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                if (e.key === "Escape") setEditingName(false);
-              }}
-              className="h-8 w-64"
-            />
-          ) : (
-            <button
-              className="rounded-md px-2 py-1 text-sm font-semibold hover:bg-muted"
-              onClick={() => {
-                setDraftName(screen.name);
-                setEditingName(true);
-              }}
-            >
-              {screen.name}
-            </button>
-          )}
-          <span className="text-xs text-muted-foreground">Auto-saved</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
-                <Keyboard className="h-4 w-4" /> Shortcuts
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
-              <span>Keyboard shortcuts</span>
-              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">?</kbd>
-            </TooltipContent>
-          </Tooltip>
-          <Button variant="outline" size="sm" onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}>
-            <Eye className="h-4 w-4" /> Preview
-          </Button>
-        </div>
-      </div>
-
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragMove={handleDragMove}
-        onDragEnd={handleDragEnd}
-        onDragCancel={() => { setActiveDrag(null); setDragPreview(null); }}
-        modifiers={[snapModifier]}
-      >
-        <div className="flex flex-1 overflow-hidden">
-          <WidgetPanel onAdd={handleAdd} />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            {showTemplates ? (
-              <div className="flex-1 overflow-y-auto bg-subtle">
-                <LayoutTemplatePicker onChoose={handleTemplate} onBlank={() => setSkipTemplates(true)} />
-              </div>
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4" /> Back
+              </Link>
+            </Button>
+            {editingName ? (
+              <Input
+                autoFocus
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                onBlur={() => {
+                  if (draftName.trim()) updateScreen(screen.id, { name: draftName.trim() });
+                  setEditingName(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                  if (e.key === "Escape") setEditingName(false);
+                }}
+                className="h-8 w-64"
+              />
             ) : (
-              <Canvas screen={screen} />
+              <button
+                className="rounded-md px-2 py-1 text-sm font-semibold hover:bg-muted"
+                onClick={() => {
+                  setDraftName(screen.name);
+                  setEditingName(true);
+                }}
+              >
+                {screen.name}
+              </button>
+            )}
+            <span className="text-xs text-muted-foreground">Auto-saved</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" onClick={() => setShortcutsOpen(true)}>
+                  <Keyboard className="h-4 w-4" /> Shortcuts
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+                <span>Keyboard shortcuts</span>
+                <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">?</kbd>
+              </TooltipContent>
+            </Tooltip>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}
+            >
+              <Eye className="h-4 w-4" /> Preview
+            </Button>
+          </div>
+        </div>
+
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragMove={handleDragMove}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => {
+            setActiveDrag(null);
+            setDragPreview(null);
+          }}
+          modifiers={[snapModifier]}
+        >
+          <div className="flex flex-1 overflow-hidden">
+            <WidgetPanel onAdd={handleAdd} />
+            <div className="flex flex-1 flex-col overflow-hidden">
+              {showTemplates ? (
+                <div className="flex-1 overflow-y-auto bg-subtle">
+                  <LayoutTemplatePicker
+                    onChoose={handleTemplate}
+                    onBlank={() => setSkipTemplates(true)}
+                  />
+                </div>
+              ) : (
+                <Canvas screen={screen} />
+              )}
+            </div>
+            {selected && (
+              <PropertiesPanel screen={screen} widget={selected} onClose={() => select([])} />
             )}
           </div>
-          {selected && (
-            <PropertiesPanel screen={screen} widget={selected} onClose={() => select([])} />
-          )}
-        </div>
 
-        <DragOverlay>
-          {activeDrag?.source === "palette" && activeDrag.widgetType && (
-            <div className="rounded-md border border-blue bg-card px-3 py-2 text-sm font-medium shadow-steward-md">
-              {getWidgetDefinition(activeDrag.widgetType)?.label}
-            </div>
-          )}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay>
+            {activeDrag?.source === "palette" && activeDrag.widgetType && (
+              <div className="rounded-md border border-blue bg-card px-3 py-2 text-sm font-medium shadow-steward-md">
+                {getWidgetDefinition(activeDrag.widgetType)?.label}
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
 
-      <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Keyboard shortcuts</DialogTitle>
-          </DialogHeader>
-          <Input
-            placeholder="Search shortcuts…"
-            value={shortcutQuery}
-            onChange={(e) => setShortcutQuery(e.target.value)}
-            className="mb-2"
-          />
-          <Tabs value={shortcutTab} onValueChange={setShortcutTab}>
-            <TabsList className="mb-3 grid w-full grid-cols-6">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="edit">Edit</TabsTrigger>
-              <TabsTrigger value="canvas">Canvas</TabsTrigger>
-              <TabsTrigger value="widgets">Widgets</TabsTrigger>
-              <TabsTrigger value="media">Media</TabsTrigger>
-              <TabsTrigger value="presets">Presets</TabsTrigger>
-            </TabsList>
-            <div className="grid gap-3 py-2">
-              {SHORTCUTS.filter((s) => {
-                const matchesTab = shortcutTab === "all" || s.category === shortcutTab;
-                const q = shortcutQuery.toLowerCase();
-                const matchesQuery = s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
-                return matchesTab && matchesQuery;
-              }).map((s) => (
-                <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
-              ))}
-            </div>
-          </Tabs>
-        </DialogContent>
-      </Dialog>
-    </div>
-  </TooltipProvider>
+        <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Keyboard shortcuts</DialogTitle>
+            </DialogHeader>
+            <Input
+              placeholder="Search shortcuts…"
+              value={shortcutQuery}
+              onChange={(e) => setShortcutQuery(e.target.value)}
+              className="mb-2"
+            />
+            <Tabs value={shortcutTab} onValueChange={setShortcutTab}>
+              <TabsList className="mb-3 grid w-full grid-cols-6">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="edit">Edit</TabsTrigger>
+                <TabsTrigger value="canvas">Canvas</TabsTrigger>
+                <TabsTrigger value="widgets">Widgets</TabsTrigger>
+                <TabsTrigger value="media">Media</TabsTrigger>
+                <TabsTrigger value="presets">Presets</TabsTrigger>
+              </TabsList>
+              <div className="grid gap-3 py-2">
+                {SHORTCUTS.filter((s) => {
+                  const matchesTab = shortcutTab === "all" || s.category === shortcutTab;
+                  const q = shortcutQuery.toLowerCase();
+                  const matchesQuery =
+                    s.action.toLowerCase().includes(q) || s.keys.toLowerCase().includes(q);
+                  return matchesTab && matchesQuery;
+                }).map((s) => (
+                  <ShortcutRow key={s.keys} keys={s.keys} action={s.action} />
+                ))}
+              </div>
+            </Tabs>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -353,7 +368,9 @@ function ShortcutRow({ keys, action }: { keys: string; action: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-sm text-muted-foreground">{action}</span>
-      <kbd className="rounded-md border border-border bg-muted px-2 py-1 text-xs font-mono text-foreground">{keys}</kbd>
+      <kbd className="rounded-md border border-border bg-muted px-2 py-1 text-xs font-mono text-foreground">
+        {keys}
+      </kbd>
     </div>
   );
 }

@@ -35,7 +35,10 @@ function PaletteItem({ def, onAdd }: { def: WidgetDefinition; onAdd: (t: WidgetT
 export function WidgetPanel({ onAdd }: { onAdd: (t: WidgetType) => void }) {
   const [q, setQ] = useState("");
   const filtered = WIDGET_DEFINITIONS.filter(
-    (d) => !q || d.label.toLowerCase().includes(q.toLowerCase()) || d.description.toLowerCase().includes(q.toLowerCase()),
+    (d) =>
+      !q ||
+      d.label.toLowerCase().includes(q.toLowerCase()) ||
+      d.description.toLowerCase().includes(q.toLowerCase()),
   );
 
   return (

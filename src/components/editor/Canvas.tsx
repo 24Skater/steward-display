@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Maximize2, Minimize2, Undo2, Redo2, Grid3x3, Magnet, AlignCenterVertical, Ruler } from "lucide-react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Maximize2,
+  Minimize2,
+  Undo2,
+  Redo2,
+  Grid3x3,
+  Magnet,
+  AlignCenterVertical,
+  Ruler,
+} from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Screen, WidgetInstance } from "@/types";
 import { getScreenDimensions } from "@/types";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
@@ -120,8 +125,8 @@ function WidgetTile({
         (isDragging
           ? "ring-2 ring-blue shadow-steward-lg"
           : selected
-          ? "ring-2 ring-blue ring-offset-2 ring-offset-transparent shadow-steward-md"
-          : "ring-1 ring-white/15 hover:ring-blue/60")
+            ? "ring-2 ring-blue ring-offset-2 ring-offset-transparent shadow-steward-md"
+            : "ring-1 ring-white/15 hover:ring-blue/60")
       }
     >
       <div
@@ -129,7 +134,9 @@ function WidgetTile({
         {...listeners}
         {...attributes}
       >
-        <div className={isDragging ? "pointer-events-none select-none h-full w-full" : "h-full w-full"}>
+        <div
+          className={isDragging ? "pointer-events-none select-none h-full w-full" : "h-full w-full"}
+        >
           <WidgetRenderer widget={widget} />
         </div>
       </div>
@@ -209,8 +216,16 @@ function CanvasStage({
     }
     const v: number[] = [];
     const h: number[] = [];
-    aEdgesX.forEach((e) => targetsX.forEach((t) => { if (Math.abs(e - t) < 0.001) v.push(t); }));
-    aEdgesY.forEach((e) => targetsY.forEach((t) => { if (Math.abs(e - t) < 0.001) h.push(t); }));
+    aEdgesX.forEach((e) =>
+      targetsX.forEach((t) => {
+        if (Math.abs(e - t) < 0.001) v.push(t);
+      }),
+    );
+    aEdgesY.forEach((e) =>
+      targetsY.forEach((t) => {
+        if (Math.abs(e - t) < 0.001) h.push(t);
+      }),
+    );
     return { v: Array.from(new Set(v)), h: Array.from(new Set(h)) };
   })();
 
@@ -249,52 +264,58 @@ function CanvasStage({
       )}
       {/* Rulers along the top and left edge of the stage */}
       {showRulers && (
-      <>
-      <div
-        className="pointer-events-none absolute left-0 top-0 flex w-full items-end overflow-hidden border-b border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
-        style={{ height: 16 / effective }}
-      >
-        {Array.from({ length: Math.floor(GRID_COLS / gridSize) + 1 }).map((_, i) => {
-          const col = i * gridSize;
-          return (
-            <div
-              key={`rx-${i}`}
-              className="absolute bottom-0 border-l border-white/25"
-              style={{ left: col * cellW, height: 6 / effective }}
-            >
-              <span
-                className="absolute left-1 bottom-0 leading-none"
-                style={{ fontSize: 9 / effective, transform: `translateY(${-2 / effective}px)` }}
-              >
-                {col}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      <div
-        className="pointer-events-none absolute left-0 top-0 flex h-full flex-col overflow-hidden border-r border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
-        style={{ width: 16 / effective }}
-      >
-        {Array.from({ length: Math.floor(GRID_ROWS / gridSize) + 1 }).map((_, i) => {
-          const row = i * gridSize;
-          return (
-            <div
-              key={`ry-${i}`}
-              className="absolute right-0 border-t border-white/25"
-              style={{ top: row * cellH, width: 6 / effective }}
-            >
-              <span
-                className="absolute right-1 top-0 leading-none"
-                style={{ fontSize: 9 / effective, transform: `translateX(${-2 / effective}px)` }}
-              >
-                {row}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      </>
+        <>
+          <div
+            className="pointer-events-none absolute left-0 top-0 flex w-full items-end overflow-hidden border-b border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
+            style={{ height: 16 / effective }}
+          >
+            {Array.from({ length: Math.floor(GRID_COLS / gridSize) + 1 }).map((_, i) => {
+              const col = i * gridSize;
+              return (
+                <div
+                  key={`rx-${i}`}
+                  className="absolute bottom-0 border-l border-white/25"
+                  style={{ left: col * cellW, height: 6 / effective }}
+                >
+                  <span
+                    className="absolute left-1 bottom-0 leading-none"
+                    style={{
+                      fontSize: 9 / effective,
+                      transform: `translateY(${-2 / effective}px)`,
+                    }}
+                  >
+                    {col}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div
+            className="pointer-events-none absolute left-0 top-0 flex h-full flex-col overflow-hidden border-r border-white/15 bg-black/40 text-[10px] font-mono text-white/70"
+            style={{ width: 16 / effective }}
+          >
+            {Array.from({ length: Math.floor(GRID_ROWS / gridSize) + 1 }).map((_, i) => {
+              const row = i * gridSize;
+              return (
+                <div
+                  key={`ry-${i}`}
+                  className="absolute right-0 border-t border-white/25"
+                  style={{ top: row * cellH, width: 6 / effective }}
+                >
+                  <span
+                    className="absolute right-1 top-0 leading-none"
+                    style={{
+                      fontSize: 9 / effective,
+                      transform: `translateX(${-2 / effective}px)`,
+                    }}
+                  >
+                    {row}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
       {/* Live snap-alignment guides while dragging */}
       {dragPreview && showRulers && (
@@ -499,12 +520,27 @@ export function Canvas({ screen }: { screen: Screen }) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [selectedIds, screen.id, screen.widgets, removeWidget, updateWidget, select, duplicateWidget, setWidgets, pushHistory, undo, redo]);
+  }, [
+    selectedIds,
+    screen.id,
+    screen.widgets,
+    removeWidget,
+    updateWidget,
+    select,
+    duplicateWidget,
+    setWidgets,
+    pushHistory,
+    undo,
+    redo,
+  ]);
 
   const zoomOptions = useMemo(() => [0.25, 0.5, 0.75, 1], []);
 
   return (
-    <div ref={containerRef} className="relative flex flex-1 flex-col items-center justify-center overflow-auto bg-subtle p-8">
+    <div
+      ref={containerRef}
+      className="relative flex flex-1 flex-col items-center justify-center overflow-auto bg-subtle p-8"
+    >
       <div
         style={{
           width: dims.w * effective,
@@ -517,18 +553,20 @@ export function Canvas({ screen }: { screen: Screen }) {
             transformOrigin: "top left",
           }}
         >
-        <CanvasStage
-          screen={screen}
-          cellW={cellW}
-          cellH={cellH}
-          effective={effective}
-          gridSize={gridStep}
-        />
+          <CanvasStage
+            screen={screen}
+            cellW={cellW}
+            cellH={cellH}
+            effective={effective}
+            gridSize={gridStep}
+          />
         </div>
       </div>
 
       <div className="pointer-events-auto absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs shadow-steward-md">
-        <span className="font-medium text-muted-foreground">{dims.w}×{dims.h}</span>
+        <span className="font-medium text-muted-foreground">
+          {dims.w}×{dims.h}
+        </span>
         <span className="text-border">|</span>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -557,7 +595,9 @@ export function Canvas({ screen }: { screen: Screen }) {
               className="h-6 rounded-full border border-border bg-card px-1.5 text-xs text-foreground focus:outline-none disabled:opacity-50"
             >
               {[1, 2, 4, 6, 8, 12, 16].map((n) => (
-                <option key={n} value={n}>{n} cells</option>
+                <option key={n} value={n}>
+                  {n} cells
+                </option>
               ))}
             </select>
           </TooltipTrigger>
@@ -592,7 +632,9 @@ export function Canvas({ screen }: { screen: Screen }) {
               className="h-6 rounded-full border border-border bg-card px-1.5 text-xs text-foreground focus:outline-none disabled:opacity-50"
             >
               {[1, 2, 4, 6, 8, 12, 16].map((n) => (
-                <option key={n} value={n}>{n} cells</option>
+                <option key={n} value={n}>
+                  {n} cells
+                </option>
               ))}
             </select>
           </TooltipTrigger>
@@ -645,7 +687,9 @@ export function Canvas({ screen }: { screen: Screen }) {
                 {Math.round(z * 100)}%
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">Zoom to {Math.round(z * 100)}%</TooltipContent>
+            <TooltipContent side="top" className="text-xs">
+              Zoom to {Math.round(z * 100)}%
+            </TooltipContent>
           </Tooltip>
         ))}
         <Tooltip>
@@ -659,7 +703,9 @@ export function Canvas({ screen }: { screen: Screen }) {
           </TooltipTrigger>
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Fit to screen</span>
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + 0</kbd>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">
+              ⌘/Ctrl + 0
+            </kbd>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -673,7 +719,9 @@ export function Canvas({ screen }: { screen: Screen }) {
           </TooltipTrigger>
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Actual size</span>
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + 1</kbd>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">
+              ⌘/Ctrl + 1
+            </kbd>
           </TooltipContent>
         </Tooltip>
         <span className="text-border">|</span>
@@ -691,7 +739,9 @@ export function Canvas({ screen }: { screen: Screen }) {
           </TooltipTrigger>
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Undo</span>
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + Z</kbd>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">
+              ⌘/Ctrl + Z
+            </kbd>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -708,7 +758,9 @@ export function Canvas({ screen }: { screen: Screen }) {
           </TooltipTrigger>
           <TooltipContent side="top" className="flex items-center gap-2 text-xs">
             <span>Redo</span>
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">⌘/Ctrl + Y</kbd>
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">
+              ⌘/Ctrl + Y
+            </kbd>
           </TooltipContent>
         </Tooltip>
       </div>

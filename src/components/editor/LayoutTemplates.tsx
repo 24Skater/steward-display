@@ -16,7 +16,8 @@ export function LayoutTemplatePicker({
         </div>
         <h2 className="text-2xl font-bold text-foreground">Pick a starting layout</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Choose a template to seed your screen, or start with a blank canvas. You can always edit later.
+          Choose a template to seed your screen, or start with a blank canvas. You can always edit
+          later.
         </p>
       </div>
 
