@@ -33,3 +33,8 @@ dist-ssr
 
 # Generated brand contrast reports
 reports/
+
+# Environment files (keep *.example committed)
+.env
+.env.*
+!.env.example
