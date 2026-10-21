@@ -28,47 +28,55 @@ Part of the [Steward](https://github.com/24Skater) family of open-source church 
 ## What it does
 
 - **Screens** are full-screen layouts on a 12 × 12 grid, landscape or portrait, from 720p to
-  4K.
+  4K, saved to your church's account so everyone on the team edits the same ones.
 - **Widgets** fill them: clock, date, announcement, countdown, scripture, giving progress,
   event list, text, image, video, weather and dividers.
-- **The editor** is drag-and-drop with snapping, layout templates, presets and undo.
-- **The Display View** is what the TV shows: no chrome, scaled to fit, Escape-free.
+- **The editor** is drag-and-drop with snapping, layout templates, presets and undo. Changes
+  save on their own a moment after you stop.
+- **TVs pair with a code.** Open `/tv` in the TV's browser, type the six-character code it
+  shows into the TVs page, and pick its screen. No password on a TV remote.
+- **The TV keeps going offline.** It remembers the last screen that loaded and shows it through
+  network drops and reboots, and picks up edits within about 30 seconds of the network
+  returning.
 
 ## Quick start
 
 ```sh
-docker build -t steward-display .
-docker run -d -p 3000:3000 steward-display
+cp .env.example .env     # set POSTGRES_PASSWORD
+docker compose up -d
 ```
 
-Open <http://localhost:3000>. Production setup (TLS, reverse proxy) is in
+Open <http://localhost:3000>. The first visit asks for your church's name and creates the
+owner's account. Production setup (TLS, backups, password resets) is in
 [docs/HOSTING.md](docs/HOSTING.md).
 
 ## Status
 
 Pre-release. What works today, and what is next:
 
-|                              |                                                                                                                                                             |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Works**                    | Editor, widgets, templates, presets, import/export, Docker image, CI                                                                                        |
-| **Limitation**               | No sign-in yet, and screens are stored in the browser that built them, so a TV cannot yet load a screen built on another device. Do not expose it publicly. |
-| **Next: server and sign-in** | Postgres storage per church, sign-in (Steward SSO or local), TV pairing by code, offline cache on the TV, phone quick-edit for announcement text            |
-| **Then: Steward platform**   | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                                       |
+|                            |                                                                                                                                              |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Works**                  | Accounts and sign-in, screens and presets on the server, TV pairing, offline TVs, editor, widgets, templates, import/export, Docker, CI      |
+| **Not yet**                | Inviting teammates (one owner account per church for now), emailed password reset (an operator command resets it), weather data, Steward SSO |
+| **Next**                   | Team invitations with roles, email verification and reset, Steward SSO, Open-Meteo weather, phone quick-edit for announcement text           |
+| **Then: Steward platform** | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                        |
 
 ## Development
 
-Requires [Bun](https://bun.sh) 1.3+.
+Requires [Bun](https://bun.sh) 1.3+ and a Postgres 16 database. See
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the database and tests.
 
 ```sh
 bun install
+bun run db:migrate   # applies migrations to DATABASE_URL from .env
 bun run dev          # http://localhost:8080
-bun run lint
-bun run typecheck
-bun run build && bun run start
+bun run test         # unit tests; integration tests need TEST_DATABASE_URL
+bun run lint && bun run typecheck && bun run build
 ```
 
-CI runs formatting, lint, typecheck, build, a Docker smoke test, the brand contrast audit and
-the platform-boundary check (`scripts/ci/check-platform-boundaries.sh`).
+CI runs formatting, lint, typecheck, unit and integration tests against Postgres, build, a
+Docker smoke test against Postgres, the brand contrast audit and the platform-boundary check
+(`scripts/ci/check-platform-boundaries.sh`).
 
 ### Brand
 

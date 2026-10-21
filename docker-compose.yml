@@ -1,0 +1,38 @@
+# Steward Display with its database, for a church running it on its own server.
+#
+#   cp .env.example .env    # then set POSTGRES_PASSWORD
+#   docker compose up -d
+#
+# Open http://localhost:3000 and the setup page creates your church.
+# Put a TLS proxy in front before using it over the internet (docs/HOSTING.md).
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: display
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: display
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U display -d display"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://display:${POSTGRES_PASSWORD}@db:5432/display
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+    ports:
+      - "${PORT:-3000}:3000"
+
+volumes:
+  db-data:

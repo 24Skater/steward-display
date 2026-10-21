@@ -21,8 +21,21 @@ jobs:
       - run: sh scripts/ci/check-platform-boundaries.sh
 
   quality:
-    name: Format, lint, typecheck, build
+    name: Format, lint, typecheck, test, build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: display
+          POSTGRES_PASSWORD: display
+          POSTGRES_DB: display_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U display -d display_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://display:display@localhost:5432/display_test
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
@@ -32,6 +45,7 @@ jobs:
       - run: bun run format:check
       - run: bun run lint
       - run: bun run typecheck
+      - run: bun run test
       - run: bun run build
 
   docker:
@@ -48,18 +62,31 @@ jobs:
           tags: steward-display:ci
       - name: Smoke test
         run: |
-          docker run -d --name sd -p 3000:3000 steward-display:ci
+          docker network create sd
+          docker run -d --name sd-db --network sd -e POSTGRES_USER=display             -e POSTGRES_PASSWORD=smoke -e POSTGRES_DB=display postgres:16-alpine
+          for i in $(seq 1 30); do docker exec sd-db pg_isready -U display -d display && break; sleep 1; done
+          docker run -d --name sd --network sd -p 3000:3000             -e DATABASE_URL=postgresql://display:smoke@sd-db:5432/display steward-display:ci
           ready=""
           for i in $(seq 1 30); do
             if curl -sf -o /dev/null http://localhost:3000/robots.txt; then ready=1; break; fi
             sleep 1
           done
           test -n "$ready" || { echo "::error::container never became ready"; exit 1; }
-          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/)" = "200"
-          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/does-not-exist)" = "404"
+          docker logs sd 2>&1 | grep -q "Applied 1 migration"
+          # A fresh install sends everyone to first-run setup, and only setup.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/)" = "303"
+          curl -sI http://localhost:3000/ | grep -qi '^location: .*/setup'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/setup)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:3000/api/tv/pair)" = "503"
+          # Cross-site writes are refused before anything else runs.
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Origin: https://evil.example' http://localhost:3000/api/tv/pair)" = "403"
           # Pages get the header from src/server.ts, static files from nitro routeRules: check both.
-          curl -sI http://localhost:3000/ | grep -qi '^x-robots-tag: noindex'
+          curl -sI http://localhost:3000/setup | grep -qi '^x-robots-tag: noindex'
           curl -sI http://localhost:3000/favicon.svg | grep -qi '^x-robots-tag: noindex'
+          # Restarting re-runs migrations as a no-op.
+          docker restart sd
+          sleep 5
+          docker logs sd 2>&1 | grep -q "Database schema is up to date"
       - name: Container logs
         if: failure()
         run: docker logs sd || true

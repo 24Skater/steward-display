@@ -1,32 +1,49 @@
 # Hosting Steward Display
 
-Steward Display builds to a self-contained Node server (`.output/server/index.mjs`) and ships
-as a Docker image.
+Steward Display is one Node server and one Postgres database. It ships as a Docker image and a
+`docker-compose.yml` that runs both.
 
-## Run with Docker
-
-```sh
-docker build -t steward-display .
-docker run -d --name steward-display -p 3000:3000 --restart unless-stopped steward-display
-```
-
-The container listens on port 3000 (`PORT` overrides it) and reports health through the
-image's `HEALTHCHECK`.
-
-## Run without Docker
-
-Requires Bun 1.3+ to build and Node 22+ to run.
+## Run with Docker Compose
 
 ```sh
-bun install --frozen-lockfile
-bun run build
-PORT=3000 bun run start   # or: node .output/server/index.mjs
+cp .env.example .env      # set POSTGRES_PASSWORD to something long
+docker compose up -d
 ```
+
+Open <http://localhost:3000>. The first visit shows a setup page: your church's name, and the
+owner's name, email and password. It appears once; after that the page sends people to sign
+in.
+
+On every start the container applies any new database migrations, then starts the server. An
+up-to-date database makes that a no-op. Set `SKIP_MIGRATIONS=true` to run them some other way.
+
+## Configuration
+
+| Variable               | Default    | What it does                                                                                  |
+| ---------------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`         | (required) | Postgres connection string. Compose builds it from `POSTGRES_PASSWORD`.                       |
+| `POSTGRES_PASSWORD`    | (required) | Compose only: the database password.                                                          |
+| `PORT`                 | `3000`     | The port the server listens on (and that compose publishes).                                  |
+| `TRUST_PROXY`          | `false`    | `true` behind a reverse proxy: rate limits use `X-Forwarded-For`, cookies honour its `https`. |
+| `PLATFORM_ROOT_DOMAIN` | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
+
+## Pairing TVs
+
+On the TV's browser, open `https://your-display-address/tv`. It shows a six-character code.
+Sign in from any phone or computer, open **TVs**, choose **Pair a TV** and type the code. The
+code lasts ten minutes; the TV gets a new one by itself.
+
+A paired TV checks for changes about every 30 seconds. If the network drops it keeps showing
+the last screen that loaded, including after a reboot. Unpairing a TV from the TVs page stops
+it at its next check and it shows a new code.
+
+Most smart-TV browsers work. For a TV that does not have one, a small streaming stick or a
+Raspberry Pi in kiosk mode pointed at `/tv` does.
 
 ## TLS, HSTS and compression
 
 The app does not terminate TLS or compress responses. Put it behind a reverse proxy that does,
-for example Caddy:
+and set `TRUST_PROXY=true`. With Caddy:
 
 ```caddyfile
 display.example.org {
@@ -36,22 +53,60 @@ display.example.org {
 }
 ```
 
+Without TLS, sign-in cookies travel unencrypted. Do not expose Display to the internet over
+plain http.
+
 On the hosted Steward platform this is the edge proxy's job.
+
+## Backups
+
+Everything Display knows is in the database: accounts, screens, presets, settings and paired
+TVs. Back it up with `pg_dump`, for example nightly from cron on the host:
+
+```sh
+docker compose exec -T db pg_dump -U display -Fc display > display-$(date +%F).dump
+```
+
+Restore into an empty database with:
+
+```sh
+docker compose exec -T db pg_restore -U display -d display --clean --if-exists < display-2026-10-21.dump
+```
+
+Keep copies off the machine. A backup you have never restored is a hope, not a backup: try a
+restore once into a scratch database.
+
+## Resetting a password
+
+Until email is set up, whoever runs the server resets passwords. This sets a new random
+password, prints it, and signs that person out everywhere:
+
+```sh
+docker compose exec app node tools/reset-password.mjs someone@church.org
+```
+
+To choose the password instead, pipe it in: `echo 'a new password' | docker compose exec -T app
+node tools/reset-password.mjs someone@church.org`.
+
+## Run without Docker
+
+Requires Bun 1.3+ to build, Node 22+ to run, and Postgres 16.
+
+```sh
+bun install --frozen-lockfile
+bun run build
+DATABASE_URL=postgresql://... node scripts/migrate.mjs
+DATABASE_URL=postgresql://... PORT=3000 node .output/server/index.mjs
+```
 
 ## Search engines
 
-The admin app and Display Views are private. Every response carries
-`X-Robots-Tag: noindex, nofollow`, pages carry a robots meta tag, and `robots.txt` disallows
-everything. Do not remove these; product marketing belongs on a separate site.
+The admin app and TV pages are private. Every response carries `X-Robots-Tag: noindex,
+nofollow`, pages carry a robots meta tag, and `robots.txt` disallows everything. Do not remove
+these; product marketing belongs on a separate site.
 
 ## Platform boundaries
 
 The hosted platform's root domain is configuration (`PLATFORM_ROOT_DOMAIN`), never a source
 constant. `scripts/ci/check-platform-boundaries.sh` fails CI on a hardcoded platform domain or
 any platform billing credential.
-
-## Data
-
-Current release: screens are stored in each browser's local storage, so a screen built on one
-device is not visible on another. Server-side storage, sign-in and TV pairing are the next
-phase of work (see the project README).

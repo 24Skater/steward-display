@@ -7,12 +7,15 @@ or anything else).
 
 Signage for churches: an **admin app** where screens are built from widgets, and an unattended
 **Display View** on a lobby TV. Part of the Steward product family; it must also run standalone
-for self-hosters. There is no sign-in yet; it arrives with the server phase.
+for self-hosters. People sign in with email and password; TVs pair with a code and hold a
+device token.
 
 ## Stack
 
 - TanStack Start (React 19, file routes in `src/routes`), Vite 8, Tailwind 4, shadcn/Radix
   (`src/components/ui`), Zustand stores in `src/store`, Bun.
+- Postgres through Prisma 7 (`prisma/schema.prisma`, client generated into `src/generated`).
+  Server-only code lives in `src/server/`; the build refuses browser imports of it.
 - Builds to a Node server with nitro's `node-server` preset (`vite.config.ts`). **Not
   Cloudflare.** Ships as the Docker image in `Dockerfile`.
 
@@ -29,15 +32,20 @@ for self-hosters. There is no sign-in yet; it arrives with the server phase.
    through server functions.
 5. **Never show fake or placeholder data on the Display View.** An unconfigured widget renders
    nothing there.
-6. **No Supabase / Lovable Cloud.** The planned backend is Postgres + Prisma, matching the other
+6. **No Supabase / Lovable Cloud.** The backend is Postgres + Prisma, matching the other
    Steward apps, with platform modules vendored (copied) rather than imported.
 7. **Developer-only server functions** (the contrast audit) must call `assertDevOnly()`.
 8. **Screen content is public.** Whatever a Display View shows is broadcast to a room.
+9. **Tenancy lives in the database client.** Every model is classified in
+   `src/server/tenancy.ts`; create rows with `inOrg()`; `bypass()` only for work about the
+   installation, with a comment saying why. See `docs/DEVELOPMENT.md`.
+10. **Errors shown to people are `UserError`s.** Anything else is logged and replaced with a
+    generic message, so stack traces and SQL never reach a browser or a TV.
 
 ## Before committing
 
 ```sh
-bun run format:check && bun run lint && bun run typecheck && bun run build
+bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build
 sh scripts/ci/check-platform-boundaries.sh
 ```
 
@@ -47,5 +55,6 @@ that has been pushed.
 ## Further reading
 
 - `README.md` - status and roadmap
-- `docs/HOSTING.md` - deployment
+- `docs/HOSTING.md` - deployment, backups, password resets
+- `docs/DEVELOPMENT.md` - database, tests, tenancy
 - `SECURITY.md` - reporting and content rules
