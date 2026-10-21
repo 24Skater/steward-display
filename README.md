@@ -1,11 +1,11 @@
 <div align="center">
 
-<img src="public/og-image.png" alt="Steward · Display - screens and widgets for church lobbies and signage" width="100%">
+<img src="docs/assets/hero.svg" alt="Steward Display — self-hosted church signage: build screens from widgets and pair any TV with a code." width="100%">
 
 <br><br>
 
-<a href="https://github.com/24Skater/steward-display/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/24Skater/steward-display/ci.yml?style=flat-square&label=CI&labelColor=0D1B2E&color=E8B847" alt="CI"></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-E8B847?style=flat-square&labelColor=0D1B2E" alt="MIT licence"></a>
+<a href="https://github.com/24Skater/steward-display/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/24Skater/steward-display/ci.yml?style=flat-square&label=CI&labelColor=0D1B2E&color=7C3AED" alt="CI"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-7C3AED?style=flat-square&labelColor=0D1B2E" alt="MIT licence"></a>
 <img src="https://img.shields.io/badge/self--hosted-yes-6B7A8D?style=flat-square&labelColor=0D1B2E" alt="Self-hosted">
 
 <br><br>
@@ -13,7 +13,8 @@
 **[What it does](#what-it-does)** &nbsp;·&nbsp;
 **[Quick start](#quick-start)** &nbsp;·&nbsp;
 **[Status](#status)** &nbsp;·&nbsp;
-**[Development](#development)**
+**[Development](#development)** &nbsp;·&nbsp;
+**[The Steward family](#the-steward-family)**
 
 </div>
 
@@ -22,8 +23,6 @@
 Signage for churches. The lobby TV that shows the time, this week's announcements, a
 countdown to the service and the building-fund thermometer, built by a volunteer on a laptop
 and kept up to date from a phone.
-
-Part of the [Steward](https://github.com/24Skater) family of open-source church tools.
 
 ## What it does
 
@@ -75,6 +74,22 @@ the platform-boundary check (`scripts/ci/check-platform-boundaries.sh`).
 Colours, type and the Steward mark come from
 [steward-brand](https://github.com/24Skater/steward-brand). Brand assets are bundled in
 `public/` - the app never loads them from GitHub at runtime.
+
+## The Steward family
+
+Steward is five applications on one design system. Each one runs standalone and
+self-hosted — nothing here requires the others, or us.
+
+| Application                                                 | What it does                                 |
+| ----------------------------------------------------------- | -------------------------------------------- |
+| **[Congregation](https://github.com/24Skater/StewardChMS)** | Members, giving, worship planning, reporting |
+| **[StewardPOS](https://github.com/24Skater/stewardpos)**    | Point of sale, inventory, returns            |
+| **[Table](https://github.com/24Skater/steward-table)**      | Food orders, kitchen display, delivery       |
+| **[VBS](https://github.com/24Skater/StewardVBS)**           | Registration, check-in, reporting            |
+| **[Display](https://github.com/24Skater/steward-display)**  | Lobby screens, announcements, TV pairing     |
+
+They share one design system — [Steward Brand](https://github.com/24Skater/steward-brand),
+the tokens, components and icons every screen is built from.
 
 ## Security
 

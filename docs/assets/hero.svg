@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420" role="img" aria-label="Steward Display — self-hosted church signage: build screens from widgets and pair any TV with a code.">
+  <title>Steward Display — self-hosted church signage: build screens from widgets and pair any TV with a code.</title>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1600" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#081320"/><stop offset="0.55" stop-color="#0D1B2E"/><stop offset="1" stop-color="#081320"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.80" cy="0.92" r="0.58">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.20"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rule" x1="96" y1="0" x2="1504" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.9"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="spine" x1="0" y1="112" x2="0" y2="292" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E8B847"/><stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="420" fill="url(#ground)"/>
+  <rect width="1600" height="420" fill="url(#glow)"/>
+
+  <!-- the mark at scale, bleeding off the right edge: the only ornament -->
+  <g fill="#7C3AED" fill-opacity="0.07"><rect x="1444.98" y="-81.07" width="59.71" height="238.83" rx="29.85"/><rect x="1325.56" y="8.49" width="298.54" height="59.71" rx="29.85"/><rect x="1459.90" y="142.83" width="29.85" height="298.54" rx="14.93"/><rect x="1489.76" y="299.56" width="97.02" height="37.32" rx="18.66"/><rect x="1489.76" y="381.66" width="67.17" height="37.32" rx="18.66"/></g>
+
+  <!-- faint column grid, the only texture -->
+  <g stroke="#FAF7F2" stroke-opacity="0.04" stroke-width="1">
+    <line x1="96" y1="0" x2="96" y2="420"/>
+    <line x1="224" y1="0" x2="224" y2="420"/>
+    <line x1="352" y1="0" x2="352" y2="420"/>
+    <line x1="480" y1="0" x2="480" y2="420"/>
+    <line x1="608" y1="0" x2="608" y2="420"/>
+    <line x1="736" y1="0" x2="736" y2="420"/>
+    <line x1="864" y1="0" x2="864" y2="420"/>
+    <line x1="992" y1="0" x2="992" y2="420"/>
+    <line x1="1120" y1="0" x2="1120" y2="420"/>
+    <line x1="1248" y1="0" x2="1248" y2="420"/>
+    <line x1="1376" y1="0" x2="1376" y2="420"/>
+  </g>
+
+  <rect x="96" y="112" width="5" height="180" rx="2.5" fill="url(#spine)"/>
+  <g fill="#E8B847" fill-opacity="1"><rect x="156.00" y="120.00" width="8.00" height="32.00" rx="4.00"/><rect x="140.00" y="132.00" width="40.00" height="8.00" rx="4.00"/><rect x="158.00" y="150.00" width="4.00" height="40.00" rx="2.00"/><rect x="162.00" y="171.00" width="13.00" height="5.00" rx="2.50"/><rect x="162.00" y="182.00" width="9.00" height="5.00" rx="2.50"/></g>
+
+  <text x="200" y="152" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="19" font-weight="600" letter-spacing="0.34em" fill="#E8B847">STEWARD</text>
+  <text x="200" y="234" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="74" font-weight="600" letter-spacing="-0.022em" fill="#FAF7F2">Display</text>
+  <text x="200" y="282" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="25" font-weight="400" fill="#8C9AAB">Lobby and hallway screens a church builds once and every TV keeps showing.</text>
+
+  <line x1="96" y1="340" x2="1504" y2="340" stroke="url(#rule)" stroke-width="1.5"/>
+  <text x="96" y="376" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="17" font-weight="500" letter-spacing="0.07em" fill="#8C9AAB">Self-hosted   ·   MIT   ·   PostgreSQL   ·   Docker</text>
+  <circle cx="1498" cy="370" r="6" fill="#7C3AED"/>
+</svg>

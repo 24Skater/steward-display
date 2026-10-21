@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-25T04:35:25.177Z",
+  "generatedAt": "2026-10-21T12:19:25.014Z",
   "config": {
     "requireAAA": false,
     "failOnDecorative": false,
@@ -10,7 +10,7 @@
       "decorative": 1.5
     },
     "source": {
-      "jsonPath": "/dev-server/contrast.config.json",
+      "jsonPath": "C:\\Users\\ramos\\GitHub\\steward-display\\contrast.config.json",
       "envOverrides": []
     }
   },
