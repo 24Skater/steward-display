@@ -1,7 +1,15 @@
 import { create } from "zustand";
-import type { WidgetInstance } from "@/types";
+import { toast } from "sonner";
+
+import {
+  createPresetFn,
+  deletePresetFn,
+  listPresetsFn,
+  updatePresetFn,
+} from "@/lib/api/content.functions";
+import { errorMessage } from "@/lib/errors";
 import type { WidgetPreset } from "@/lib/widgetPresets";
-import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
+import type { WidgetInstance } from "@/types";
 
 export type CustomPreset = WidgetPreset & {
   widgetType: string;
@@ -12,7 +20,7 @@ export type CustomPreset = WidgetPreset & {
 interface PresetState {
   presets: CustomPreset[];
   hydrated: boolean;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
   listFor: (widgetType: string) => CustomPreset[];
   create: (
     widgetType: string,
@@ -20,54 +28,79 @@ interface PresetState {
     config: Record<string, unknown>,
     style?: NonNullable<WidgetInstance["style"]>,
     description?: string,
-  ) => CustomPreset;
+    opts?: { quiet?: boolean },
+  ) => Promise<void>;
   update: (
     id: string,
     patch: Partial<Omit<CustomPreset, "id" | "custom" | "createdAt" | "widgetType">>,
-  ) => void;
-  remove: (id: string) => void;
+  ) => Promise<void>;
+  remove: (id: string) => Promise<void>;
 }
 
-function uid() {
-  return "p_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+function fromWire(p: {
+  id: string;
+  widgetType: string;
+  label: string;
+  description?: string;
+  config: Record<string, unknown>;
+  style?: WidgetInstance["style"];
+  createdAt: string;
+}): CustomPreset {
+  return { ...p, custom: true };
 }
 
-function persist(presets: CustomPreset[]) {
-  writeJSON(STORAGE_KEYS.customPresets, presets);
-}
-
+/**
+ * A church's saved widget presets, kept on the server. Changes show at once and
+ * roll back, with a message, if the server refuses them.
+ */
 export const usePresetStore = create<PresetState>((set, get) => ({
   presets: [],
   hydrated: false,
-  hydrate: () => {
+
+  hydrate: async () => {
     if (get().hydrated) return;
-    set({ presets: readJSON<CustomPreset[]>(STORAGE_KEYS.customPresets, []), hydrated: true });
+    try {
+      set({ presets: (await listPresetsFn()).map(fromWire), hydrated: true });
+    } catch (error) {
+      set({ hydrated: true });
+      toast.error(`Couldn't load presets: ${errorMessage(error)}`);
+    }
   },
+
   listFor: (widgetType) => get().presets.filter((p) => p.widgetType === widgetType),
-  create: (widgetType, label, config, style, description) => {
-    const preset: CustomPreset = {
-      id: uid(),
-      widgetType,
-      label,
-      description,
-      config: { ...config },
-      style: style ? { ...style } : undefined,
-      custom: true,
-      createdAt: new Date().toISOString(),
-    };
-    const next = [...get().presets, preset];
-    set({ presets: next });
-    persist(next);
-    return preset;
+
+  create: async (widgetType, label, config, style, description, opts) => {
+    try {
+      const created = await createPresetFn({
+        data: { widgetType, label, description, config, style },
+      });
+      set({ presets: [...get().presets, fromWire(created)] });
+      if (!opts?.quiet) toast.success(`Saved preset "${label}"`);
+    } catch (error) {
+      toast.error(`Couldn't save the preset: ${errorMessage(error)}`);
+    }
   },
-  update: (id, patch) => {
-    const next = get().presets.map((p) => (p.id === id ? { ...p, ...patch } : p));
-    set({ presets: next });
-    persist(next);
+
+  update: async (id, patch) => {
+    const before = get().presets;
+    set({ presets: before.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
+    try {
+      const { label, description, config, style } = patch;
+      await updatePresetFn({ data: { id, patch: { label, description, config, style } } });
+    } catch (error) {
+      set({ presets: before });
+      toast.error(`Couldn't update the preset: ${errorMessage(error)}`);
+    }
   },
-  remove: (id) => {
-    const next = get().presets.filter((p) => p.id !== id);
-    set({ presets: next });
-    persist(next);
+
+  remove: async (id) => {
+    const before = get().presets;
+    set({ presets: before.filter((p) => p.id !== id) });
+    try {
+      await deletePresetFn({ data: { id } });
+    } catch (error) {
+      set({ presets: before });
+      toast.error(`Couldn't delete the preset: ${errorMessage(error)}`);
+    }
   },
 }));

@@ -38,6 +38,8 @@ import {
 import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
 import { toast } from "sonner";
 import { ContrastAudit } from "@/components/settings/ContrastAudit";
+import { ChurchSettings } from "@/components/settings/ChurchSettings";
+import { useViewer } from "@/lib/viewer";
 
 export const Route = createFileRoute("/_admin/settings")({
   head: () => ({ meta: [{ title: "Settings — Steward Display" }] }),
@@ -318,6 +320,7 @@ function SettingsPage() {
     update,
     resetGridDefaults,
   } = useSettingsStore();
+  const viewer = useViewer();
   const screens = useScreenStore((s) => s.screens);
   const importScreens = useScreenStore((s) => s.importScreens);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -379,8 +382,11 @@ function SettingsPage() {
     try {
       const text = await file.text();
       const incoming = parseImportedScreens(text);
-      importScreens(incoming);
-      toast.success(`Imported ${incoming.length} screen${incoming.length === 1 ? "" : "s"}.`);
+      const { imported, failed } = await importScreens(incoming);
+      const summary = `Imported ${imported} screen${imported === 1 ? "" : "s"}.`;
+      if (failed.length > 0) {
+        toast.warning(`${summary} Couldn't import: ${failed.join(", ")}.`);
+      } else toast.success(summary);
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Couldn't read that file.");
     }
@@ -613,15 +619,8 @@ function SettingsPage() {
         </Alert>
       )}
 
-      <Section title="Organization">
-        <div className="space-y-1.5">
-          <Label htmlFor="org">Name</Label>
-          <Input id="org" value={orgName} onChange={(e) => update({ orgName: e.target.value })} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="tz">Timezone</Label>
-          <Input id="tz" value={timezone} onChange={(e) => update({ timezone: e.target.value })} />
-        </div>
+      <Section title="Church">
+        <ChurchSettings isOwner={viewer.role === "OWNER"} />
       </Section>
 
       <Section title="Display defaults">

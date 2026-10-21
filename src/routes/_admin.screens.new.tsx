@@ -15,6 +15,7 @@ import {
 import { useScreenStore } from "@/store/screenStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 import type { ScreenResolution } from "@/types";
 
 export const Route = createFileRoute("/_admin/screens/new")({
@@ -35,24 +36,32 @@ function NewScreenPage() {
   const [customHeight, setCustomHeight] = useState(1080);
   const [backgroundColor, setBackgroundColor] = useState("#0B1220");
 
-  const submit = () => {
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
     if (!name.trim()) {
       toast.error("Add a screen name to continue.");
       return;
     }
-    const s = create({
-      name: name.trim(),
-      description: description.trim() || undefined,
-      orientation,
-      resolution,
-      customWidth: resolution === "custom" ? customWidth : undefined,
-      customHeight: resolution === "custom" ? customHeight : undefined,
-      backgroundColor,
-      gridSize: defaultGridSize,
-      snapStep: defaultSnapStep,
-    });
-    toast.success("Screen created.");
-    navigate({ to: "/screens/$id/edit", params: { id: s.id } });
+    setBusy(true);
+    try {
+      const s = await create({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        orientation,
+        resolution,
+        customWidth: resolution === "custom" ? customWidth : undefined,
+        customHeight: resolution === "custom" ? customHeight : undefined,
+        backgroundColor,
+        gridSize: defaultGridSize,
+        snapStep: defaultSnapStep,
+      });
+      toast.success("Screen created.");
+      await navigate({ to: "/screens/$id/edit", params: { id: s.id } });
+    } catch (error) {
+      toast.error(`Couldn't create the screen: ${errorMessage(error)}`);
+      setBusy(false);
+    }
   };
 
   return (
@@ -169,7 +178,9 @@ function NewScreenPage() {
           <Button variant="outline" asChild>
             <Link to="/">Cancel</Link>
           </Button>
-          <Button onClick={submit}>Create screen</Button>
+          <Button onClick={() => void submit()} disabled={busy}>
+            {busy ? "Creating…" : "Create screen"}
+          </Button>
         </div>
       </div>
     </main>

@@ -28,6 +28,8 @@ export const Route = createFileRoute("/_admin/")({
 function DashboardPage() {
   const screens = useScreenStore((s) => s.screens);
   const hydrated = useScreenStore((s) => s.hydrated);
+  const loadError = useScreenStore((s) => s.loadError);
+  const retry = useScreenStore((s) => s.hydrate);
   const [q, setQ] = useState("");
   const [orientation, setOrientation] = useState<string>("all");
   const [sort, setSort] = useState<string>("updated");
@@ -59,6 +61,17 @@ function DashboardPage() {
           ) : undefined
         }
       />
+      {loadError && !hydrated && (
+        <div
+          role="alert"
+          className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+        >
+          <span className="flex-1">Couldn't load your screens: {loadError}</span>
+          <Button size="sm" variant="outline" onClick={() => void retry()}>
+            Try again
+          </Button>
+        </div>
+      )}
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[220px]">

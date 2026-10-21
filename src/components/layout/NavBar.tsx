@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Moon, Sun } from "lucide-react";
+import { CircleUser, Menu, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Sheet,
@@ -13,6 +13,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 
 const NAV = [
   { to: "/", label: "Screens" },
+  { to: "/tvs", label: "TVs" },
   { to: "/widgets", label: "Widgets" },
   { to: "/presets", label: "Presets" },
   { to: "/settings", label: "Settings" },
@@ -66,6 +67,14 @@ export function NavBar() {
       </nav>
 
       <div className="flex items-center gap-1">
+        <Link
+          to="/account"
+          aria-label="Your account"
+          aria-current={isActive("/account") ? "page" : undefined}
+          className={ICON_BUTTON}
+        >
+          <CircleUser className="h-5 w-5" />
+        </Link>
         <button
           aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
           onClick={() => update({ theme: theme === "dark" ? "light" : "dark" })}

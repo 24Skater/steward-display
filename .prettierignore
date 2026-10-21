@@ -8,3 +8,5 @@ bun.lock
 routeTree.gen.ts
 reports
 .launch-audit.json
+src/generated
+prisma/migrations

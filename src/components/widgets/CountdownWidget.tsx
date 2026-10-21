@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTimeZone, wallTimeToInstant } from "@/lib/timezone";
 import { SetupHint } from "./SetupHint";
 
 export interface CountdownConfig {
@@ -19,7 +20,9 @@ function diff(target: Date) {
 }
 
 export function CountdownWidget({ config }: { config: CountdownConfig }) {
-  const target = config.target ? new Date(config.target) : null;
+  const timeZone = useTimeZone();
+  // The target is a wall-clock time at the church, not wherever the TV thinks it is.
+  const target = config.target ? wallTimeToInstant(config.target, timeZone) : null;
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);

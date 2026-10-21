@@ -59,6 +59,8 @@ export interface Screen {
   snapStep?: number;
   createdAt: string;
   updatedAt: string;
+  /** The server's save counter. Absent on a screen that has never been saved. */
+  version?: number;
 }
 
 export interface Settings {

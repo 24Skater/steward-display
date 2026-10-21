@@ -239,7 +239,9 @@ function CanvasStage({
         width: dims.w,
         height: dims.h,
         backgroundColor: screen.backgroundColor,
-        backgroundImage: screen.backgroundImage ? `url(${screen.backgroundImage})` : undefined,
+        backgroundImage: screen.backgroundImage
+          ? `url(${JSON.stringify(screen.backgroundImage)})`
+          : undefined,
         backgroundSize: "cover",
       }}
     >

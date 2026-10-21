@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 
 function relTime(iso: string) {
   const d = new Date(iso).getTime();
@@ -105,8 +106,9 @@ export function ScreenCard({ screen }: { screen: Screen }) {
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  const copy = duplicate(screen.id);
-                  if (copy) toast.success("Screen duplicated.");
+                  duplicate(screen.id)
+                    .then((copy) => copy && toast.success("Screen duplicated."))
+                    .catch((error: unknown) => toast.error(errorMessage(error)));
                 }}
               >
                 <Copy className="mr-2 h-4 w-4" /> Duplicate
@@ -128,7 +130,8 @@ export function ScreenCard({ screen }: { screen: Screen }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this screen?</AlertDialogTitle>
             <AlertDialogDescription>
-              "{screen.name}" and its widgets will be removed from this device.
+              "{screen.name}" and its widgets will be deleted for everyone at your church. Any TV
+              showing it goes to standby.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -136,8 +139,9 @@ export function ScreenCard({ screen }: { screen: Screen }) {
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
-                remove(screen.id);
-                toast.success("Screen deleted.");
+                remove(screen.id)
+                  .then(() => toast.success("Screen deleted."))
+                  .catch((error: unknown) => toast.error(errorMessage(error)));
               }}
             >
               Yes, delete

@@ -97,7 +97,7 @@ function EditorPage() {
         <EmptyState
           icon={MonitorOff}
           title="Screen not found"
-          body="It may have been deleted or never existed on this device."
+          body="It may have been deleted. Your church's screens are on the Screens page."
           action={
             <Button asChild>
               <Link to="/">Back to screens</Link>

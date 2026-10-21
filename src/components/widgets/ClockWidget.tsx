@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 
+import { useTimeZone, wallClock } from "@/lib/timezone";
+
 export interface ClockConfig {
   format24h?: boolean;
   showSeconds?: boolean;
 }
 
 export function ClockWidget({ config }: { config: ClockConfig }) {
+  const timeZone = useTimeZone();
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     setNow(new Date());
@@ -20,10 +23,11 @@ export function ClockWidget({ config }: { config: ClockConfig }) {
       </div>
     );
 
-  const hours = config.format24h ? now.getHours() : ((now.getHours() + 11) % 12) + 1;
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  const ss = String(now.getSeconds()).padStart(2, "0");
-  const ampm = !config.format24h ? (now.getHours() >= 12 ? " PM" : " AM") : "";
+  const clock = wallClock(now, timeZone);
+  const hours = config.format24h ? clock.hour : ((clock.hour + 11) % 12) + 1;
+  const mm = String(clock.minute).padStart(2, "0");
+  const ss = String(clock.second).padStart(2, "0");
+  const ampm = !config.format24h ? (clock.hour >= 12 ? " PM" : " AM") : "";
 
   return (
     <div className="flex h-full w-full items-center justify-center">
