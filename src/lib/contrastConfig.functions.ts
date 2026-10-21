@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertDevOnly } from "./dev-only";
 import { loadContrastConfig, type ResolvedContrastConfig } from "./contrast.config";
 
 /**
@@ -8,6 +9,7 @@ import { loadContrastConfig, type ResolvedContrastConfig } from "./contrast.conf
  */
 export const getContrastConfig = createServerFn({ method: "GET" }).handler(
   async (): Promise<ResolvedContrastConfig> => {
+    assertDevOnly();
     return loadContrastConfig();
   },
 );

@@ -953,12 +953,15 @@ function SettingsPage() {
         </a>
       </Section>
 
-      <Section
-        title="Accessibility · Brand contrast audit"
-        description="Live WCAG 2.1 contrast check for every brand token pairing. Run on every build; failures also log to the dev console."
-      >
-        <ContrastAudit />
-      </Section>
+      {/* Developer tool: it reads src/styles.css from disk, which production images do not ship. */}
+      {import.meta.env.DEV && (
+        <Section
+          title="Accessibility · Brand contrast audit"
+          description="Live WCAG 2.1 contrast check for every brand token pairing. Run in CI; failures also log to the dev console."
+        >
+          <ContrastAudit />
+        </Section>
+      )}
     </main>
   );
 }
