@@ -1,7 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useSettingsStore } from "@/store/settingsStore";
 
 const NAV = [
@@ -76,6 +83,7 @@ export function NavBar() {
           <SheetContent side="right" className="w-72">
             <SheetHeader>
               <SheetTitle>Steward · Display</SheetTitle>
+              <SheetDescription className="sr-only">Main navigation</SheetDescription>
             </SheetHeader>
             <nav aria-label="Main" className="mt-6 flex flex-col gap-1">
               {NAV.map((item) => (

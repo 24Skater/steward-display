@@ -48,12 +48,12 @@ Open <http://localhost:3000>. Production setup (TLS, reverse proxy) is in
 
 Pre-release. What works today, and what is next:
 
-|                              |                                                                                                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Works**                    | Editor, widgets, templates, presets, import/export, Docker image, CI                                                                             |
-| **Limitation**               | Screens are stored in the browser that built them. A TV cannot yet load a screen built on another device.                                        |
-| **Next: server and sign-in** | Postgres storage per church, sign-in (Steward SSO or local), TV pairing by code, offline cache on the TV, phone quick-edit for announcement text |
-| **Then: Steward platform**   | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                            |
+|                              |                                                                                                                                                             |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Works**                    | Editor, widgets, templates, presets, import/export, Docker image, CI                                                                                        |
+| **Limitation**               | No sign-in yet, and screens are stored in the browser that built them, so a TV cannot yet load a screen built on another device. Do not expose it publicly. |
+| **Next: server and sign-in** | Postgres storage per church, sign-in (Steward SSO or local), TV pairing by code, offline cache on the TV, phone quick-edit for announcement text            |
+| **Then: Steward platform**   | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                                       |
 
 ## Development
 

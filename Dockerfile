@@ -14,7 +14,8 @@ WORKDIR /app
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=3000
-COPY --from=build --chown=node:node /app/.output ./.output
+# Root-owned and read-only to the node user: the app has no reason to modify its own code.
+COPY --from=build /app/.output ./.output
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

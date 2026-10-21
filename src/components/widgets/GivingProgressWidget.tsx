@@ -1,3 +1,5 @@
+import { SetupHint } from "./SetupHint";
+
 export interface GivingConfig {
   label?: string;
   goal?: number;
@@ -14,8 +16,10 @@ function fmt(n: number) {
 }
 
 export function GivingProgressWidget({ config }: { config: GivingConfig }) {
-  const goal = config.goal ?? 10000;
+  const goal = config.goal ?? 0;
   const current = config.current ?? 0;
+  // Never invent a goal: these figures are shown to the congregation as fact.
+  if (!(goal > 0)) return <SetupHint>Set a giving goal</SetupHint>;
   const pct = Math.min(100, Math.round((current / goal) * 100));
   const accent = config.accent ?? "var(--emerald)";
   return (

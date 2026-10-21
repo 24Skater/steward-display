@@ -1,9 +1,12 @@
+import { SetupHint } from "./SetupHint";
+
 export interface TextConfig {
   text?: string;
   align?: "left" | "center" | "right";
 }
 
 export function TextWidget({ config }: { config: TextConfig }) {
+  if (!config.text) return <SetupHint>Add text</SetupHint>;
   return (
     <div
       className={`flex h-full w-full items-center justify-center p-4 text-${config.align ?? "left"}`}
@@ -12,7 +15,7 @@ export function TextWidget({ config }: { config: TextConfig }) {
         className="w-full leading-snug whitespace-pre-wrap"
         style={{ fontSize: "clamp(0.875rem, 3cqw, 2rem)" }}
       >
-        {config.text || "Text"}
+        {config.text}
       </p>
     </div>
   );

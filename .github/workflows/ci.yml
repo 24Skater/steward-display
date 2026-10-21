@@ -49,7 +49,17 @@ jobs:
       - name: Smoke test
         run: |
           docker run -d --name sd -p 3000:3000 steward-display:ci
-          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:3000/robots.txt && break; sleep 1; done
+          ready=""
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null http://localhost:3000/robots.txt; then ready=1; break; fi
+            sleep 1
+          done
+          test -n "$ready" || { echo "::error::container never became ready"; exit 1; }
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/)" = "200"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/does-not-exist)" = "404"
+          # Pages get the header from src/server.ts, static files from nitro routeRules: check both.
           curl -sI http://localhost:3000/ | grep -qi '^x-robots-tag: noindex'
+          curl -sI http://localhost:3000/favicon.svg | grep -qi '^x-robots-tag: noindex'
+      - name: Container logs
+        if: failure()
+        run: docker logs sd || true

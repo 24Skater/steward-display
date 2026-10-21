@@ -5,9 +5,9 @@ or anything else).
 
 ## What this is
 
-Signage for churches: an authenticated **admin app** (build screens from widgets) and an
-unattended **Display View** on a lobby TV. Part of the Steward product family; it must also run
-standalone for self-hosters.
+Signage for churches: an **admin app** where screens are built from widgets, and an unattended
+**Display View** on a lobby TV. Part of the Steward product family; it must also run standalone
+for self-hosters. There is no sign-in yet; it arrives with the server phase.
 
 ## Stack
 

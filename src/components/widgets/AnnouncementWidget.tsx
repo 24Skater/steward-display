@@ -1,3 +1,5 @@
+import { SetupHint } from "./SetupHint";
+
 export interface AnnouncementConfig {
   title?: string;
   body?: string;
@@ -17,6 +19,7 @@ export interface AnnouncementConfig {
 }
 
 export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
+  if (!config.title && !config.body) return <SetupHint>Add an announcement</SetupHint>;
   const align = config.align ?? "center";
   const titleCqw = config.titleSize ?? 5;
   const bodyCqw = config.bodySize ?? 3;

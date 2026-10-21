@@ -7,7 +7,6 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
-    "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",

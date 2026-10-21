@@ -45,13 +45,13 @@ export const WIDGET_PRESETS: Record<string, WidgetPreset[]> = {
     {
       id: "next-service",
       label: "Next service",
-      config: { title: "Next Service", body: "Sunday at 10:00 AM", align: "center" },
+      config: { title: "Next Service", body: "", align: "center" },
     },
     {
       id: "alert",
       label: "Alert banner",
       description: "High-contrast warning",
-      config: { title: "Heads up", body: "Important announcement goes here.", align: "left" },
+      config: { title: "Heads up", body: "", align: "left" },
       style: { backgroundColor: "#DC2626", textColor: "#FFFFFF", borderRadius: "8px" },
     },
   ],
@@ -83,14 +83,14 @@ export const WIDGET_PRESETS: Record<string, WidgetPreset[]> = {
     {
       id: "heading",
       label: "Heading",
-      config: { text: "Heading", align: "center" },
+      config: { text: "", align: "center" },
       style: { textColor: "#FFFFFF" },
     },
-    { id: "body", label: "Body paragraph", config: { text: "Add your text here.", align: "left" } },
+    { id: "body", label: "Body paragraph", config: { text: "", align: "left" } },
     {
       id: "caption",
       label: "Caption",
-      config: { text: "Caption", align: "center" },
+      config: { text: "", align: "center" },
       style: { opacity: 0.7 },
     },
   ],
@@ -111,17 +111,17 @@ export const WIDGET_PRESETS: Record<string, WidgetPreset[]> = {
     {
       id: "general",
       label: "General fund",
-      config: { label: "General Fund", goal: 10000, current: 0, accent: "#16A34A" },
+      config: { label: "General Fund", goal: 0, current: 0, accent: "#16A34A" },
     },
     {
       id: "building",
       label: "Building campaign",
-      config: { label: "Building Campaign", goal: 100000, current: 0, accent: "#2563EB" },
+      config: { label: "Building Campaign", goal: 0, current: 0, accent: "#2563EB" },
     },
     {
       id: "missions",
       label: "Missions",
-      config: { label: "Missions", goal: 25000, current: 0, accent: "#D97706" },
+      config: { label: "Missions", goal: 0, current: 0, accent: "#D97706" },
     },
   ],
   divider: [
