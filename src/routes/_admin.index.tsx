@@ -49,11 +49,14 @@ function DashboardPage() {
         title="Screens"
         subtitle="Manage your display configurations."
         actions={
-          <Button asChild>
-            <Link to="/screens/new">
-              <Plus className="h-4 w-4" /> Add screen
-            </Link>
-          </Button>
+          // One primary action per view: with no screens yet, the empty state owns it.
+          screens.length > 0 ? (
+            <Button asChild>
+              <Link to="/screens/new">
+                <Plus className="h-4 w-4" /> Add screen
+              </Link>
+            </Button>
+          ) : undefined
         }
       />
 
@@ -95,6 +98,23 @@ function DashboardPage() {
             <div key={i} className="h-64 animate-pulse rounded-xl bg-muted" />
           ))}
         </div>
+      ) : list.length === 0 && screens.length > 0 ? (
+        <EmptyState
+          icon={Search}
+          title="No screens match"
+          body="Try a different search or orientation."
+          action={
+            <Button
+              variant="outline"
+              onClick={() => {
+                setQ("");
+                setOrientation("all");
+              }}
+            >
+              Clear filters
+            </Button>
+          }
+        />
       ) : list.length === 0 ? (
         <EmptyState
           icon={MonitorPlay}

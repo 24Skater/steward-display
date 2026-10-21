@@ -61,7 +61,7 @@ function DisplayPage() {
 function IdleSlate({ message }: { message?: string }) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-navy text-white">
-      <img src="/brand/steward-mark-light.svg" alt="" className="h-16 w-16 opacity-80" />
+      <img src="/brand/steward-mark.svg" alt="" className="h-16 w-16 opacity-80" />
       {message && <p className="max-w-xl px-6 text-center text-2xl text-white/80">{message}</p>}
     </div>
   );
@@ -109,7 +109,7 @@ function DisplayStage({ screen }: { screen: Screen }) {
 
       {screen.showWatermark !== false && (
         <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 text-white/30">
-          <img src="/brand/steward-mark-light.svg" alt="" className="h-4 w-4" />
+          <img src="/brand/steward-mark.svg" alt="" className="h-4 w-4" />
           <span className="text-xs font-medium">Steward · Display</span>
         </div>
       )}
