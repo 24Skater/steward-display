@@ -8,11 +8,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import {
-  DEFAULT_CONTRAST_CONFIG,
-  type ContrastConfig,
-  type ContrastUse,
-} from "./contrast";
+import { DEFAULT_CONTRAST_CONFIG, type ContrastConfig, type ContrastUse } from "./contrast";
 
 const USES: ContrastUse[] = ["body", "large", "ui", "decorative"];
 
@@ -67,9 +63,7 @@ function readJsonConfig(cwd: string): {
         path: p,
       };
     } catch (e) {
-      throw new Error(
-        `Could not parse contrast config at ${p}: ${(e as Error).message}`,
-      );
+      throw new Error(`Could not parse contrast config at ${p}: ${(e as Error).message}`);
     }
   }
   return { config: null, path: null };
@@ -82,9 +76,7 @@ export type ResolvedContrastConfig = ContrastConfig & {
   };
 };
 
-export function loadContrastConfig(
-  cwd: string = process.cwd(),
-): ResolvedContrastConfig {
+export function loadContrastConfig(cwd: string = process.cwd()): ResolvedContrastConfig {
   const { config: fileCfg, path: jsonPath } = readJsonConfig(cwd);
   const envOverrides: string[] = [];
 
@@ -104,16 +96,14 @@ export function loadContrastConfig(
     }
   }
 
-  let requireAAA =
-    fileCfg?.requireAAA ?? DEFAULT_CONTRAST_CONFIG.requireAAA;
+  let requireAAA = fileCfg?.requireAAA ?? DEFAULT_CONTRAST_CONFIG.requireAAA;
   const envAAA = parseBool(process.env.CONTRAST_REQUIRE_AAA);
   if (envAAA != null) {
     requireAAA = envAAA;
     envOverrides.push("CONTRAST_REQUIRE_AAA");
   }
 
-  let failOnDecorative =
-    fileCfg?.failOnDecorative ?? DEFAULT_CONTRAST_CONFIG.failOnDecorative;
+  let failOnDecorative = fileCfg?.failOnDecorative ?? DEFAULT_CONTRAST_CONFIG.failOnDecorative;
   const envDec = parseBool(process.env.CONTRAST_FAIL_ON_DECORATIVE);
   if (envDec != null) {
     failOnDecorative = envDec;

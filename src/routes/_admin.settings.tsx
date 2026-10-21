@@ -5,11 +5,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,7 +44,15 @@ export const Route = createFileRoute("/_admin/settings")({
   component: SettingsPage,
 });
 
-function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="rounded-xl border border-border bg-card p-6 shadow-steward-sm">
       <h2 className="text-h3 font-semibold">{title}</h2>
@@ -80,7 +84,13 @@ function DiffValue({
 }) {
   const changed = value !== baseline;
   return (
-    <span className={changed ? "inline-flex items-center gap-1.5 font-medium text-foreground" : "inline-flex items-center gap-1.5 text-muted-foreground"}>
+    <span
+      className={
+        changed
+          ? "inline-flex items-center gap-1.5 font-medium text-foreground"
+          : "inline-flex items-center gap-1.5 text-muted-foreground"
+      }
+    >
       {format(value)}
       {changed && (
         <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
@@ -105,8 +115,12 @@ function SnapshotList({
     <ul className="max-h-32 overflow-y-auto rounded-md border border-border bg-background p-2 space-y-1 text-xs">
       {entries.map((entry, index) => (
         <li key={`${entry.timestamp}-${index}`} className="flex justify-between gap-3">
-          <span>Grid {entry.defaultGridSize}, snap {entry.defaultSnapStep}</span>
-          <span className="text-muted-foreground">{new Date(entry.timestamp).toLocaleString()}</span>
+          <span>
+            Grid {entry.defaultGridSize}, snap {entry.defaultSnapStep}
+          </span>
+          <span className="text-muted-foreground">
+            {new Date(entry.timestamp).toLocaleString()}
+          </span>
         </li>
       ))}
     </ul>
@@ -177,42 +191,82 @@ function GridImportPreview({
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="px-3 py-2">Default grid size</td>
-                <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultGridSize)}</td>
-                <td className="px-3 py-2">
-                  <DiffValue value={replaceGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                <td className="px-3 py-2 text-muted-foreground">
+                  {formatCell(current.defaultGridSize)}
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={mergeGridSize} baseline={current.defaultGridSize} format={formatCell} />
+                  <DiffValue
+                    value={replaceGridSize}
+                    baseline={current.defaultGridSize}
+                    format={formatCell}
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue
+                    value={mergeGridSize}
+                    baseline={current.defaultGridSize}
+                    format={formatCell}
+                  />
                 </td>
               </tr>
               <tr>
                 <td className="px-3 py-2">Default snap step</td>
-                <td className="px-3 py-2 text-muted-foreground">{formatCell(current.defaultSnapStep)}</td>
-                <td className="px-3 py-2">
-                  <DiffValue value={replaceSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                <td className="px-3 py-2 text-muted-foreground">
+                  {formatCell(current.defaultSnapStep)}
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={mergeSnapStep} baseline={current.defaultSnapStep} format={formatCell} />
+                  <DiffValue
+                    value={replaceSnapStep}
+                    baseline={current.defaultSnapStep}
+                    format={formatCell}
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue
+                    value={mergeSnapStep}
+                    baseline={current.defaultSnapStep}
+                    format={formatCell}
+                  />
                 </td>
               </tr>
               <tr>
                 <td className="px-3 py-2">Max undo snapshots</td>
-                <td className="px-3 py-2 text-muted-foreground">{formatCount(current.maxGridHistorySize)}</td>
-                <td className="px-3 py-2">
-                  <DiffValue value={replaceMax} baseline={current.maxGridHistorySize} format={formatCount} />
+                <td className="px-3 py-2 text-muted-foreground">
+                  {formatCount(current.maxGridHistorySize)}
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={mergeMax} baseline={current.maxGridHistorySize} format={formatCount} />
+                  <DiffValue
+                    value={replaceMax}
+                    baseline={current.maxGridHistorySize}
+                    format={formatCount}
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue
+                    value={mergeMax}
+                    baseline={current.maxGridHistorySize}
+                    format={formatCount}
+                  />
                 </td>
               </tr>
               <tr>
                 <td className="px-3 py-2">Saved snapshots</td>
-                <td className="px-3 py-2 text-muted-foreground">{formatCount(currentHistoryLength)}</td>
-                <td className="px-3 py-2">
-                  <DiffValue value={replaceHistoryCount} baseline={currentHistoryLength} format={formatCount} />
+                <td className="px-3 py-2 text-muted-foreground">
+                  {formatCount(currentHistoryLength)}
                 </td>
                 <td className="px-3 py-2">
-                  <DiffValue value={mergeHistoryCount} baseline={currentHistoryLength} format={formatCount} />
+                  <DiffValue
+                    value={replaceHistoryCount}
+                    baseline={currentHistoryLength}
+                    format={formatCount}
+                  />
+                </td>
+                <td className="px-3 py-2">
+                  <DiffValue
+                    value={mergeHistoryCount}
+                    baseline={currentHistoryLength}
+                    format={formatCount}
+                  />
                 </td>
               </tr>
             </tbody>
@@ -283,23 +337,26 @@ function SettingsPage() {
   } | null>(null);
   const [importGridDefaults, setImportGridDefaults] = useState(gridImportIncludeDefaults ?? true);
   const [importHistory, setImportHistory] = useState(gridImportIncludeHistory ?? true);
-  
-  
+
   const [gridDefaultsHistory, setGridDefaultsHistory] = useState<
     { defaultGridSize: number; defaultSnapStep: number; timestamp: number }[]
   >(() => {
     const loaded = readJSON<unknown>(STORAGE_KEYS.gridDefaultsHistory, []);
     if (!Array.isArray(loaded)) return [];
     return loaded
-      .filter((entry): entry is { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
-        if (!entry || typeof entry !== "object") return false;
-        const e = entry as Record<string, unknown>;
-        return (
-          typeof e.defaultGridSize === "number" &&
-          typeof e.defaultSnapStep === "number" &&
-          typeof e.timestamp === "number"
-        );
-      })
+      .filter(
+        (
+          entry,
+        ): entry is { defaultGridSize: number; defaultSnapStep: number; timestamp: number } => {
+          if (!entry || typeof entry !== "object") return false;
+          const e = entry as Record<string, unknown>;
+          return (
+            typeof e.defaultGridSize === "number" &&
+            typeof e.defaultSnapStep === "number" &&
+            typeof e.timestamp === "number"
+          );
+        },
+      )
       .slice(0, maxGridHistorySize);
   });
 
@@ -312,7 +369,10 @@ function SettingsPage() {
   }, [maxGridHistorySize]);
 
   const handleExport = () => {
-    downloadJSON(`steward-display-${new Date().toISOString().slice(0, 10)}.json`, exportScreensToJSON(screens));
+    downloadJSON(
+      `steward-display-${new Date().toISOString().slice(0, 10)}.json`,
+      exportScreensToJSON(screens),
+    );
     toast.success("Backup downloaded.");
   };
 
@@ -388,13 +448,18 @@ function SettingsPage() {
     };
     update(patch);
     if (importHistory) {
-      setGridDefaultsHistory(history.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
+      setGridDefaultsHistory(
+        history.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize),
+      );
     }
     const importedParts = [
       importGridDefaults && "grid defaults",
       importHistory && "undo history",
     ].filter(Boolean);
-    finishGridImport(warnings, importedParts.length > 0 ? `Replaced ${importedParts.join(" and ")}.` : "Nothing to import.");
+    finishGridImport(
+      warnings,
+      importedParts.length > 0 ? `Replaced ${importedParts.join(" and ")}.` : "Nothing to import.",
+    );
   };
 
   const confirmMergeGridImport = () => {
@@ -413,20 +478,37 @@ function SettingsPage() {
     update(patch);
     const mergedHistory = [
       ...(importGridDefaults
-        ? [{ defaultGridSize: gridDefaults.defaultGridSize, defaultSnapStep: gridDefaults.defaultSnapStep, timestamp: Date.now() }]
+        ? [
+            {
+              defaultGridSize: gridDefaults.defaultGridSize,
+              defaultSnapStep: gridDefaults.defaultSnapStep,
+              timestamp: Date.now(),
+            },
+          ]
         : []),
       ...gridDefaultsHistory,
       ...(importHistory ? history : []),
     ].sort((a, b) => b.timestamp - a.timestamp);
-    setGridDefaultsHistory(mergedHistory.slice(0, importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize));
+    setGridDefaultsHistory(
+      mergedHistory.slice(
+        0,
+        importGridDefaults ? gridDefaults.maxGridHistorySize : maxGridHistorySize,
+      ),
+    );
     const importedParts = [
       importGridDefaults && "grid defaults",
       importHistory && "undo history",
     ].filter(Boolean);
-    finishGridImport(warnings, importedParts.length > 0 ? `Merged ${importedParts.join(" and ")}.` : "Nothing to import.");
+    finishGridImport(
+      warnings,
+      importedParts.length > 0 ? `Merged ${importedParts.join(" and ")}.` : "Nothing to import.",
+    );
   };
 
-  const finishGridImport = (warnings: string[], message = "Grid defaults and history imported.") => {
+  const finishGridImport = (
+    warnings: string[],
+    message = "Grid defaults and history imported.",
+  ) => {
     setImportDialogOpen(false);
     setPendingGridImport(null);
     if (warnings.length > 0) {
@@ -464,7 +546,10 @@ function SettingsPage() {
       action: {
         label: "Undo",
         onClick: () => {
-          update({ defaultGridSize: previous.defaultGridSize, defaultSnapStep: previous.defaultSnapStep });
+          update({
+            defaultGridSize: previous.defaultGridSize,
+            defaultSnapStep: previous.defaultSnapStep,
+          });
           toast.success("Previous grid defaults restored.");
         },
       },
@@ -530,7 +615,6 @@ function SettingsPage() {
         </Alert>
       )}
 
-
       <Section title="Organization">
         <div className="space-y-1.5">
           <Label htmlFor="org">Name</Label>
@@ -546,8 +630,13 @@ function SettingsPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Default orientation</Label>
-            <Select value={defaultOrientation} onValueChange={(v) => update({ defaultOrientation: v as any })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={defaultOrientation}
+              onValueChange={(v) => update({ defaultOrientation: v as any })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="landscape">Landscape</SelectItem>
                 <SelectItem value="portrait">Portrait</SelectItem>
@@ -556,26 +645,43 @@ function SettingsPage() {
           </div>
           <div className="space-y-1.5">
             <Label>Default background</Label>
-            <Input value={defaultBackground} onChange={(e) => update({ defaultBackground: e.target.value })} />
+            <Input
+              value={defaultBackground}
+              onChange={(e) => update({ defaultBackground: e.target.value })}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Default grid size (cells)</Label>
-            <Select value={String(defaultGridSize)} onValueChange={(v) => update({ defaultGridSize: Number(v) })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={String(defaultGridSize)}
+              onValueChange={(v) => update({ defaultGridSize: Number(v) })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {[1, 2, 4, 6, 8, 12, 16].map((n) => (
-                  <SelectItem key={n} value={String(n)}>{n} cells</SelectItem>
+                  <SelectItem key={n} value={String(n)}>
+                    {n} cells
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Default snap step (cells)</Label>
-            <Select value={String(defaultSnapStep)} onValueChange={(v) => update({ defaultSnapStep: Number(v) })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={String(defaultSnapStep)}
+              onValueChange={(v) => update({ defaultSnapStep: Number(v) })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {[1, 2, 4, 6, 8, 12, 16].map((n) => (
-                  <SelectItem key={n} value={String(n)}>{n} cells</SelectItem>
+                  <SelectItem key={n} value={String(n)}>
+                    {n} cells
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -606,7 +712,9 @@ function SettingsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Reset grid defaults?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will restore <strong>Default grid size</strong> to 1 cell and <strong>Default snap step</strong> to 4 cells, and overwrite your saved settings. This action cannot be undone.
+                This will restore <strong>Default grid size</strong> to 1 cell and{" "}
+                <strong>Default snap step</strong> to 4 cells, and overwrite your saved settings.
+                This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -618,7 +726,10 @@ function SettingsPage() {
       </Section>
 
       {gridDefaultsHistory.length > 0 && (
-        <Section title="Grid defaults history" description="Revert to previous grid default snapshots from this session.">
+        <Section
+          title="Grid defaults history"
+          description="Revert to previous grid default snapshots from this session."
+        >
           <div className="space-y-3">
             {gridDefaultsHistory.map((entry, index) => (
               <div
@@ -633,11 +744,7 @@ function SettingsPage() {
                     {new Date(entry.timestamp).toLocaleString()}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => revertGridDefaults(entry)}
-                >
+                <Button variant="outline" size="sm" onClick={() => revertGridDefaults(entry)}>
                   Revert
                 </Button>
               </div>
@@ -659,7 +766,8 @@ function SettingsPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Clear grid defaults history?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will remove all saved grid default snapshots from the history panel and localStorage. You won't be able to revert to them afterward.
+                  This will remove all saved grid default snapshots from the history panel and
+                  localStorage. You won't be able to revert to them afterward.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -671,21 +779,44 @@ function SettingsPage() {
         </Section>
       )}
 
-      <Section title="Data sources" description="Connect external services. Wiring lands in a future release.">
+      <Section
+        title="Data sources"
+        description="Connect external services. Wiring lands in a future release."
+      >
         <div className="space-y-1.5">
           <Label htmlFor="weather">OpenWeatherMap API key</Label>
-          <Input id="weather" value={weatherApiKey ?? ""} onChange={(e) => update({ weatherApiKey: e.target.value })} placeholder="Optional" />
+          <Input
+            id="weather"
+            value={weatherApiKey ?? ""}
+            onChange={(e) => update({ weatherApiKey: e.target.value })}
+            placeholder="Optional"
+          />
         </div>
       </Section>
 
-      <Section title="Export & import" description="Back up screens as JSON, or restore from a previous export.">
+      <Section
+        title="Export & import"
+        description="Back up screens as JSON, or restore from a previous export."
+      >
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={handleExport}><Download className="h-4 w-4" /> Export screens</Button>
-          <Button variant="outline" onClick={() => fileRef.current?.click()}><Upload className="h-4 w-4" /> Import screens</Button>
-          <Button variant="outline" onClick={handleExportSettings}><Download className="h-4 w-4" /> Export settings</Button>
-          <Button variant="outline" onClick={handleExportGridDefaults}><Download className="h-4 w-4" /> Export grid defaults</Button>
-          <Button variant="outline" onClick={() => gridDefaultsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import grid defaults</Button>
-          <Button variant="outline" onClick={() => settingsFileRef.current?.click()}><Upload className="h-4 w-4" /> Import settings</Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="h-4 w-4" /> Export screens
+          </Button>
+          <Button variant="outline" onClick={() => fileRef.current?.click()}>
+            <Upload className="h-4 w-4" /> Import screens
+          </Button>
+          <Button variant="outline" onClick={handleExportSettings}>
+            <Download className="h-4 w-4" /> Export settings
+          </Button>
+          <Button variant="outline" onClick={handleExportGridDefaults}>
+            <Download className="h-4 w-4" /> Export grid defaults
+          </Button>
+          <Button variant="outline" onClick={() => gridDefaultsFileRef.current?.click()}>
+            <Upload className="h-4 w-4" /> Import grid defaults
+          </Button>
+          <Button variant="outline" onClick={() => settingsFileRef.current?.click()}>
+            <Upload className="h-4 w-4" /> Import settings
+          </Button>
           <input
             ref={fileRef}
             type="file"
@@ -720,7 +851,13 @@ function SettingsPage() {
             }}
           />
 
-          <AlertDialog open={importDialogOpen} onOpenChange={(open) => { setImportDialogOpen(open); if (!open) setPendingGridImport(null); }}>
+          <AlertDialog
+            open={importDialogOpen}
+            onOpenChange={(open) => {
+              setImportDialogOpen(open);
+              if (!open) setPendingGridImport(null);
+            }}
+          >
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Import grid defaults</AlertDialogTitle>
@@ -729,7 +866,10 @@ function SettingsPage() {
                 </AlertDialogDescription>
                 {lastGridImport && (
                   <p className="text-xs text-muted-foreground">
-                    Last import: {formatRelativeTime(lastGridImport.timestamp)} · {lastGridImport.mode === "replace" ? "Replace" : "Merge"} · Grid defaults {lastGridImport.includedDefaults ? "on" : "off"} · Undo history {lastGridImport.includedHistory ? "on" : "off"}
+                    Last import: {formatRelativeTime(lastGridImport.timestamp)} ·{" "}
+                    {lastGridImport.mode === "replace" ? "Replace" : "Merge"} · Grid defaults{" "}
+                    {lastGridImport.includedDefaults ? "on" : "off"} · Undo history{" "}
+                    {lastGridImport.includedHistory ? "on" : "off"}
                   </p>
                 )}
               </AlertDialogHeader>
@@ -752,7 +892,9 @@ function SettingsPage() {
                   <div className="space-y-1">
                     <p className="text-sm font-medium">Import options</p>
                     <p className="text-xs text-muted-foreground">
-                      Saved choices: Grid defaults {(gridImportIncludeDefaults ?? true) ? "on" : "off"} · Undo history {(gridImportIncludeHistory ?? true) ? "on" : "off"}
+                      Saved choices: Grid defaults{" "}
+                      {(gridImportIncludeDefaults ?? true) ? "on" : "off"} · Undo history{" "}
+                      {(gridImportIncludeHistory ?? true) ? "on" : "off"}
                     </p>
                   </div>
                   <Label className="flex items-center justify-between gap-4 text-sm font-normal">
@@ -779,8 +921,18 @@ function SettingsPage() {
               )}
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction disabled={!importGridDefaults && !importHistory} onClick={confirmMergeGridImport}>Merge</AlertDialogAction>
-                <AlertDialogAction disabled={!importGridDefaults && !importHistory} onClick={confirmReplaceGridImport}>Replace</AlertDialogAction>
+                <AlertDialogAction
+                  disabled={!importGridDefaults && !importHistory}
+                  onClick={confirmMergeGridImport}
+                >
+                  Merge
+                </AlertDialogAction>
+                <AlertDialogAction
+                  disabled={!importGridDefaults && !importHistory}
+                  onClick={confirmReplaceGridImport}
+                >
+                  Replace
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

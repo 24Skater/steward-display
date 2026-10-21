@@ -38,9 +38,7 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
                   WebkitLineClamp: config.titleMaxLines,
                   overflow: "hidden",
                   textOverflow:
-                    (config.titleTruncationMode ?? "ellipsis") === "clip"
-                      ? "clip"
-                      : "ellipsis",
+                    (config.titleTruncationMode ?? "ellipsis") === "clip" ? "clip" : "ellipsis",
                 }
               : {}),
           }}
@@ -64,9 +62,7 @@ export function AnnouncementWidget({ config }: { config: AnnouncementConfig }) {
                   WebkitLineClamp: config.bodyMaxLines,
                   overflow: "hidden",
                   textOverflow:
-                    (config.bodyTruncationMode ?? "ellipsis") === "clip"
-                      ? "clip"
-                      : "ellipsis",
+                    (config.bodyTruncationMode ?? "ellipsis") === "clip" ? "clip" : "ellipsis",
                 }
               : {}),
           }}

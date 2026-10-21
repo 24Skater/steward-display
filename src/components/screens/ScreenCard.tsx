@@ -67,7 +67,9 @@ export function ScreenCard({ screen }: { screen: Screen }) {
                   : screen.resolution}
               </Badge>
               <span>·</span>
-              <span>{screen.widgets.length} widget{screen.widgets.length === 1 ? "" : "s"}</span>
+              <span>
+                {screen.widgets.length} widget{screen.widgets.length === 1 ? "" : "s"}
+              </span>
               <span>·</span>
               <span>{relTime(screen.updatedAt)}</span>
               {screen.schedule?.enabled && (
@@ -91,7 +93,9 @@ export function ScreenCard({ screen }: { screen: Screen }) {
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate({ to: "/screens/$id/edit", params: { id: screen.id } })}>
+              <DropdownMenuItem
+                onClick={() => navigate({ to: "/screens/$id/edit", params: { id: screen.id } })}
+              >
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -108,7 +112,10 @@ export function ScreenCard({ screen }: { screen: Screen }) {
                 <Copy className="mr-2 h-4 w-4" /> Duplicate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setConfirm(true)}>
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setConfirm(true)}
+              >
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

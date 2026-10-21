@@ -19,10 +19,7 @@ import {
   type ContrastConfig,
 } from "@/lib/contrast";
 import { getContrastConfig } from "@/lib/contrastConfig.functions";
-import {
-  getTokenLocations,
-  type TokenLocation,
-} from "@/lib/tokenLocations.functions";
+import { getTokenLocations, type TokenLocation } from "@/lib/tokenLocations.functions";
 
 type ResolvedConfig = ContrastConfig & {
   source: { jsonPath: string | null; envOverrides: string[] };
@@ -30,10 +27,7 @@ type ResolvedConfig = ContrastConfig & {
 
 const REPO_SOURCE_URL = (import.meta.env.VITE_REPO_SOURCE_URL ?? "") as string;
 
-function buildSourceHref(
-  sourcePath: string | undefined,
-  line: number | undefined,
-): string | null {
+function buildSourceHref(sourcePath: string | undefined, line: number | undefined): string | null {
   if (!REPO_SOURCE_URL || !sourcePath || !line) return null;
   return `${REPO_SOURCE_URL.replace(/\/$/, "")}/${sourcePath}#L${line}`;
 }
@@ -63,9 +57,7 @@ function TokenChip({
         aria-hidden="true"
       />
       <span>{varName}</span>
-      {firstLine && (
-        <span className="text-muted-foreground">:{firstLine}</span>
-      )}
+      {firstLine && <span className="text-muted-foreground">:{firstLine}</span>}
     </>
   );
   if (href) {
@@ -118,9 +110,7 @@ function Row({
     <li
       className={
         "flex flex-wrap items-center gap-3 rounded-md border p-2 transition-colors " +
-        (isFail
-          ? "border-red/60 bg-red/10 ring-1 ring-red/40 shadow-sm"
-          : "border-border")
+        (isFail ? "border-red/60 bg-red/10 ring-1 ring-red/40 shadow-sm" : "border-border")
       }
       data-pass={ok}
       data-fail={isFail || undefined}
@@ -138,10 +128,7 @@ function Row({
       </span>
       <div className="min-w-0 flex-1">
         <div
-          className={
-            "truncate text-sm font-medium " +
-            (isFail ? "text-red" : "text-foreground")
-          }
+          className={"truncate text-sm font-medium " + (isFail ? "text-red" : "text-foreground")}
         >
           {isFail && <AlertTriangle className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />}
           {r.name}
@@ -177,8 +164,7 @@ function Row({
       <div className="flex shrink-0 items-center gap-2">
         <span
           className={
-            "tabular-nums text-sm font-semibold " +
-            (isFail ? "text-red" : "text-foreground")
+            "tabular-nums text-sm font-semibold " + (isFail ? "text-red" : "text-foreground")
           }
           title={`Threshold ≥ ${r.threshold}:1`}
         >
@@ -210,7 +196,11 @@ function Row({
 
 export function ContrastAudit() {
   const fetchConfig = useServerFn(getContrastConfig);
-  const { data: config, isLoading, error } = useQuery<ResolvedConfig>({
+  const {
+    data: config,
+    isLoading,
+    error,
+  } = useQuery<ResolvedConfig>({
     queryKey: ["contrast-config"],
     queryFn: () => fetchConfig(),
     staleTime: 60_000,
@@ -225,8 +215,10 @@ export function ContrastAudit() {
   const tokens = tokenData?.tokens ?? {};
   const sourcePath = tokenData?.sourcePath;
 
-  const active: ResolvedConfig =
-    config ?? { ...DEFAULT_CONTRAST_CONFIG, source: { jsonPath: null, envOverrides: [] } };
+  const active: ResolvedConfig = config ?? {
+    ...DEFAULT_CONTRAST_CONFIG,
+    source: { jsonPath: null, envOverrides: [] },
+  };
 
   const [showOnlyFailing, setShowOnlyFailing] = useState(false);
   const [themeFilter, setThemeFilter] = useState<"all" | "light" | "dark">("all");
@@ -291,9 +283,7 @@ export function ContrastAudit() {
       <div
         className={
           "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium " +
-          (failing === 0
-            ? "bg-emerald/10 text-emerald"
-            : "bg-red/10 text-red")
+          (failing === 0 ? "bg-emerald/10 text-emerald" : "bg-red/10 text-red")
         }
         role="status"
         aria-live="polite"
@@ -306,7 +296,8 @@ export function ContrastAudit() {
         ) : (
           <>
             <AlertTriangle className="h-4 w-4" />
-            {failing} of {required.length} required pairing{required.length === 1 ? "" : "s"} fail WCAG {level}.
+            {failing} of {required.length} required pairing{required.length === 1 ? "" : "s"} fail
+            WCAG {level}.
           </>
         )}
       </div>
@@ -371,11 +362,20 @@ export function ContrastAudit() {
           <ul className="space-y-1.5">
             {filteredLight.length === 0 ? (
               <li className="text-sm text-muted-foreground">
-                {showOnlyFailing ? "No failing pairs in the light theme." : "No pairs in the light theme."}
+                {showOnlyFailing
+                  ? "No failing pairs in the light theme."
+                  : "No pairs in the light theme."}
               </li>
             ) : (
               filteredLight.map((r) => (
-                <Row key={`l-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
+                <Row
+                  key={`l-${r.name}`}
+                  r={r}
+                  level={level}
+                  tokens={tokens}
+                  sourcePath={sourcePath}
+                  onJump={jumpToVar}
+                />
               ))
             )}
           </ul>
@@ -390,11 +390,20 @@ export function ContrastAudit() {
           <ul className="space-y-1.5">
             {filteredDark.length === 0 ? (
               <li className="text-sm text-muted-foreground">
-                {showOnlyFailing ? "No failing pairs in the dark theme." : "No pairs in the dark theme."}
+                {showOnlyFailing
+                  ? "No failing pairs in the dark theme."
+                  : "No pairs in the dark theme."}
               </li>
             ) : (
               filteredDark.map((r) => (
-                <Row key={`d-${r.name}`} r={r} level={level} tokens={tokens} sourcePath={sourcePath} onJump={jumpToVar} />
+                <Row
+                  key={`d-${r.name}`}
+                  r={r}
+                  level={level}
+                  tokens={tokens}
+                  sourcePath={sourcePath}
+                  onJump={jumpToVar}
+                />
               ))
             )}
           </ul>
@@ -568,7 +577,9 @@ function ActiveConfigCard({
         <span
           className={
             "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold " +
-            (config.requireAAA ? "bg-primary/20 text-primary-foreground" : "bg-emerald/15 text-emerald")
+            (config.requireAAA
+              ? "bg-primary/20 text-primary-foreground"
+              : "bg-emerald/15 text-emerald")
           }
         >
           {loading ? "Loading…" : config.requireAAA ? "AAA mode" : "AA mode"}

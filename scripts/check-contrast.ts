@@ -38,14 +38,7 @@ console.log(
 );
 
 for (const r of results) {
-  const tag =
-    r.use === "decorative"
-      ? "INFO"
-      : r.passAA
-        ? r.passAAA
-          ? "AAA "
-          : "AA  "
-        : "FAIL";
+  const tag = r.use === "decorative" ? "INFO" : r.passAA ? (r.passAAA ? "AAA " : "AA  ") : "FAIL";
   const line = `  [${tag}] ${pad(r.theme, 5)} ${r.ratio
     .toFixed(2)
     .padStart(5)}:1  (≥${r.threshold}:1)  ${r.name}`;
@@ -53,13 +46,9 @@ for (const r of results) {
 }
 
 if (failures.length) {
-  console.error(
-    `\n✗ ${failures.length} required brand pairing(s) fail WCAG AA:`,
-  );
+  console.error(`\n✗ ${failures.length} required brand pairing(s) fail WCAG AA:`);
   for (const f of failures) {
-    console.error(
-      `    ${f.theme} · ${f.name} — ${f.ratio.toFixed(2)}:1 (needs ${f.threshold}:1)`,
-    );
+    console.error(`    ${f.theme} · ${f.name} — ${f.ratio.toFixed(2)}:1 (needs ${f.threshold}:1)`);
   }
   console.error(
     `\n  Adjust the tokens in src/styles.css (and mirror in src/lib/contrast.ts) until all pairings pass.`,
@@ -109,9 +98,17 @@ function badge(r: PairResult): string {
 }
 
 function esc(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]!));
+  return s.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c]!,
+  );
 }
 
 function renderHtml(s: typeof summary): string {
@@ -120,7 +117,8 @@ function renderHtml(s: typeof summary): string {
       .filter((r) => r.theme === theme)
       .map((r) => {
         const tag = badge(r);
-        const tagClass = r.use === "decorative" ? "info" : r.passAA ? (r.passAAA ? "aaa" : "aa") : "fail";
+        const tagClass =
+          r.use === "decorative" ? "info" : r.passAA ? (r.passAAA ? "aaa" : "aa") : "fail";
         return `<tr class="row ${tagClass}">
     <td><span class="swatch" style="background:${r.bg};color:${r.fg}">Aa</span></td>
     <td class="name">${esc(r.name)}</td>
@@ -148,7 +146,9 @@ function renderHtml(s: typeof summary): string {
     s.config.source.envOverrides.length
       ? `env: <code>${esc(s.config.source.envOverrides.join(", "))}</code>`
       : null,
-  ].filter(Boolean).join(" · ");
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return `<!doctype html>
 <html lang="en">
@@ -222,14 +222,18 @@ function renderHtml(s: typeof summary): string {
 
 function renderMarkdown(s: typeof summary): string {
   const level = s.config.requireAAA ? "AAA" : "AA";
-  const head = s.status === "pass"
-    ? `### ✓ Steward contrast — all ${s.totals.required} required pairings meet WCAG ${level}`
-    : `### ✗ Steward contrast — ${s.totals.failing} of ${s.totals.required} required pairings fail WCAG ${level}`;
+  const head =
+    s.status === "pass"
+      ? `### ✓ Steward contrast — all ${s.totals.required} required pairings meet WCAG ${level}`
+      : `### ✗ Steward contrast — ${s.totals.failing} of ${s.totals.required} required pairings fail WCAG ${level}`;
   const cfgLine = `**Mode:** ${level} · body ≥ ${s.config.thresholds.body}:1 · large ≥ ${s.config.thresholds.large}:1 · ui ≥ ${s.config.thresholds.ui}:1 · decorative ${s.config.failOnDecorative ? "enforced" : "informational"} (≥ ${s.config.thresholds.decorative}:1)`;
   const sect = (theme: "light" | "dark") => {
     const rows = s.results
       .filter((r) => r.theme === theme)
-      .map((r) => `| ${badge(r)} | ${r.name} | \`${r.fg.toUpperCase()}\` on \`${r.bg.toUpperCase()}\` | ${r.use} | ${r.ratio.toFixed(2)}:1 | ≥ ${r.threshold}:1 |`)
+      .map(
+        (r) =>
+          `| ${badge(r)} | ${r.name} | \`${r.fg.toUpperCase()}\` on \`${r.bg.toUpperCase()}\` | ${r.use} | ${r.ratio.toFixed(2)}:1 | ≥ ${r.threshold}:1 |`,
+      )
       .join("\n");
     return `\n#### ${theme[0].toUpperCase()}${theme.slice(1)} theme\n\n| Status | Pairing | Tokens | Use | Ratio | Threshold |\n| --- | --- | --- | --- | --- | --- |\n${rows}\n`;
   };

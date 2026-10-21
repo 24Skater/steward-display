@@ -80,10 +80,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Steward Display" },
-      { name: "description", content: "Configurable screen and widget display system for the Steward ecosystem." },
+      {
+        name: "description",
+        content: "Configurable screen and widget display system for the Steward ecosystem.",
+      },
       { name: "author", content: "Steward" },
       { property: "og:title", content: "Steward Display" },
-      { property: "og:description", content: "Configurable screen and widget display system for the Steward ecosystem." },
+      {
+        property: "og:description",
+        content: "Configurable screen and widget display system for the Steward ecosystem.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

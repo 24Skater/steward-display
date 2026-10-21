@@ -1,8 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import {
-  loadContrastConfig,
-  type ResolvedContrastConfig,
-} from "./contrast.config";
+import { loadContrastConfig, type ResolvedContrastConfig } from "./contrast.config";
 
 /**
  * Returns the exact same ContrastConfig the CI script resolves, including

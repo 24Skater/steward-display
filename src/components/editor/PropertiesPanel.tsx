@@ -1,4 +1,18 @@
-import { Trash2, Copy, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, X, Sparkles, Plus, MoreHorizontal, Pencil, User, Eye } from "lucide-react";
+import {
+  Trash2,
+  Copy,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUp,
+  ChevronsDown,
+  X,
+  Sparkles,
+  Plus,
+  MoreHorizontal,
+  Pencil,
+  User,
+  Eye,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -20,12 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import type { Screen, WidgetInstance } from "@/types";
 import { useScreenStore } from "@/store/screenStore";
@@ -36,8 +45,6 @@ import { WidgetConfigForm } from "./WidgetConfigForms";
 import { getPresetsForWidget, type WidgetPreset } from "@/lib/widgetPresets";
 import { usePresetStore, type CustomPreset } from "@/store/presetStore";
 import { WidgetRenderer } from "./WidgetRenderer";
-
-
 
 const BG_SWATCHES = ["", "#0B1220", "#111827", "#FFFFFF", "#FEF3C7", "#DBEAFE", "#FCE7F3"];
 const TEXT_SWATCHES = ["#FFFFFF", "#0B1220", "#F59E0B", "#DC2626", "#2563EB", "#16A34A"];
@@ -75,9 +82,7 @@ export function PropertiesPanel({
   const removePreset = usePresetStore((s) => s.remove);
 
   const [editorPreset, setEditorPreset] = useState<
-    | { mode: "create" }
-    | { mode: "edit"; preset: CustomPreset }
-    | null
+    { mode: "create" } | { mode: "edit"; preset: CustomPreset } | null
   >(null);
   const [previewPreset, setPreviewPreset] = useState<WidgetPreset | null>(null);
 
@@ -157,299 +162,358 @@ export function PropertiesPanel({
 
   const hasAnyPresets = builtInPresets.length > 0 || customPresets.length > 0;
 
-
-
   return (
     <TooltipProvider delayDuration={200}>
       <aside className="flex h-full w-[22rem] shrink-0 flex-col border-l border-border bg-card">
-      <div className="flex items-start justify-between gap-3 border-b border-border p-3">
-        <div className="flex min-w-0 items-center gap-2">
-          {Icon && (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-foreground">
-              <Icon className="h-4 w-4" />
-            </span>
-          )}
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-foreground">{def?.label}</p>
-            <p className="text-[11px] text-muted-foreground">{def?.category} widget</p>
-          </div>
-        </div>
-        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5">
-        <ToolbarButton tooltip="Duplicate" shortcut="⌘/Ctrl + D" onClick={() => duplicateWidget(screen.id, widget.id)}>
-          <Copy className="h-3.5 w-3.5" />
-        </ToolbarButton>
-        <ToolbarButton tooltip="Bring to front" onClick={() => reorderWidget(screen.id, widget.id, "front")}>
-          <ChevronsUp className="h-3.5 w-3.5" />
-        </ToolbarButton>
-        <ToolbarButton tooltip="Bring forward" onClick={() => reorderWidget(screen.id, widget.id, "forward")}>
-          <ChevronUp className="h-3.5 w-3.5" />
-        </ToolbarButton>
-        <ToolbarButton tooltip="Send backward" onClick={() => reorderWidget(screen.id, widget.id, "backward")}>
-          <ChevronDown className="h-3.5 w-3.5" />
-        </ToolbarButton>
-        <ToolbarButton tooltip="Send to back" onClick={() => reorderWidget(screen.id, widget.id, "back")}>
-          <ChevronsDown className="h-3.5 w-3.5" />
-        </ToolbarButton>
-      </div>
-
-      <Tabs defaultValue="content" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mx-3 mt-3 grid grid-cols-3">
-          <TabsTrigger value="content">Content</TabsTrigger>
-          <TabsTrigger value="style">Style</TabsTrigger>
-          <TabsTrigger value="layout">Layout</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="content" className="mt-0 flex-1 overflow-y-auto p-4">
-          <div className="mb-5 rounded-md border border-border bg-muted/40 p-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                <Sparkles className="h-3 w-3" />
-                Presets
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditorPreset({ mode: "create" })}
-                className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-foreground hover:border-blue hover:text-blue"
-              >
-                <Plus className="h-3 w-3" /> Save current
-              </button>
-            </div>
-
-            {builtInPresets.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {builtInPresets.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => applyPreset(p)}
-                    onMouseEnter={() => setPreviewPreset(p)}
-                    onMouseLeave={() => setPreviewPreset(null)}
-                    title={p.description}
-                    className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:border-blue hover:bg-blue/10 hover:text-blue"
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
+        <div className="flex items-start justify-between gap-3 border-b border-border p-3">
+          <div className="flex min-w-0 items-center gap-2">
+            {Icon && (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-foreground">
+                <Icon className="h-4 w-4" />
+              </span>
             )}
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-foreground">{def?.label}</p>
+              <p className="text-[11px] text-muted-foreground">{def?.category} widget</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-            {customPresets.length > 0 && (
-              <div className="mt-2">
-                <div className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                  <User className="h-2.5 w-2.5" /> My presets
+        <div className="flex items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5">
+          <ToolbarButton
+            tooltip="Duplicate"
+            shortcut="⌘/Ctrl + D"
+            onClick={() => duplicateWidget(screen.id, widget.id)}
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            tooltip="Bring to front"
+            onClick={() => reorderWidget(screen.id, widget.id, "front")}
+          >
+            <ChevronsUp className="h-3.5 w-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            tooltip="Bring forward"
+            onClick={() => reorderWidget(screen.id, widget.id, "forward")}
+          >
+            <ChevronUp className="h-3.5 w-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            tooltip="Send backward"
+            onClick={() => reorderWidget(screen.id, widget.id, "backward")}
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
+          </ToolbarButton>
+          <ToolbarButton
+            tooltip="Send to back"
+            onClick={() => reorderWidget(screen.id, widget.id, "back")}
+          >
+            <ChevronsDown className="h-3.5 w-3.5" />
+          </ToolbarButton>
+        </div>
+
+        <Tabs defaultValue="content" className="flex min-h-0 flex-1 flex-col">
+          <TabsList className="mx-3 mt-3 grid grid-cols-3">
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="style">Style</TabsTrigger>
+            <TabsTrigger value="layout">Layout</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="content" className="mt-0 flex-1 overflow-y-auto p-4">
+            <div className="mb-5 rounded-md border border-border bg-muted/40 p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <Sparkles className="h-3 w-3" />
+                  Presets
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setEditorPreset({ mode: "create" })}
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-foreground hover:border-blue hover:text-blue"
+                >
+                  <Plus className="h-3 w-3" /> Save current
+                </button>
+              </div>
+
+              {builtInPresets.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
-                  {customPresets.map((p) => (
-                    <div
+                  {builtInPresets.map((p) => (
+                    <button
                       key={p.id}
-                      className="group inline-flex items-stretch overflow-hidden rounded-full border border-border bg-background text-[11px] font-medium text-foreground transition-colors hover:border-blue"
+                      type="button"
+                      onClick={() => applyPreset(p)}
                       onMouseEnter={() => setPreviewPreset(p)}
                       onMouseLeave={() => setPreviewPreset(null)}
+                      title={p.description}
+                      className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:border-blue hover:bg-blue/10 hover:text-blue"
                     >
-                      <button
-                        type="button"
-                        onClick={() => applyPreset(p)}
-                        title={p.description}
-                        className="px-2.5 py-1 hover:text-blue"
-                      >
-                        {p.label}
-                      </button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            aria-label="Preset options"
-                            className="border-l border-border px-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                          >
-                            <MoreHorizontal className="h-3 w-3" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => setEditorPreset({ mode: "edit", preset: p })}>
-                            <Pencil className="h-3.5 w-3.5" /> Rename
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onSelect={() => {
-                              updatePreset(p.id, {
-                                config: { ...widget.config },
-                                style: widget.style ? { ...widget.style } : undefined,
-                              });
-                            }}
-                          >
-                            <Sparkles className="h-3.5 w-3.5" /> Update from current
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onSelect={() => removePreset(p.id)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                      {p.label}
+                    </button>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
 
-            {hasAnyPresets && (
-              <div className="mt-3 rounded-md border border-border bg-background p-2">
-                <div className="mb-1.5 flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                    <Eye className="h-3 w-3" /> Preview
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-[10px] text-muted-foreground">
-                      {previewPreset ? previewPreset.label : "Current widget"}
-                    </span>
-                    {previewPreset && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          applyPresetWithUndo(previewPreset);
-                        }}
-                        className="inline-flex items-center gap-1 rounded-md bg-blue px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue/90"
+              {customPresets.length > 0 && (
+                <div className="mt-2">
+                  <div className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <User className="h-2.5 w-2.5" /> My presets
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {customPresets.map((p) => (
+                      <div
+                        key={p.id}
+                        className="group inline-flex items-stretch overflow-hidden rounded-full border border-border bg-background text-[11px] font-medium text-foreground transition-colors hover:border-blue"
+                        onMouseEnter={() => setPreviewPreset(p)}
+                        onMouseLeave={() => setPreviewPreset(null)}
                       >
-                        Apply
-                      </button>
-                    )}
+                        <button
+                          type="button"
+                          onClick={() => applyPreset(p)}
+                          title={p.description}
+                          className="px-2.5 py-1 hover:text-blue"
+                        >
+                          {p.label}
+                        </button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              aria-label="Preset options"
+                              className="border-l border-border px-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                            >
+                              <MoreHorizontal className="h-3 w-3" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onSelect={() => setEditorPreset({ mode: "edit", preset: p })}
+                            >
+                              <Pencil className="h-3.5 w-3.5" /> Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                updatePreset(p.id, {
+                                  config: { ...widget.config },
+                                  style: widget.style ? { ...widget.style } : undefined,
+                                });
+                              }}
+                            >
+                              <Sparkles className="h-3.5 w-3.5" /> Update from current
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => removePreset(p.id)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
-                  <WidgetRenderer widget={previewWidget} />
+              )}
+
+              {hasAnyPresets && (
+                <div className="mt-3 rounded-md border border-border bg-background p-2">
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                      <Eye className="h-3 w-3" /> Preview
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-[10px] text-muted-foreground">
+                        {previewPreset ? previewPreset.label : "Current widget"}
+                      </span>
+                      {previewPreset && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            applyPresetWithUndo(previewPreset);
+                          }}
+                          className="inline-flex items-center gap-1 rounded-md bg-blue px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue/90"
+                        >
+                          Apply
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="aspect-[16/9] w-full overflow-hidden rounded-md border border-border">
+                    <WidgetRenderer widget={previewWidget} />
+                  </div>
                 </div>
+              )}
+
+              <p className="mt-2 text-[10px] text-muted-foreground">
+                {hasAnyPresets
+                  ? "Apply a preset, then keep tweaking — or save your current setup."
+                  : "No presets yet. Save your current setup to reuse it later."}
+              </p>
+            </div>
+
+            <WidgetConfigForm widget={widget} onChange={patchConfig} />
+          </TabsContent>
+
+          <TabsContent value="style" className="mt-0 flex-1 space-y-5 overflow-y-auto p-4">
+            <ColorBlock
+              label="Background"
+              value={widget.style?.backgroundColor ?? ""}
+              onChange={(v) => patchStyle({ backgroundColor: v })}
+              swatches={BG_SWATCHES}
+              allowClear
+            />
+            <ColorBlock
+              label="Text color"
+              value={widget.style?.textColor ?? ""}
+              onChange={(v) => patchStyle({ textColor: v })}
+              swatches={TEXT_SWATCHES}
+              allowClear
+            />
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Corner radius</Label>
+              <Input
+                value={widget.style?.borderRadius ?? ""}
+                placeholder="e.g. 12px"
+                onChange={(e) => patchStyle({ borderRadius: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">
+                Opacity ({Math.round((widget.style?.opacity ?? 1) * 100)}%)
+              </Label>
+              <Slider
+                value={[Math.round((widget.style?.opacity ?? 1) * 100)]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={(v) => patchStyle({ opacity: v[0] / 100 })}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="layout" className="mt-0 flex-1 space-y-5 overflow-y-auto p-4">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Position
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Stepper
+                  label="X"
+                  value={widget.x}
+                  min={0}
+                  max={GRID_COLS - widget.w}
+                  onChange={(v) => patch({ x: v })}
+                />
+                <Stepper
+                  label="Y"
+                  value={widget.y}
+                  min={0}
+                  max={GRID_ROWS - widget.h}
+                  onChange={(v) => patch({ y: v })}
+                />
               </div>
-            )}
-
-            <p className="mt-2 text-[10px] text-muted-foreground">
-              {hasAnyPresets
-                ? "Apply a preset, then keep tweaking — or save your current setup."
-                : "No presets yet. Save your current setup to reuse it later."}
-            </p>
-          </div>
-
-          <WidgetConfigForm widget={widget} onChange={patchConfig} />
-        </TabsContent>
-
-        <TabsContent value="style" className="mt-0 flex-1 space-y-5 overflow-y-auto p-4">
-          <ColorBlock
-            label="Background"
-            value={widget.style?.backgroundColor ?? ""}
-            onChange={(v) => patchStyle({ backgroundColor: v })}
-            swatches={BG_SWATCHES}
-            allowClear
-          />
-          <ColorBlock
-            label="Text color"
-            value={widget.style?.textColor ?? ""}
-            onChange={(v) => patchStyle({ textColor: v })}
-            swatches={TEXT_SWATCHES}
-            allowClear
-          />
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Corner radius</Label>
-            <Input
-              value={widget.style?.borderRadius ?? ""}
-              placeholder="e.g. 12px"
-              onChange={(e) => patchStyle({ borderRadius: e.target.value })}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium">
-              Opacity ({Math.round((widget.style?.opacity ?? 1) * 100)}%)
-            </Label>
-            <Slider
-              value={[Math.round((widget.style?.opacity ?? 1) * 100)]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={(v) => patchStyle({ opacity: v[0] / 100 })}
-            />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="layout" className="mt-0 flex-1 space-y-5 overflow-y-auto p-4">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Position</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Stepper label="X" value={widget.x} min={0} max={GRID_COLS - widget.w} onChange={(v) => patch({ x: v })} />
-              <Stepper label="Y" value={widget.y} min={0} max={GRID_ROWS - widget.h} onChange={(v) => patch({ y: v })} />
             </div>
-          </div>
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Size</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Stepper label="Width" value={widget.w} min={1} max={GRID_COLS - widget.x} onChange={(v) => patch({ w: v })} />
-              <Stepper label="Height" value={widget.h} min={1} max={GRID_ROWS - widget.y} onChange={(v) => patch({ h: v })} />
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Size
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Stepper
+                  label="Width"
+                  value={widget.w}
+                  min={1}
+                  max={GRID_COLS - widget.x}
+                  onChange={(v) => patch({ w: v })}
+                />
+                <Stepper
+                  label="Height"
+                  value={widget.h}
+                  min={1}
+                  max={GRID_ROWS - widget.y}
+                  onChange={(v) => patch({ h: v })}
+                />
+              </div>
             </div>
-          </div>
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Quick align</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" onClick={() => patch({ x: Math.floor((GRID_COLS - widget.w) / 2) })}>
-                Center horizontally
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => patch({ y: Math.floor((GRID_ROWS - widget.h) / 2) })}>
-                Center vertically
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => patch({ x: 0, w: GRID_COLS })}>
-                Fill row
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => patch({ y: 0, h: GRID_ROWS })}>
-                Fill column
-              </Button>
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Quick align
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => patch({ x: Math.floor((GRID_COLS - widget.w) / 2) })}
+                >
+                  Center horizontally
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => patch({ y: Math.floor((GRID_ROWS - widget.h) / 2) })}
+                >
+                  Center vertically
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => patch({ x: 0, w: GRID_COLS })}>
+                  Fill row
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => patch({ y: 0, h: GRID_ROWS })}>
+                  Fill column
+                </Button>
+              </div>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
 
-      <div className="border-t border-border p-3">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => {
-                removeWidget(screen.id, widget.id);
-                onClose();
-              }}
-            >
-              <Trash2 className="h-4 w-4" /> Delete widget
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
-            <span>Remove selected widget</span>
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">Delete / Backspace</kbd>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+        <div className="border-t border-border p-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={() => {
+                  removeWidget(screen.id, widget.id);
+                  onClose();
+                }}
+              >
+                <Trash2 className="h-4 w-4" /> Delete widget
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
+              <span>Remove selected widget</span>
+              <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">
+                Delete / Backspace
+              </kbd>
+            </TooltipContent>
+          </Tooltip>
+        </div>
 
-      <PresetEditorDialog
-        state={editorPreset}
-        onClose={() => setEditorPreset(null)}
-        onSave={(label, description) => {
-          if (!editorPreset) return;
-          if (editorPreset.mode === "create") {
-            createPreset(
-              widget.widgetType,
-              label,
-              widget.config ?? {},
-              widget.style,
-              description || undefined,
-            );
-          } else {
-            updatePreset(editorPreset.preset.id, { label, description: description || undefined });
-          }
-          setEditorPreset(null);
-        }}
-      />
-    </aside>
-  </TooltipProvider>
+        <PresetEditorDialog
+          state={editorPreset}
+          onClose={() => setEditorPreset(null)}
+          onSave={(label, description) => {
+            if (!editorPreset) return;
+            if (editorPreset.mode === "create") {
+              createPreset(
+                widget.widgetType,
+                label,
+                widget.config ?? {},
+                widget.style,
+                description || undefined,
+              );
+            } else {
+              updatePreset(editorPreset.preset.id, {
+                label,
+                description: description || undefined,
+              });
+            }
+            setEditorPreset(null);
+          }}
+        />
+      </aside>
+    </TooltipProvider>
   );
 }
 
@@ -494,7 +558,9 @@ function PresetEditorDialog({
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label htmlFor="preset-label" className="text-xs font-medium">Name</Label>
+            <Label htmlFor="preset-label" className="text-xs font-medium">
+              Name
+            </Label>
             <Input
               id="preset-label"
               autoFocus
@@ -504,7 +570,9 @@ function PresetEditorDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="preset-desc" className="text-xs font-medium">Description (optional)</Label>
+            <Label htmlFor="preset-desc" className="text-xs font-medium">
+              Description (optional)
+            </Label>
             <Textarea
               id="preset-desc"
               value={description}
@@ -515,7 +583,9 @@ function PresetEditorDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
           <Button onClick={() => onSave(label.trim(), description.trim())} disabled={!label.trim()}>
             {isEdit ? "Save changes" : "Save preset"}
           </Button>
@@ -549,7 +619,11 @@ function ToolbarButton({
       </TooltipTrigger>
       <TooltipContent side="bottom" className="flex items-center gap-2 text-xs">
         <span>{tooltip}</span>
-        {shortcut && <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">{shortcut}</kbd>}
+        {shortcut && (
+          <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">
+            {shortcut}
+          </kbd>
+        )}
       </TooltipContent>
     </Tooltip>
   );
@@ -579,7 +653,12 @@ function ColorBlock({
           className="h-9 w-12 cursor-pointer rounded-md border border-border bg-background"
           aria-label={`${label} picker`}
         />
-        <Input value={value} placeholder="transparent" onChange={(e) => onChange(e.target.value)} className="flex-1 font-mono text-xs" />
+        <Input
+          value={value}
+          placeholder="transparent"
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 font-mono text-xs"
+        />
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
         {swatches.map((s) => (
@@ -591,7 +670,14 @@ function ColorBlock({
               "h-6 w-6 rounded-md border transition-transform hover:scale-110 " +
               (value === s ? "border-blue ring-2 ring-blue/40" : "border-border")
             }
-            style={s ? { background: s } : { backgroundImage: "repeating-linear-gradient(45deg, hsl(var(--muted)) 0 4px, transparent 4px 8px)" }}
+            style={
+              s
+                ? { background: s }
+                : {
+                    backgroundImage:
+                      "repeating-linear-gradient(45deg, hsl(var(--muted)) 0 4px, transparent 4px 8px)",
+                  }
+            }
             aria-label={s ? `Use ${s}` : "Transparent"}
             title={s || "Transparent"}
           />

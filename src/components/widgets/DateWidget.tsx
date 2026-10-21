@@ -12,9 +12,14 @@ export function DateWidget({ config }: { config: DateConfig }) {
     return () => clearInterval(id);
   }, []);
   if (!now) return null;
-  const formatted = new Intl.DateTimeFormat(undefined, { dateStyle: config.format ?? "full" }).format(now);
+  const formatted = new Intl.DateTimeFormat(undefined, {
+    dateStyle: config.format ?? "full",
+  }).format(now);
   return (
-    <div className="flex h-full w-full items-center justify-center text-center font-semibold" style={{ fontSize: "clamp(1rem, 6cqw, 4rem)" }}>
+    <div
+      className="flex h-full w-full items-center justify-center text-center font-semibold"
+      style={{ fontSize: "clamp(1rem, 6cqw, 4rem)" }}
+    >
       {formatted}
     </div>
   );

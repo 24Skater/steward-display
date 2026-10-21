@@ -82,7 +82,6 @@ function PresetsPage() {
 
   const activeFilters = query.trim() || typeFilter !== "all";
 
-
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 px-6 py-10">
       <PageHeader
@@ -140,7 +139,6 @@ function PresetsPage() {
       ) : grouped.length === 0 ? (
         <p className="text-sm text-muted-foreground">No presets match your filters.</p>
       ) : (
-
         <div className="space-y-6">
           {grouped.map(([type, list]) => {
             const def = getWidgetDefinition(type as WidgetType);
@@ -163,10 +161,7 @@ function PresetsPage() {
                 </header>
                 <ul className="divide-y divide-border">
                   {list.map((p) => (
-                    <li
-                      key={p.id}
-                      className="flex items-center justify-between gap-3 px-5 py-3"
-                    >
+                    <li key={p.id} className="flex items-center justify-between gap-3 px-5 py-3">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">{p.label}</p>
                         {p.description && (
@@ -177,11 +172,7 @@ function PresetsPage() {
                         </p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditing(p)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => setEditing(p)}>
                           <Pencil className="h-3.5 w-3.5" /> Edit
                         </Button>
                         <Button
@@ -272,7 +263,9 @@ function EditDialog({
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label htmlFor="edit-label" className="text-xs font-medium">Name</Label>
+            <Label htmlFor="edit-label" className="text-xs font-medium">
+              Name
+            </Label>
             <Input
               id="edit-label"
               autoFocus
@@ -281,7 +274,9 @@ function EditDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="edit-desc" className="text-xs font-medium">Description</Label>
+            <Label htmlFor="edit-desc" className="text-xs font-medium">
+              Description
+            </Label>
             <Textarea
               id="edit-desc"
               rows={2}
@@ -291,7 +286,9 @@ function EditDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
           <Button disabled={!label.trim()} onClick={() => onSave(label.trim(), description.trim())}>
             Save changes
           </Button>

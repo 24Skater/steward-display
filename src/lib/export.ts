@@ -5,8 +5,7 @@ const GRID_SIZE_OPTIONS = [1, 2, 4, 6, 8, 12, 16] as const;
 const DEFAULT_GRID_SIZE = 1;
 const DEFAULT_SNAP_STEP = 4;
 
-const isValidGridValue = (v: number) =>
-  (GRID_SIZE_OPTIONS as readonly number[]).includes(v);
+const isValidGridValue = (v: number) => (GRID_SIZE_OPTIONS as readonly number[]).includes(v);
 
 const otherSettingsSchema = z.object({
   orgName: z.string().optional(),
@@ -136,14 +135,13 @@ export function parseImportedGridDefaults(text: string): {
 }
 
 export function exportSettingsToJSON(settings: Settings): string {
-  return JSON.stringify(
-    { version: 1, exportedAt: new Date().toISOString(), settings },
-    null,
-    2,
-  );
+  return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), settings }, null, 2);
 }
 
-export function parseImportedSettings(text: string): { settings: Partial<Settings>; warnings: string[] } {
+export function parseImportedSettings(text: string): {
+  settings: Partial<Settings>;
+  warnings: string[];
+} {
   const parsed = JSON.parse(text);
   const candidate =
     parsed && typeof parsed === "object" && parsed.settings && typeof parsed.settings === "object"

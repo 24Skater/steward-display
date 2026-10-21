@@ -5,7 +5,10 @@ export interface VideoConfig {
 }
 
 export function VideoWidget({ config }: { config: VideoConfig }) {
-  if (!config.src) return <div className="flex h-full w-full items-center justify-center opacity-60">No video</div>;
+  if (!config.src)
+    return (
+      <div className="flex h-full w-full items-center justify-center opacity-60">No video</div>
+    );
   return (
     <video
       src={config.src}

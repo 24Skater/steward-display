@@ -10,10 +10,26 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "body": { "type": "number", "exclusiveMinimum": 0, "description": "Min ratio for body text (WCAG AA default 4.5)." },
-        "large": { "type": "number", "exclusiveMinimum": 0, "description": "Min ratio for large text (WCAG AA default 3.0)." },
-        "ui": { "type": "number", "exclusiveMinimum": 0, "description": "Min ratio for UI / non-text (WCAG 1.4.11 default 3.0)." },
-        "decorative": { "type": "number", "exclusiveMinimum": 0, "description": "Floor for purely decorative pairings; informational unless failOnDecorative is true." }
+        "body": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Min ratio for body text (WCAG AA default 4.5)."
+        },
+        "large": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Min ratio for large text (WCAG AA default 3.0)."
+        },
+        "ui": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Min ratio for UI / non-text (WCAG 1.4.11 default 3.0)."
+        },
+        "decorative": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Floor for purely decorative pairings; informational unless failOnDecorative is true."
+        }
       }
     },
     "requireAAA": {

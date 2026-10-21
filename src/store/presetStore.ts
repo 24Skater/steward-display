@@ -21,7 +21,10 @@ interface PresetState {
     style?: NonNullable<WidgetInstance["style"]>,
     description?: string,
   ) => CustomPreset;
-  update: (id: string, patch: Partial<Omit<CustomPreset, "id" | "custom" | "createdAt" | "widgetType">>) => void;
+  update: (
+    id: string,
+    patch: Partial<Omit<CustomPreset, "id" | "custom" | "createdAt" | "widgetType">>,
+  ) => void;
   remove: (id: string) => void;
 }
 

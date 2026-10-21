@@ -55,12 +55,19 @@ function DisplayPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [id, navigate]);
 
-  if (!hydrated) return <div className="flex h-screen items-center justify-center bg-black text-white/60">Loading…</div>;
+  if (!hydrated)
+    return (
+      <div className="flex h-screen items-center justify-center bg-black text-white/60">
+        Loading…
+      </div>
+    );
   if (!screen) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 bg-black text-white">
         <p>Screen not found.</p>
-        <Link to="/" className="text-sm text-blue hover:underline">Back to screens</Link>
+        <Link to="/" className="text-sm text-blue hover:underline">
+          Back to screens
+        </Link>
       </div>
     );
   }

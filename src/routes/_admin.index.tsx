@@ -68,7 +68,9 @@ function DashboardPage() {
           />
         </div>
         <Select value={orientation} onValueChange={setOrientation}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Orientation" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Orientation" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All orientations</SelectItem>
             <SelectItem value="landscape">Landscape</SelectItem>
@@ -76,7 +78,9 @@ function DashboardPage() {
           </SelectContent>
         </Select>
         <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Sort by" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="updated">Last modified</SelectItem>
             <SelectItem value="created">Date created</SelectItem>
@@ -98,7 +102,9 @@ function DashboardPage() {
           body="Create one to get started."
           action={
             <Button asChild>
-              <Link to="/screens/new"><Plus className="h-4 w-4" /> Create your first screen</Link>
+              <Link to="/screens/new">
+                <Plus className="h-4 w-4" /> Create your first screen
+              </Link>
             </Button>
           }
         />
