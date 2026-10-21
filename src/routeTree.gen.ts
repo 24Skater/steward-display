@@ -9,15 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TvRouteImport } from './routes/tv'
+import { Route as SetupRouteImport } from './routes/setup'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin.index'
 import { Route as AdminWidgetsRouteImport } from './routes/_admin.widgets'
+import { Route as AdminTvsRouteImport } from './routes/_admin.tvs'
 import { Route as AdminSettingsRouteImport } from './routes/_admin.settings'
 import { Route as AdminPresetsRouteImport } from './routes/_admin.presets'
+import { Route as AdminAccountRouteImport } from './routes/_admin.account'
 import { Route as ScreensIdPreviewRouteImport } from './routes/screens.$id.preview'
+import { Route as ApiTvScreenRouteImport } from './routes/api.tv.screen'
+import { Route as ApiTvPairRouteImport } from './routes/api.tv.pair'
 import { Route as AdminScreensNewRouteImport } from './routes/_admin.screens.new'
+import { Route as ApiTvPairStatusRouteImport } from './routes/api.tv.pair.status'
 import { Route as AdminScreensIdEditRouteImport } from './routes/_admin.screens.$id.edit'
 
+const TvRoute = TvRouteImport.update({
+  id: '/tv',
+  path: '/tv',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => rootRouteImport,
@@ -32,6 +55,11 @@ const AdminWidgetsRoute = AdminWidgetsRouteImport.update({
   path: '/widgets',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTvsRoute = AdminTvsRouteImport.update({
+  id: '/tvs',
+  path: '/tvs',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -42,15 +70,35 @@ const AdminPresetsRoute = AdminPresetsRouteImport.update({
   path: '/presets',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAccountRoute = AdminAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ScreensIdPreviewRoute = ScreensIdPreviewRouteImport.update({
   id: '/screens/$id/preview',
   path: '/screens/$id/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTvScreenRoute = ApiTvScreenRouteImport.update({
+  id: '/api/tv/screen',
+  path: '/api/tv/screen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTvPairRoute = ApiTvPairRouteImport.update({
+  id: '/api/tv/pair',
+  path: '/api/tv/pair',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminScreensNewRoute = AdminScreensNewRouteImport.update({
   id: '/screens/new',
   path: '/screens/new',
   getParentRoute: () => AdminRoute,
+} as any)
+const ApiTvPairStatusRoute = ApiTvPairStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => ApiTvPairRoute,
 } as any)
 const AdminScreensIdEditRoute = AdminScreensIdEditRouteImport.update({
   id: '/screens/$id/edit',
@@ -60,71 +108,145 @@ const AdminScreensIdEditRoute = AdminScreensIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
+  '/login': typeof LoginRoute
+  '/setup': typeof SetupRoute
+  '/tv': typeof TvRoute
+  '/account': typeof AdminAccountRoute
   '/presets': typeof AdminPresetsRoute
   '/settings': typeof AdminSettingsRoute
+  '/tvs': typeof AdminTvsRoute
   '/widgets': typeof AdminWidgetsRoute
   '/screens/new': typeof AdminScreensNewRoute
+  '/api/tv/pair': typeof ApiTvPairRouteWithChildren
+  '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/api/tv/pair/status': typeof ApiTvPairStatusRoute
 }
 export interface FileRoutesByTo {
+  '/login': typeof LoginRoute
+  '/setup': typeof SetupRoute
+  '/tv': typeof TvRoute
+  '/account': typeof AdminAccountRoute
   '/presets': typeof AdminPresetsRoute
   '/settings': typeof AdminSettingsRoute
+  '/tvs': typeof AdminTvsRoute
   '/widgets': typeof AdminWidgetsRoute
   '/': typeof AdminIndexRoute
   '/screens/new': typeof AdminScreensNewRoute
+  '/api/tv/pair': typeof ApiTvPairRouteWithChildren
+  '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/api/tv/pair/status': typeof ApiTvPairStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_admin': typeof AdminRouteWithChildren
+  '/login': typeof LoginRoute
+  '/setup': typeof SetupRoute
+  '/tv': typeof TvRoute
+  '/_admin/account': typeof AdminAccountRoute
   '/_admin/presets': typeof AdminPresetsRoute
   '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/tvs': typeof AdminTvsRoute
   '/_admin/widgets': typeof AdminWidgetsRoute
   '/_admin/': typeof AdminIndexRoute
   '/_admin/screens/new': typeof AdminScreensNewRoute
+  '/api/tv/pair': typeof ApiTvPairRouteWithChildren
+  '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/_admin/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/api/tv/pair/status': typeof ApiTvPairStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
+    | '/setup'
+    | '/tv'
+    | '/account'
     | '/presets'
     | '/settings'
+    | '/tvs'
     | '/widgets'
     | '/screens/new'
+    | '/api/tv/pair'
+    | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/screens/$id/edit'
+    | '/api/tv/pair/status'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/login'
+    | '/setup'
+    | '/tv'
+    | '/account'
     | '/presets'
     | '/settings'
+    | '/tvs'
     | '/widgets'
     | '/'
     | '/screens/new'
+    | '/api/tv/pair'
+    | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/screens/$id/edit'
+    | '/api/tv/pair/status'
   id:
     | '__root__'
     | '/_admin'
+    | '/login'
+    | '/setup'
+    | '/tv'
+    | '/_admin/account'
     | '/_admin/presets'
     | '/_admin/settings'
+    | '/_admin/tvs'
     | '/_admin/widgets'
     | '/_admin/'
     | '/_admin/screens/new'
+    | '/api/tv/pair'
+    | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/_admin/screens/$id/edit'
+    | '/api/tv/pair/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SetupRoute: typeof SetupRoute
+  TvRoute: typeof TvRoute
+  ApiTvPairRoute: typeof ApiTvPairRouteWithChildren
+  ApiTvScreenRoute: typeof ApiTvScreenRoute
   ScreensIdPreviewRoute: typeof ScreensIdPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tv': {
+      id: '/tv'
+      path: '/tv'
+      fullPath: '/tv'
+      preLoaderRoute: typeof TvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin': {
       id: '/_admin'
       path: ''
@@ -146,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWidgetsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/tvs': {
+      id: '/_admin/tvs'
+      path: '/tvs'
+      fullPath: '/tvs'
+      preLoaderRoute: typeof AdminTvsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/settings': {
       id: '/_admin/settings'
       path: '/settings'
@@ -160,11 +289,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPresetsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/account': {
+      id: '/_admin/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AdminAccountRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/screens/$id/preview': {
       id: '/screens/$id/preview'
       path: '/screens/$id/preview'
       fullPath: '/screens/$id/preview'
       preLoaderRoute: typeof ScreensIdPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tv/screen': {
+      id: '/api/tv/screen'
+      path: '/api/tv/screen'
+      fullPath: '/api/tv/screen'
+      preLoaderRoute: typeof ApiTvScreenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tv/pair': {
+      id: '/api/tv/pair'
+      path: '/api/tv/pair'
+      fullPath: '/api/tv/pair'
+      preLoaderRoute: typeof ApiTvPairRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_admin/screens/new': {
@@ -173,6 +323,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/screens/new'
       preLoaderRoute: typeof AdminScreensNewRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/api/tv/pair/status': {
+      id: '/api/tv/pair/status'
+      path: '/status'
+      fullPath: '/api/tv/pair/status'
+      preLoaderRoute: typeof ApiTvPairStatusRouteImport
+      parentRoute: typeof ApiTvPairRoute
     }
     '/_admin/screens/$id/edit': {
       id: '/_admin/screens/$id/edit'
@@ -185,8 +342,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAccountRoute: typeof AdminAccountRoute
   AdminPresetsRoute: typeof AdminPresetsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTvsRoute: typeof AdminTvsRoute
   AdminWidgetsRoute: typeof AdminWidgetsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminScreensNewRoute: typeof AdminScreensNewRoute
@@ -194,8 +353,10 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccountRoute: AdminAccountRoute,
   AdminPresetsRoute: AdminPresetsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminTvsRoute: AdminTvsRoute,
   AdminWidgetsRoute: AdminWidgetsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminScreensNewRoute: AdminScreensNewRoute,
@@ -204,8 +365,25 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface ApiTvPairRouteChildren {
+  ApiTvPairStatusRoute: typeof ApiTvPairStatusRoute
+}
+
+const ApiTvPairRouteChildren: ApiTvPairRouteChildren = {
+  ApiTvPairStatusRoute: ApiTvPairStatusRoute,
+}
+
+const ApiTvPairRouteWithChildren = ApiTvPairRoute._addFileChildren(
+  ApiTvPairRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
+  LoginRoute: LoginRoute,
+  SetupRoute: SetupRoute,
+  TvRoute: TvRoute,
+  ApiTvPairRoute: ApiTvPairRouteWithChildren,
+  ApiTvScreenRoute: ApiTvScreenRoute,
   ScreensIdPreviewRoute: ScreensIdPreviewRoute,
 }
 export const routeTree = rootRouteImport

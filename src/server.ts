@@ -2,6 +2,9 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { isSameOriginWrite, isSetupPath } from "./server/gate";
+import { runInOrg } from "./server/org-context";
+import { resolveOrg } from "./server/org-resolver";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -59,12 +62,48 @@ function withBaselineHeaders(response: Response): Response {
   });
 }
 
+function plainResponse(status: number, message: string): Response {
+  return new Response(message, {
+    status,
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+  });
+}
+
+/**
+ * Every request runs inside the church its hostname names (see
+ * `server/org-resolver.ts`), so the database guard always knows whose data a
+ * query may touch. Before a church exists, only setup runs.
+ */
+async function handle(request: Request, env: unknown, ctx: unknown): Promise<Response> {
+  if (!isSameOriginWrite(request)) {
+    return plainResponse(403, "This request did not come from this site.");
+  }
+
+  const handler = await getServerEntry();
+  const run = async () => normalizeCatastrophicSsrResponse(await handler.fetch(request, env, ctx));
+
+  const resolution = await resolveOrg(request.headers.get("host"));
+  switch (resolution.kind) {
+    case "org":
+      return runInOrg(resolution.org, run);
+    case "setup": {
+      const { pathname } = new URL(request.url);
+      if (isSetupPath(pathname)) return run();
+      if (pathname.startsWith("/api/")) return plainResponse(503, "Not set up yet.");
+      return new Response(null, { status: 303, headers: { location: "/setup" } });
+    }
+    case "unknown-host":
+      return plainResponse(404, "There is no Steward Display at this address.");
+    case "ambiguous":
+      console.error("[Tenancy] Self-hosted install has more than one church; refusing to guess.");
+      return plainResponse(500, "This installation is misconfigured. Check the server log.");
+  }
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
-      const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
-      return withBaselineHeaders(await normalizeCatastrophicSsrResponse(response));
+      return withBaselineHeaders(await handle(request, env, ctx));
     } catch (error) {
       console.error(error);
       return withBaselineHeaders(
