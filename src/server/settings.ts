@@ -31,12 +31,12 @@ export async function updateOrgSettings(patch: unknown): Promise<OrgSettingsView
   const { churchName, ...settingsPatch } = input;
 
   const next = orgSettingsSchema.parse({ ...(await getOrgSettings()), ...settingsPatch });
-  const existing = await db().orgSettings.findFirst({ select: { id: true } });
-  if (existing) {
-    await db().orgSettings.update({ where: { id: existing.id }, data: { data: asJson(next) } });
-  } else {
-    await db().orgSettings.create({ data: inOrg({ data: asJson(next) }) });
-  }
+  const { orgId } = requireOrg();
+  await db().orgSettings.upsert({
+    where: { orgId },
+    create: inOrg({ data: asJson(next) }),
+    update: { data: asJson(next) },
+  });
 
   if (churchName !== undefined && churchName !== requireOrg().name) {
     // The org row is the tenant root, addressed by its own id.

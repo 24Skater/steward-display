@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { WidgetRenderer } from "@/components/editor/WidgetRenderer";
 import { DisplayModeContext } from "@/lib/displayMode";
+import { TimeZoneContext } from "@/lib/timezone";
 import { GRID_COLS, GRID_ROWS } from "@/lib/gridConstants";
 import { getScreenDimensions, type Screen } from "@/types";
 
@@ -52,58 +53,67 @@ export function IdleSlate({ message, children }: IdleSlateProps) {
   );
 }
 
-export function DisplayStage({ screen, overlay }: { screen: Screen; overlay?: ReactNode }) {
+interface DisplayStageProps {
+  screen: Screen;
+  /** The church's time zone; undefined uses this browser's (right for the preview). */
+  timeZone?: string;
+  overlay?: ReactNode;
+}
+
+export function DisplayStage({ screen, timeZone, overlay }: DisplayStageProps) {
   const { scale, dims } = useFitScale(screen);
   const cellW = dims.w / GRID_COLS;
   const cellH = dims.h / GRID_ROWS;
 
   return (
     <DisplayModeContext.Provider value={true}>
-      <div
-        className="fixed inset-0 flex cursor-none items-center justify-center overflow-hidden"
-        style={{
-          backgroundColor: screen.backgroundColor,
-          // Quoted, so an address can only ever be an address.
-          backgroundImage: screen.backgroundImage
-            ? `url(${JSON.stringify(screen.backgroundImage)})`
-            : undefined,
-          backgroundSize: "cover",
-        }}
-      >
+      <TimeZoneContext.Provider value={timeZone}>
         <div
-          className="relative text-white"
+          className="fixed inset-0 flex cursor-none items-center justify-center overflow-hidden"
           style={{
-            width: dims.w,
-            height: dims.h,
-            transform: `scale(${scale})`,
-            transformOrigin: "center center",
+            backgroundColor: screen.backgroundColor,
+            // Quoted, so an address can only ever be an address.
+            backgroundImage: screen.backgroundImage
+              ? `url(${JSON.stringify(screen.backgroundImage)})`
+              : undefined,
+            backgroundSize: "cover",
           }}
         >
-          {screen.widgets.map((w, i) => (
-            <div
-              key={w.id}
-              className="absolute animate-steward-in"
-              style={{
-                left: w.x * cellW,
-                top: w.y * cellH,
-                width: w.w * cellW,
-                height: w.h * cellH,
-                animationDelay: `${i * 100}ms`,
-              }}
-            >
-              <WidgetRenderer widget={w} />
-            </div>
-          ))}
-        </div>
-
-        {screen.showWatermark !== false && (
-          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 text-white/30">
-            <img src="/brand/steward-mark.svg" alt="" className="h-4 w-4" />
-            <span className="text-xs font-medium">Steward · Display</span>
+          <div
+            className="relative text-white"
+            style={{
+              width: dims.w,
+              height: dims.h,
+              transform: `scale(${scale})`,
+              transformOrigin: "center center",
+            }}
+          >
+            {screen.widgets.map((w, i) => (
+              <div
+                key={w.id}
+                className="absolute animate-steward-in"
+                style={{
+                  left: w.x * cellW,
+                  top: w.y * cellH,
+                  width: w.w * cellW,
+                  height: w.h * cellH,
+                  animationDelay: `${i * 100}ms`,
+                }}
+              >
+                <WidgetRenderer widget={w} />
+              </div>
+            ))}
           </div>
-        )}
-        {overlay}
-      </div>
+
+          {screen.showWatermark !== false && (
+            <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 text-white/30">
+              <img src="/brand/steward-mark.svg" alt="" className="h-4 w-4" />
+              <span className="text-xs font-medium">Steward · Display</span>
+            </div>
+          )}
+          {overlay}
+        </div>
+      </TimeZoneContext.Provider>
     </DisplayModeContext.Provider>
   );
 }

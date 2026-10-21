@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { isSameOriginWrite } from "./gate";
+import { clientIpFrom } from "./client-ip";
+import { bodySizeRefusal, isSameOriginWrite } from "./gate";
 import { extractTenantSlug } from "./platform-domain";
 import { hashPassword, verifyPassword } from "./password";
 import { RateLimiter } from "./rate-limit";
@@ -92,7 +93,7 @@ describe("RateLimiter", () => {
 describe("sessionCookie", () => {
   it("is HttpOnly, Lax and Secure when asked", () => {
     const cookie = sessionCookie("tok", { secure: true, expiresAt: new Date(0) });
-    expect(cookie).toContain("sd_session=tok");
+    expect(cookie).toContain("__Host-sd_session=tok");
     expect(cookie).toContain("HttpOnly");
     expect(cookie).toContain("SameSite=Lax");
     expect(cookie).toContain("Secure");
@@ -176,5 +177,79 @@ describe("isSameOriginWrite", () => {
     expect(isSameOriginWrite(req("POST", { "sec-fetch-site": "same-site" }))).toBe(false);
     expect(isSameOriginWrite(req("POST", { origin: "https://evil.example" }))).toBe(false);
     expect(isSameOriginWrite(req("POST", { origin: "null" }))).toBe(false);
+  });
+});
+
+describe("bodySizeRefusal", () => {
+  const post = (path: string, length: string | null) =>
+    new Request(`https://grace.example${path}`, {
+      method: "POST",
+      body: "x",
+      headers: length === null ? {} : { "content-length": length },
+    });
+
+  it("refuses oversized and unknown-length bodies, smaller limits for TVs", () => {
+    expect(bodySizeRefusal(new Request("https://grace.example/"))).toBeNull();
+    expect(bodySizeRefusal(post("/_serverFn/x", "1000"))).toBeNull();
+    expect(bodySizeRefusal(post("/_serverFn/x", String(9 * 1024 * 1024)))).toBe(413);
+    expect(bodySizeRefusal(post("/api/tv/pair/status", "5000"))).toBe(413);
+  });
+});
+
+describe("style values", () => {
+  const withStyle = (style: Record<string, unknown>, backgroundColor = "#0B1220") => ({
+    name: "Lobby",
+    orientation: "landscape",
+    resolution: "1920x1080",
+    backgroundColor,
+    widgets: [{ id: "w", widgetType: "text", x: 0, y: 0, w: 1, h: 1, config: {}, style }],
+  });
+
+  it("accepts real colours and sizes", () => {
+    expect(() =>
+      parseScreenDocument(
+        withStyle({ backgroundColor: "rgba(0, 0, 0, 0.5)", borderRadius: "16px" }),
+      ),
+    ).not.toThrow();
+    expect(() => parseScreenDocument(withStyle({ textColor: "currentColor" }))).not.toThrow();
+  });
+
+  it("refuses anything that would smuggle more CSS in", () => {
+    expect(() => parseScreenDocument(withStyle({}, "red; background-image: url(x)"))).toThrow();
+    expect(() =>
+      parseScreenDocument(withStyle({ borderRadius: "8px; position: fixed" })),
+    ).toThrow();
+  });
+});
+
+describe("clientIpFrom", () => {
+  it("ignores X-Forwarded-For unless a proxy is trusted", () => {
+    expect(clientIpFrom("10.0.0.5", "1.2.3.4", {})).toBe("10.0.0.5");
+  });
+
+  it("reads the hop the proxy added, not what the visitor typed", () => {
+    const env = { TRUST_PROXY: "true" };
+    // Visitor sent "6.6.6.6"; the proxy appended the real address.
+    expect(clientIpFrom("10.0.0.5", "6.6.6.6, 203.0.113.9", env)).toBe("203.0.113.9");
+    expect(
+      clientIpFrom("10.0.0.5", "6.6.6.6, 198.51.100.2, 10.0.0.9", {
+        ...env,
+        TRUSTED_PROXY_HOPS: "2",
+      }),
+    ).toBe("198.51.100.2");
+    expect(clientIpFrom("10.0.0.5", null, env)).toBe("10.0.0.5");
+  });
+});
+
+describe("bodySizeRefusal edge cases", () => {
+  it("lets an empty POST through and refuses chunked bodies of unknown length", () => {
+    const empty = new Request("https://grace.example/api/tv/pair", { method: "POST", body: "" });
+    expect(bodySizeRefusal(empty)).toBeNull();
+    const chunked = new Request("https://grace.example/api/tv/pair", {
+      method: "POST",
+      body: "x",
+      headers: { "transfer-encoding": "chunked" },
+    });
+    expect(bodySizeRefusal(chunked)).toBe(411);
   });
 });

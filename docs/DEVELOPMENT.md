@@ -44,15 +44,18 @@ image uses.
 ## Tenancy: the rule that matters most
 
 Every query against a church's data is scoped to the church in context, inside the database
-client (`src/server/db.ts`). Forgetting a `where: { orgId }` is not possible; querying with no
-church in context throws.
+client (`src/server/db.ts`). A model's own reads and writes cannot forget `where: { orgId }`,
+and querying with no church in context throws. The exceptions are listed below.
 
 - A new model must be added to `TENANTED_MODELS` or `GLOBAL_MODELS` in
   `src/server/tenancy.ts`. `tenancy.test.ts` fails until it is.
 - A tenanted model needs a non-nullable `orgId`. Create rows with `inOrg({ ... })`.
 - `bypass()` skips the guard. It is for work about the installation rather than a church:
   resolving the hostname, first-run setup, the global `User` row. Every use says why.
-- Nested writes (a `create` inside another model's `data`) are invisible to the guard. Do not
-  use them on tenanted models.
+- What the guard cannot see, and this code therefore does not use on tenanted models:
+  nested writes (a `create` or `connect` inside another model's `data`), `include`/`select`
+  of a tenanted relation reached through a global model (a user's sessions, say), and raw SQL
+  (`$queryRaw`, `$executeRaw`). Reads and writes go through the tenanted model itself.
+- Updates that try to move a row to another church (`data: { orgId }`) throw.
 - Isolation has tests: `flows.int.test.ts` checks one church cannot read, save or pair into
   another's. Extend them when you add a model.

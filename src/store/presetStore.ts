@@ -28,6 +28,7 @@ interface PresetState {
     config: Record<string, unknown>,
     style?: NonNullable<WidgetInstance["style"]>,
     description?: string,
+    opts?: { quiet?: boolean },
   ) => Promise<void>;
   update: (
     id: string,
@@ -68,13 +69,13 @@ export const usePresetStore = create<PresetState>((set, get) => ({
 
   listFor: (widgetType) => get().presets.filter((p) => p.widgetType === widgetType),
 
-  create: async (widgetType, label, config, style, description) => {
+  create: async (widgetType, label, config, style, description, opts) => {
     try {
       const created = await createPresetFn({
         data: { widgetType, label, description, config, style },
       });
       set({ presets: [...get().presets, fromWire(created)] });
-      toast.success(`Saved preset "${label}"`);
+      if (!opts?.quiet) toast.success(`Saved preset "${label}"`);
     } catch (error) {
       toast.error(`Couldn't save the preset: ${errorMessage(error)}`);
     }

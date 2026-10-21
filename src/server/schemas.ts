@@ -13,7 +13,16 @@ import { z } from "zod";
 const MAX_DOCUMENT_BYTES = 256 * 1024;
 const MAX_WIDGETS = 200;
 
-const colour = z.string().max(64);
+/**
+ * A CSS colour, and nothing else that could ride along in a style attribute:
+ * hex, a colour function of numbers, or a keyword such as "transparent".
+ */
+const colour = z
+  .string()
+  .max(64)
+  .regex(/^(#[0-9a-f]{3,8}|(rgba?|hsla?|oklch|oklab)\([0-9.,%\s/-]+\)|[a-z]{3,20})$/i, {
+    message: "Must be a colour like #1B2A41",
+  });
 const shortText = z.string().max(200);
 
 /** http(s) only. `javascript:` and friends never reach a TV. Empty means unset. */
@@ -65,7 +74,11 @@ export const widgetSchema = z.object({
     .object({
       backgroundColor: colour.optional(),
       textColor: colour.optional(),
-      borderRadius: z.string().max(32).optional(),
+      borderRadius: z
+        .string()
+        .max(32)
+        .regex(/^\d+(\.\d+)?(px|rem|em|%)?$/, { message: "Must be a size like 12px" })
+        .optional(),
       opacity: z.number().min(0).max(1).optional(),
     })
     .optional(),

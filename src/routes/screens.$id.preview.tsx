@@ -24,6 +24,7 @@ function PreviewPage() {
   useDisplayChrome();
 
   if (!hydrated) return <IdleSlate />;
-  if (!screen) return <IdleSlate message="This screen isn't available on this device." />;
+  if (!screen)
+    return <IdleSlate message="This screen was deleted, or belongs to another church." />;
   return <DisplayStage screen={screen} />;
 }

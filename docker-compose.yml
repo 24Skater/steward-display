@@ -3,7 +3,8 @@
 #   cp .env.example .env    # then set POSTGRES_PASSWORD
 #   docker compose up -d
 #
-# Open http://localhost:3000 and the setup page creates your church.
+# Open http://localhost:3000. The setup page asks for a one-time code, printed
+# by `docker compose logs app` on the line starting [setup].
 # Put a TLS proxy in front before using it over the internet (docs/HOSTING.md).
 
 services:
@@ -31,8 +32,12 @@ services:
     environment:
       DATABASE_URL: postgresql://display:${POSTGRES_PASSWORD}@db:5432/display
       TRUST_PROXY: ${TRUST_PROXY:-false}
+      TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
+      SETUP_CODE: ${SETUP_CODE:-}
     ports:
-      - "${PORT:-3000}:3000"
+      # Behind a proxy on the same machine, set BIND_ADDRESS=127.0.0.1 so the
+      # app is reachable only through it (Docker's published ports bypass ufw).
+      - "${BIND_ADDRESS:-0.0.0.0}:${PORT:-3000}:3000"
 
 volumes:
   db-data:

@@ -59,31 +59,32 @@ try {
     }
     if (row) {
       throw new Error(
-        `${name} failed part-way on an earlier start. Fix the database by hand, then mark it ` +
-          `with \`prisma migrate resolve\` before starting again.`,
+        `${name} is recorded as started but not finished, by an earlier \`prisma migrate\` run. ` +
+          `Check the database by hand. If none of it applied, remove the record so it runs again: ` +
+          `DELETE FROM "_prisma_migrations" WHERE migration_name = '${name}' AND finished_at IS NULL; ` +
+          `if all of it applied, mark it done: UPDATE "_prisma_migrations" SET finished_at = now() ` +
+          `WHERE migration_name = '${name}' AND finished_at IS NULL; then start again.`,
       );
     }
 
-    const id = randomUUID();
-    await client.query(
-      'INSERT INTO "_prisma_migrations" (id, checksum, migration_name) VALUES ($1, $2, $3)',
-      [id, checksum, name],
-    );
+    // The record and the migration commit together, or not at all: a crash at
+    // any point leaves either a finished migration or no trace of the attempt.
     try {
       await client.query("BEGIN");
+      await client.query(
+        'INSERT INTO "_prisma_migrations" (id, checksum, migration_name) VALUES ($1, $2, $3)',
+        [randomUUID(), checksum, name],
+      );
       await client.query(sql);
+      await client.query(
+        'UPDATE "_prisma_migrations" SET finished_at = now(), applied_steps_count = 1 WHERE migration_name = $1 AND finished_at IS NULL',
+        [name],
+      );
       await client.query("COMMIT");
     } catch (error) {
-      // The transaction left the schema as it was, so forget the attempt and
-      // let the next start try again once the cause is fixed.
-      await client.query("ROLLBACK");
-      await client.query('DELETE FROM "_prisma_migrations" WHERE id = $1', [id]);
+      await client.query("ROLLBACK").catch(() => {});
       throw new Error(`Migration ${name} failed and was rolled back: ${error?.message ?? error}`);
     }
-    await client.query(
-      'UPDATE "_prisma_migrations" SET finished_at = now(), applied_steps_count = 1 WHERE id = $1',
-      [id],
-    );
     applied++;
     console.log(`Applied ${name}`);
   }

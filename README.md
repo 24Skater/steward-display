@@ -46,8 +46,8 @@ cp .env.example .env     # set POSTGRES_PASSWORD
 docker compose up -d
 ```
 
-Open <http://localhost:3000>. The first visit asks for your church's name and creates the
-owner's account. Production setup (TLS, backups, password resets) is in
+Open <http://localhost:3000>. The first visit asks for a setup code (`docker compose logs app`
+prints it), your church's name, and creates the owner's account. Production setup (TLS, backups, password resets) is in
 [docs/HOSTING.md](docs/HOSTING.md).
 
 ## Status

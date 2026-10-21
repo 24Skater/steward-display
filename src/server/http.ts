@@ -6,9 +6,10 @@ import {
   setResponseHeader,
 } from "@tanstack/react-start/server";
 
+import { clientIpFrom } from "./client-ip";
 import { UserError } from "./errors";
 import { limits, type RateLimiter } from "./rate-limit";
-import { SESSION_COOKIE, sessionCookie, viewerForToken, type Viewer } from "./sessions";
+import { sessionCookie, sessionCookieName, viewerForToken, type Viewer } from "./sessions";
 
 /**
  * The seam between the framework's request and this app's server modules.
@@ -21,8 +22,9 @@ function trustProxy(): boolean {
   return process.env.TRUST_PROXY?.trim().toLowerCase() === "true";
 }
 
+/** The requester's address for rate limiting. See client-ip.ts for which header entry counts. */
 export function clientIp(): string {
-  return getRequestIP({ xForwardedFor: trustProxy() }) ?? "unknown";
+  return clientIpFrom(getRequestIP(), getRequestHeader("x-forwarded-for"));
 }
 
 export function userAgent(): string | null {
@@ -44,7 +46,7 @@ export function clearSessionCookie(): void {
 }
 
 export function sessionToken(): string | undefined {
-  return getCookie(SESSION_COOKIE);
+  return getCookie(sessionCookieName(isSecureRequest()));
 }
 
 export async function currentViewer(): Promise<Viewer | null> {

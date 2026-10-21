@@ -87,7 +87,9 @@ export function useTvPlayer(): TvState {
     async function pollScreen(): Promise<void> {
       const token = read(KEYS.token);
       if (!token) return startPairing();
-      const etag = read(KEYS.etag);
+      // Only ask "has it changed?" when there is a saved copy to keep showing:
+      // a 304 with nothing saved would leave the TV on a blank slate.
+      const etag = readPayload() ? read(KEYS.etag) : null;
       try {
         const response = await fetch("/api/tv/screen", {
           headers: { authorization: `Bearer ${token}`, ...(etag ? { "if-none-match": etag } : {}) },

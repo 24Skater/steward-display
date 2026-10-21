@@ -95,6 +95,17 @@ export function applyOrgScope(
     args.where = { ...((args.where as object) ?? {}), orgId };
   }
 
+  // Moving a row to another church by rewriting its orgId is never right either.
+  for (const payload of [args.data, operation === "upsert" ? args.update : undefined]) {
+    if (!WHERE_WRITE_OPS.has(operation) && operation !== "upsert") break;
+    const moved = (payload as Payload)?.orgId;
+    if (moved !== undefined && moved !== orgId) {
+      throw new Error(
+        `[Tenancy] ${operation} on ${model} tries to move rows to orgId ${String(moved)}.`,
+      );
+    }
+  }
+
   for (const payload of createPayloads(operation, args)) {
     if (!payload) continue;
     const existing = payload.orgId;

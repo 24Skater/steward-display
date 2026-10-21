@@ -4,7 +4,9 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/lib/errors";
+import { downloadJSON, exportScreensToJSON } from "@/lib/export";
 import { STORAGE_KEYS, readJSON, writeJSON } from "@/lib/storage";
+import { usePresetStore, type CustomPreset } from "@/store/presetStore";
 import { useScreenStore } from "@/store/screenStore";
 import type { Screen } from "@/types";
 
@@ -19,6 +21,13 @@ const IMPORTED_KEY = "steward.screens.importedAt";
 const DISMISSED_KEY = "steward.screens.importDismissed";
 const BACKUP_KEY = "steward.screens.backup";
 
+const PRESETS_BACKUP_KEY = "steward.customPresets.backup";
+
+function legacyPresets(): CustomPreset[] {
+  const stored = readJSON<unknown>(STORAGE_KEYS.customPresets, []);
+  return Array.isArray(stored) ? (stored as CustomPreset[]) : [];
+}
+
 function legacyScreens(): Screen[] {
   if (readJSON<string | null>(IMPORTED_KEY, null) || readJSON<boolean>(DISMISSED_KEY, false)) {
     return [];
@@ -29,6 +38,7 @@ function legacyScreens(): Screen[] {
 
 export function BrowserImportBanner() {
   const importScreens = useScreenStore((s) => s.importScreens);
+  const createPreset = usePresetStore((s) => s.create);
   const [pending, setPending] = useState<Screen[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -40,13 +50,35 @@ export function BrowserImportBanner() {
     setBusy(true);
     try {
       const { imported, failed } = await importScreens(pending);
+      // Recorded the moment the server has them, so nothing can import them twice.
       writeJSON(BACKUP_KEY, pending);
       writeJSON(IMPORTED_KEY, new Date().toISOString());
       window.localStorage.removeItem(STORAGE_KEYS.screens);
       setPending([]);
+
+      // Presets came from the same browser storage; bring them along.
+      const presets = legacyPresets();
+      for (const p of presets) {
+        await createPreset(p.widgetType, p.label, p.config ?? {}, p.style, p.description, {
+          quiet: true,
+        });
+      }
+      if (presets.length > 0) {
+        writeJSON(PRESETS_BACKUP_KEY, presets);
+        window.localStorage.removeItem(STORAGE_KEYS.customPresets);
+      }
+
       const summary = `Moved ${imported} screen${imported === 1 ? "" : "s"} to your church's account.`;
-      if (failed > 0) {
-        toast.warning(`${summary} ${failed} couldn't be moved; a copy stays in this browser.`);
+      if (failed.length > 0) {
+        const left = pending.filter((s) => failed.includes(s.name));
+        toast.warning(`${summary} Couldn't move: ${failed.join(", ")}.`, {
+          duration: 20_000,
+          action: {
+            label: "Download them",
+            onClick: () =>
+              downloadJSON("steward-display-not-moved.json", exportScreensToJSON(left)),
+          },
+        });
       } else {
         toast.success(summary);
       }

@@ -10,7 +10,8 @@ import {
   PASSWORD_MIN_LENGTH,
 } from "./password";
 import { churchNameSchema, emailSchema, personNameSchema } from "./schemas";
-import { createSession, revokeAllSessions } from "./sessions";
+import { createSession, revokeSessionsEverywhere } from "./sessions";
+import { isSetupCode } from "./setup-code";
 import { z } from "zod";
 
 /**
@@ -68,6 +69,12 @@ export async function setUpInstallation(
   userAgent: string | null,
 ): Promise<SignedIn> {
   if (isHosted()) throw new UserError("Setup is not available here.", 404);
+  if (!isSetupCode((input as { setupCode?: unknown } | null)?.setupCode)) {
+    throw new UserError(
+      "That setup code isn't right. It's in the server's log, on the line starting [setup].",
+      403,
+    );
+  }
   const { churchName, name, email, password } = setupInputSchema.parse(input);
   const passwordHash = await hashPassword(password);
 
@@ -137,5 +144,5 @@ export async function changePassword(
   await db().user.update(
     bypass({ where: { id: userId }, data: { passwordHash: await hashPassword(newPassword) } }),
   );
-  return { signedOut: await revokeAllSessions(userId, keepSessionId) };
+  return { signedOut: await revokeSessionsEverywhere(userId, keepSessionId) };
 }

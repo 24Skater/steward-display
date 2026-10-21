@@ -75,10 +75,19 @@ export const limits = {
   signIn: new RateLimiter({ limit: 10, windowMs: 15 * MINUTE }),
   /** Per IP: one installation is set up once. */
   setup: new RateLimiter({ limit: 10, windowMs: 15 * MINUTE }),
-  /** Per IP: a TV asks for a code, and asks again when it expires. */
-  pairStart: new RateLimiter({ limit: 20, windowMs: 15 * MINUTE }),
-  /** Per signed-in user: entering codes. Guessing a live one would take ~10^7 tries. */
+  /** Per IP, regardless of email: caps how much scrypt one address can make us run. */
+  signInPerIp: new RateLimiter({ limit: 50, windowMs: 15 * MINUTE }),
+  /** Per address: a TV asks for a code, and again every ten minutes while unpaired. */
+  pairStart: new RateLimiter({ limit: 30, windowMs: 15 * MINUTE }),
+  /**
+   * Per signed-in user: entering codes. A code is one of 25^6 (~244 million),
+   * so 20 tries in 15 minutes makes guessing a live one hopeless.
+   */
   pairClaim: new RateLimiter({ limit: 20, windowMs: 15 * MINUTE }),
-  /** Per IP: TV status and screen polling, generous because a lobby may hold a dozen TVs. */
-  tvPoll: new RateLimiter({ limit: 600, windowMs: 15 * MINUTE }),
+  /** Per pairing: a waiting TV polls every 3 s, about 300 times a window. */
+  tvPairPoll: new RateLimiter({ limit: 400, windowMs: 15 * MINUTE }),
+  /** Per paired TV: polls every ~30 s, about 30 a window; room for reloads. */
+  tvScreenPoll: new RateLimiter({ limit: 120, windowMs: 15 * MINUTE }),
+  /** Per address: requests that fail authentication or bring no credential. */
+  tvUnauthenticated: new RateLimiter({ limit: 1000, windowMs: 15 * MINUTE }),
 };

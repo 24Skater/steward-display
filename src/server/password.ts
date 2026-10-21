@@ -18,7 +18,31 @@ const MAX_MEMORY = 64 * 1024 * 1024;
 export const PASSWORD_MIN_LENGTH = 10;
 export const PASSWORD_MAX_LENGTH = 256;
 
+/**
+ * At most two hashes at once. Each takes 32 MiB and a libuv worker for tens of
+ * milliseconds; unbounded, a burst of sign-ins would occupy all four workers
+ * and stall everything else that uses them (DNS lookups, file reads).
+ */
+const MAX_CONCURRENT = 2;
+let running = 0;
+const waiting: (() => void)[] = [];
+
+async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
+  if (running >= MAX_CONCURRENT) await new Promise<void>((resolve) => waiting.push(resolve));
+  running++;
+  try {
+    return await fn();
+  } finally {
+    running--;
+    waiting.shift()?.();
+  }
+}
+
 function scrypt(password: string, salt: Buffer, keylen: number, opts: ScryptOptions) {
+  return withSlot(() => rawScrypt(password, salt, keylen, opts));
+}
+
+function rawScrypt(password: string, salt: Buffer, keylen: number, opts: ScryptOptions) {
   return new Promise<Buffer>((resolve, reject) => {
     scryptCb(password.normalize("NFKC"), salt, keylen, opts, (error, key) =>
       error ? reject(error) : resolve(key),

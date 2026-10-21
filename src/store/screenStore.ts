@@ -34,7 +34,8 @@ interface ScreenState {
   updateScreen: (id: string, patch: Partial<Screen>) => void;
   deleteScreen: (id: string) => Promise<void>;
   duplicateScreen: (id: string) => Promise<Screen | undefined>;
-  importScreens: (screens: Screen[]) => Promise<{ imported: number; failed: number }>;
+  /** Names of the screens that could not be imported are in `failed`. */
+  importScreens: (screens: Screen[]) => Promise<{ imported: number; failed: string[] }>;
   addWidget: (
     screenId: string,
     type: WidgetType,
@@ -58,26 +59,65 @@ function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 }
 
-/** The part of a screen the server stores; ids, timestamps and version are its own. */
+const MEDIA_URL = /^https?:\/\//i;
+const URL_KEYS = new Set(["src", "url", "href", "image", "imageUrl", "poster"]);
+
+/** An address the server will accept: empty, or http(s). Same rule as src/server/schemas.ts. */
+function isAcceptableUrl(value: unknown): boolean {
+  return typeof value !== "string" || value === "" || MEDIA_URL.test(value);
+}
+
+/**
+ * The part of a screen the server stores; ids, timestamps and version are its
+ * own. A half-typed address ("www.church.org/x.jpg", or "htt" mid-word) is sent
+ * as empty rather than sinking the whole save: it stays in the editor, and the
+ * widget shows its setup hint until it is a real address.
+ */
 export function toInput(screen: Screen): ScreenInput {
   const { id: _id, createdAt: _c, updatedAt: _u, version: _v, ...input } = screen;
-  return input;
+  return {
+    ...input,
+    backgroundImage: isAcceptableUrl(input.backgroundImage) ? input.backgroundImage : undefined,
+    widgets: input.widgets.map((w) => ({
+      ...w,
+      config: Object.fromEntries(
+        Object.entries(w.config).map(([key, value]) =>
+          URL_KEYS.has(key) && !isAcceptableUrl(value) ? [key, ""] : [key, value],
+        ),
+      ),
+    })),
+  };
 }
 
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
 /** Bumped on every local change, so a save that returns knows whether it is still current. */
 const revisions = new Map<string, number>();
+/** One save per screen at a time: a second would carry the same base version and conflict with the first. */
+const inFlight = new Set<string>();
+/** Screens this browser is deleting, so their own vanishing is not reported as someone else's doing. */
+const deleting = new Set<string>();
 
 export const useScreenStore = create<ScreenState>((set, get) => {
   const setStatus = (id: string, status: SaveStatus) =>
     set({ saveStatus: { ...get().saveStatus, [id]: status } });
+
+  const forget = (id: string) => {
+    clearTimeout(timers.get(id));
+    timers.delete(id);
+    revisions.delete(id);
+    const { [id]: _gone, ...saveStatus } = get().saveStatus;
+    set({ screens: get().screens.filter((s) => s.id !== id), saveStatus });
+  };
 
   const replaceScreen = (screen: Screen) =>
     set({ screens: get().screens.map((s) => (s.id === screen.id ? screen : s)) });
 
   async function save(id: string): Promise<void> {
     const screen = get().screens.find((s) => s.id === id);
-    if (!screen) return;
+    if (!screen || deleting.has(id)) return;
+    // Already saving: when that save returns it sees the newer revision and goes again.
+    if (inFlight.has(id)) return;
+    inFlight.add(id);
     const revision = revisions.get(id) ?? 0;
     setStatus(id, "saving");
     try {
@@ -85,39 +125,44 @@ export const useScreenStore = create<ScreenState>((set, get) => {
         data: { id, baseVersion: screen.version ?? 1, screen: toInput(screen) },
       });
       if (result.status === "not-found") {
-        set({ screens: get().screens.filter((s) => s.id !== id) });
-        toast.error(`"${screen.name}" was deleted by someone else.`);
+        if (!deleting.has(id)) toast.error(`"${screen.name}" was deleted by someone else.`);
+        forget(id);
         return;
       }
       if (result.status === "conflict") {
+        const lostEdits = (revisions.get(id) ?? 0) !== revision;
         replaceScreen(result.screen);
-        revisions.set(id, revision + 1);
+        revisions.set(id, (revisions.get(id) ?? 0) + 1);
         setStatus(id, "saved");
         toast.warning(
-          `Someone else saved "${screen.name}" first. You're now looking at their version.`,
+          `Someone else saved "${screen.name}" while you were editing. You're now looking at their version` +
+            (lostEdits ? "; your last few changes were not saved." : "."),
         );
         return;
       }
       const current = get().screens.find((s) => s.id === id);
-      if (current)
+      if (current) {
         replaceScreen({
           ...current,
           version: result.screen.version,
           updatedAt: result.screen.updatedAt,
         });
-      // Edited again while this save was in flight: save once more.
-      if ((revisions.get(id) ?? 0) !== revision) scheduleSave(id);
-      else setStatus(id, "saved");
+      }
+      setStatus(id, "saved");
     } catch (error) {
       setStatus(id, "error");
       toast.error(`Couldn't save "${screen.name}": ${errorMessage(error)}`, {
         action: { label: "Retry", onClick: () => void save(id) },
       });
+      return;
+    } finally {
+      inFlight.delete(id);
     }
+    // Edited again while that save was in flight: save once more, from the new version.
+    if ((revisions.get(id) ?? 0) !== revision) scheduleSave(id);
   }
 
   function scheduleSave(id: string): void {
-    revisions.set(id, (revisions.get(id) ?? 0) + 1);
     setStatus(id, "pending");
     clearTimeout(timers.get(id));
     timers.set(
@@ -139,6 +184,7 @@ export const useScreenStore = create<ScreenState>((set, get) => {
     });
     if (!found) return;
     set({ screens });
+    revisions.set(id, (revisions.get(id) ?? 0) + 1);
     scheduleSave(id);
   }
 
@@ -154,7 +200,8 @@ export const useScreenStore = create<ScreenState>((set, get) => {
         const screens = await listScreensFn();
         set({ screens, hydrated: true, loadError: null });
       } catch (error) {
-        set({ hydrated: true, loadError: errorMessage(error) });
+        // Not marked hydrated: an empty list here would read as "you have no screens".
+        set({ loadError: errorMessage(error) });
       }
     },
 
@@ -183,10 +230,15 @@ export const useScreenStore = create<ScreenState>((set, get) => {
     updateScreen: (id, patch) => edit(id, (s) => ({ ...s, ...patch })),
 
     deleteScreen: async (id) => {
+      deleting.add(id);
       clearTimeout(timers.get(id));
       timers.delete(id);
-      await deleteScreenFn({ data: { id } });
-      set({ screens: get().screens.filter((s) => s.id !== id) });
+      try {
+        await deleteScreenFn({ data: { id } });
+        forget(id);
+      } finally {
+        deleting.delete(id);
+      }
     },
 
     duplicateScreen: async (id) => {
@@ -201,9 +253,15 @@ export const useScreenStore = create<ScreenState>((set, get) => {
 
     importScreens: async (incoming) => {
       const result = await importScreensFn({ data: { screens: incoming.map(toInput) } });
-      const screens = await listScreensFn();
-      set({ screens });
-      return { imported: result.imported, failed: result.failed.length };
+      // The import has happened on the server whatever happens next; a failed
+      // refresh must not make it look as if it has not (and invite a second one).
+      try {
+        set({ screens: await listScreensFn(), hydrated: true, loadError: null });
+      } catch {
+        set({ hydrated: false });
+        void get().hydrate();
+      }
+      return { imported: result.imported, failed: result.failed.map((f) => f.name) };
     },
 
     addWidget: (screenId, type, position) => {

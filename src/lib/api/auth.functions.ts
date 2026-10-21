@@ -31,6 +31,7 @@ export const getAppState = createServerFn({ method: "GET" })
   });
 
 export interface SetupInput {
+  setupCode: string;
   churchName: string;
   name: string;
   email: string;
@@ -56,7 +57,9 @@ export const signInFn = createServerFn({ method: "POST" })
   .middleware([safeErrors])
   .validator((input: SignInInput) => input)
   .handler(async ({ data }) => {
-    const key = `${clientIp()}|${String(data.email).trim().toLowerCase()}`;
+    const ip = clientIp();
+    const key = `${ip}|${String(data.email).trim().toLowerCase()}`;
+    enforceLimit(limits.signInPerIp, ip);
     enforceLimit(limits.signIn, key);
     const session = await signIn(data, userAgent());
     limits.signIn.reset(key);

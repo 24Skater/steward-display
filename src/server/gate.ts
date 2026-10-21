@@ -32,3 +32,24 @@ export function isSameOriginWrite(request: Request): boolean {
 export function isSetupPath(pathname: string): boolean {
   return pathname === "/setup" || pathname.startsWith("/_serverFn/");
 }
+
+/** A TV's requests are a pairing secret or nothing at all. */
+const TV_BODY_LIMIT = 4 * 1024;
+/** The largest legitimate body: importing a browser's worth of screens. */
+const BODY_LIMIT = 8 * 1024 * 1024;
+
+/**
+ * An HTTP status to refuse the request with because of its body size, or null.
+ * Checked before anything parses the body, so a 60 MB POST costs nothing.
+ * A chunked body of unknown length is refused: browsers always send a length.
+ * No length and no chunking is an empty POST (curl sends those), and passes.
+ */
+export function bodySizeRefusal(request: Request): 411 | 413 | null {
+  if (SAFE_METHODS.has(request.method) || !request.body) return null;
+  const header = request.headers.get("content-length");
+  if (header === null) return request.headers.has("transfer-encoding") ? 411 : null;
+  const length = Number(header);
+  if (!Number.isFinite(length) || length < 0) return 411;
+  const limit = new URL(request.url).pathname.startsWith("/api/tv/") ? TV_BODY_LIMIT : BODY_LIMIT;
+  return length > limit ? 413 : null;
+}

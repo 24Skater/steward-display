@@ -384,8 +384,9 @@ function SettingsPage() {
       const incoming = parseImportedScreens(text);
       const { imported, failed } = await importScreens(incoming);
       const summary = `Imported ${imported} screen${imported === 1 ? "" : "s"}.`;
-      if (failed > 0) toast.warning(`${summary} ${failed} couldn't be imported.`);
-      else toast.success(summary);
+      if (failed.length > 0) {
+        toast.warning(`${summary} Couldn't import: ${failed.join(", ")}.`);
+      } else toast.success(summary);
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Couldn't read that file.");
     }

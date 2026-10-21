@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 
+import { useTimeZone } from "@/lib/timezone";
+
 export interface DateConfig {
   format?: "full" | "long" | "medium" | "short";
 }
 
 export function DateWidget({ config }: { config: DateConfig }) {
+  const timeZone = useTimeZone();
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     setNow(new Date());
@@ -14,6 +17,7 @@ export function DateWidget({ config }: { config: DateConfig }) {
   if (!now) return null;
   const formatted = new Intl.DateTimeFormat(undefined, {
     dateStyle: config.format ?? "full",
+    timeZone,
   }).format(now);
   return (
     <div

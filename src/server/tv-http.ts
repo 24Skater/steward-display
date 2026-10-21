@@ -1,7 +1,8 @@
 import { deviceForToken, payloadForDevice } from "./devices";
 import { UserError, toUserError } from "./errors";
 import { collectPairing, startPairing } from "./pairing";
-import { limits } from "./rate-limit";
+import { limits, type RateLimiter } from "./rate-limit";
+import { hashSecret } from "./secrets";
 
 /**
  * The TV's three HTTP endpoints, as plain Request -> Response functions.
@@ -25,18 +26,10 @@ function errorResponse(error: unknown): Response {
   return json({ error: userError.message }, userError.status);
 }
 
-/** Behind a proxy the socket address is the proxy's; see TRUST_PROXY in .env.example. */
-export function requestIp(request: Request): string {
-  if (process.env.TRUST_PROXY?.trim().toLowerCase() === "true") {
-    const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-    if (forwarded) return forwarded;
-  }
-  return "direct";
-}
-
-function limit(request: Request, limiter = limits.tvPoll): void {
-  const result = limiter.hit(requestIp(request));
-  if (!result.ok) throw new UserError("Too many requests. The TV will retry shortly.", 429);
+/** Throws a 429 when `key` is over `limiter`'s limit. */
+function limit(limiter: RateLimiter, key: string): void {
+  if (!limiter.hit(key).ok)
+    throw new UserError("Too many requests. The TV will retry shortly.", 429);
 }
 
 function bearer(request: Request): string | null {
@@ -45,10 +38,18 @@ function bearer(request: Request): string | null {
   return match ? match[1] : null;
 }
 
+/*
+ * Rate limits are keyed by what identifies the caller best: the address for a
+ * TV asking for a code, the poll secret for a TV waiting on one, the device
+ * token for a paired TV. One noisy client therefore never starves the rest of
+ * the lobby, and `ip` comes from the socket (or the trusted proxy hop), never
+ * from a header the client wrote. See client-ip.ts.
+ */
+
 /** POST /api/tv/pair: a TV asks for a code to show. */
-export async function handlePairStart(request: Request): Promise<Response> {
+export async function handlePairStart(request: Request, ip: string): Promise<Response> {
   try {
-    limit(request, limits.pairStart);
+    limit(limits.pairStart, ip);
     return json(await startPairing(), 201);
   } catch (error) {
     return errorResponse(error);
@@ -56,13 +57,17 @@ export async function handlePairStart(request: Request): Promise<Response> {
 }
 
 /** POST /api/tv/pair/status { pollSecret }: has someone typed my code in yet? */
-export async function handlePairStatus(request: Request): Promise<Response> {
+export async function handlePairStatus(request: Request, ip: string): Promise<Response> {
   try {
-    limit(request);
     const body = (await request.json().catch(() => null)) as { pollSecret?: unknown } | null;
     const pollSecret = typeof body?.pollSecret === "string" ? body.pollSecret.slice(0, 200) : "";
     if (!pollSecret) throw new UserError("Missing pollSecret.", 400);
-    return json(await collectPairing(pollSecret));
+    limit(limits.tvPairPoll, hashSecret(pollSecret));
+    const result = await collectPairing(pollSecret);
+    // Only dead or made-up secrets count against the address: every TV at a
+    // church shares one public address, and waiting ones poll every 3 s.
+    if (result.status === "expired") limit(limits.tvUnauthenticated, ip);
+    return json(result);
   } catch (error) {
     return errorResponse(error);
   }
@@ -75,11 +80,17 @@ export async function handlePairStatus(request: Request): Promise<Response> {
  * shows a new pairing code. 304 means nothing changed since the ETag it sent,
  * which is the answer to almost every poll.
  */
-export async function handleTvScreen(request: Request): Promise<Response> {
+export async function handleTvScreen(request: Request, ip: string): Promise<Response> {
   try {
-    limit(request);
-    const device = await deviceForToken(bearer(request));
-    if (!device) return json({ error: "This TV is not paired." }, 401);
+    const token = bearer(request);
+    if (!token) return json({ error: "This TV is not paired." }, 401);
+    limit(limits.tvScreenPoll, hashSecret(token));
+    const device = await deviceForToken(token);
+    if (!device) {
+      // Only failures count against the address: a paired TV never hits this.
+      limit(limits.tvUnauthenticated, ip);
+      return json({ error: "This TV is not paired." }, 401);
+    }
 
     const { payload, etag } = await payloadForDevice(device);
     if (request.headers.get("if-none-match") === etag) {

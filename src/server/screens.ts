@@ -69,14 +69,16 @@ export async function saveScreen(
   baseVersion: number,
 ): Promise<SaveResult> {
   const document = parseScreenDocument(input);
-  const { count } = await db().screen.updateMany({
+  // One statement: the version check, the write and the read of what was
+  // written, so another save landing in between cannot be mistaken for ours.
+  const [saved] = await db().screen.updateManyAndReturn({
     where: { id, version: baseVersion },
     data: { name: document.name, document: asJson(document), version: { increment: 1 } },
   });
+  if (saved) return { status: "saved", screen: toRecord(saved) };
 
-  const row = await db().screen.findUnique({ where: { id } });
-  if (!row) return { status: "not-found" };
-  return { status: count === 1 ? "saved" : "conflict", screen: toRecord(row) };
+  const current = await db().screen.findUnique({ where: { id } });
+  return current ? { status: "conflict", screen: toRecord(current) } : { status: "not-found" };
 }
 
 export async function deleteScreen(id: string): Promise<boolean> {

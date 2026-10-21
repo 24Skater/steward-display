@@ -21,7 +21,13 @@ const MIN_PASSWORD = 10;
 
 function SetupPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ churchName: "", name: "", email: "", password: "" });
+  const [form, setForm] = useState({
+    setupCode: "",
+    churchName: "",
+    name: "",
+    email: "",
+    password: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -52,6 +58,24 @@ function SetupPage() {
       subtitle="Name your church and create the owner's account. This page only appears once."
     >
       <form onSubmit={submit} className="space-y-4" noValidate>
+        <div className="space-y-1.5">
+          <Label htmlFor="setupCode">Setup code</Label>
+          <Input
+            id="setupCode"
+            required
+            autoComplete="off"
+            spellCheck={false}
+            className="font-mono tracking-widest"
+            value={form.setupCode}
+            onChange={field("setupCode")}
+            aria-describedby="setup-code-hint"
+          />
+          <p id="setup-code-hint" className="text-xs text-muted-foreground">
+            In the server's log, on the line starting <span className="font-mono">[setup]</span>{" "}
+            (for Docker: <span className="font-mono">docker compose logs app</span>). It proves you
+            run this server.
+          </p>
+        </div>
         <div className="space-y-1.5">
           <Label htmlFor="churchName">Church name</Label>
           <Input
@@ -106,7 +130,14 @@ function SetupPage() {
         <Button
           type="submit"
           className="w-full"
-          disabled={busy || !form.churchName || !form.name || !form.email || !form.password}
+          disabled={
+            busy ||
+            !form.setupCode ||
+            !form.churchName ||
+            !form.name ||
+            !form.email ||
+            !form.password
+          }
         >
           {busy ? "Setting up…" : "Create church and sign in"}
         </Button>

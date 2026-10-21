@@ -9,7 +9,9 @@ export function ScreenThumbnail({ screen }: { screen: Screen }) {
       style={{
         aspectRatio: `${dims.w} / ${dims.h}`,
         backgroundColor: screen.backgroundColor,
-        backgroundImage: screen.backgroundImage ? `url(${screen.backgroundImage})` : undefined,
+        backgroundImage: screen.backgroundImage
+          ? `url(${JSON.stringify(screen.backgroundImage)})`
+          : undefined,
         backgroundSize: "cover",
       }}
     >

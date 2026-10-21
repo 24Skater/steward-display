@@ -16,6 +16,7 @@ import { resolveOrg, clearOrgCache } from "./org-resolver";
 import { createScreen, getScreen, importScreens, listScreens, saveScreen } from "./screens";
 import { revokeSession, viewerForToken } from "./sessions";
 import { getOrgSettings, updateOrgSettings } from "./settings";
+import { setupCode } from "./setup-code";
 
 const screenDoc = (name: string) => ({
   name,
@@ -44,12 +45,26 @@ describeDb("first-run setup", () => {
   it("creates the church and its owner once, then refuses", async () => {
     expect((await resolveOrg("anything.local")).kind).toBe("setup");
 
+    await expect(
+      setUpInstallation(
+        {
+          churchName: "Grace",
+          name: "Sam",
+          email: "s@g.org",
+          password: "a long password",
+          setupCode: "WRONG",
+        },
+        "test",
+      ),
+    ).rejects.toThrow(/setup code/);
+
     const signedIn = await setUpInstallation(
       {
         churchName: "Grace Church",
         name: "Sam",
         email: "Sam@Grace.org",
         password: "a long password",
+        setupCode: setupCode().toLowerCase(),
       },
       "test",
     );
@@ -62,7 +77,13 @@ describeDb("first-run setup", () => {
 
     await expect(
       setUpInstallation(
-        { churchName: "Other", name: "Eve", email: "eve@x.org", password: "a long password" },
+        {
+          churchName: "Other",
+          name: "Eve",
+          email: "eve@x.org",
+          password: "a long password",
+          setupCode: setupCode(),
+        },
         "test",
       ),
     ).rejects.toThrow(/already set up/);
@@ -206,12 +227,14 @@ describeDb("pairing a TV", () => {
     const collected = await asOrg(org, () => collectPairing(started.pollSecret));
     expect(collected.status).toBe("paired");
     if (collected.status !== "paired") return;
-    // A second poll, or a replayed one, gets nothing.
-    expect(await asOrg(org, () => collectPairing(started.pollSecret))).toEqual({
-      status: "expired",
-    });
+    // A TV whose answer was lost asks again: it gets a fresh token, and the first one dies.
+    const again = await asOrg(org, () => collectPairing(started.pollSecret));
+    if (again.status !== "paired") throw new Error("second collect should pair");
+    expect(again.deviceToken).not.toBe(collected.deviceToken);
+    expect(await asOrg(org, () => deviceForToken(collected.deviceToken))).toBeNull();
+    const token = again.deviceToken;
 
-    const device = await asOrg(org, () => deviceForToken(collected.deviceToken));
+    const device = await asOrg(org, () => deviceForToken(token));
     expect(device).toMatchObject({ name: "Lobby left", screenId: screen.id });
 
     const before = await asOrg(org, () => payloadForDevice(device!));
@@ -229,7 +252,7 @@ describeDb("pairing a TV", () => {
     ).toBeNull();
 
     await asOrg(org, () => removeDevice(device!.id));
-    expect(await asOrg(org, () => deviceForToken(collected.deviceToken))).toBeNull();
+    expect(await asOrg(org, () => deviceForToken(token))).toBeNull();
   });
 
   it("refuses an expired code", async () => {

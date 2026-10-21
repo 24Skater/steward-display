@@ -25,6 +25,15 @@ export type OrgResolution =
 const CACHE_TTL_MS = 60_000;
 const cache = new Map<string, { value: OrgResolution; expiresAt: number }>();
 
+/** More churches than one replica will ever serve; a bound, not a tuning knob. */
+const MAX_CACHED = 5_000;
+
+function sweep(): void {
+  const now = Date.now();
+  for (const [key, entry] of cache) if (entry.expiresAt <= now) cache.delete(key);
+  if (cache.size >= MAX_CACHED) cache.clear();
+}
+
 /** Forgets every cached answer. Called after setup creates the church. */
 export function clearOrgCache(): void {
   cache.clear();
@@ -67,8 +76,12 @@ export async function resolveOrg(
   if (cached && cached.expiresAt > Date.now()) return cached.value;
 
   const value = slug ? await orgForSlug(slug) : await soleOrg();
-  // Setup state is never cached: the next request after setup must see the church.
-  if (value.kind !== "setup") cache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS });
+  // Only real churches are cached. Setup must end the moment it succeeds, and
+  // caching misses would let a stream of random hostnames grow the map forever.
+  if (value.kind === "org") {
+    if (cache.size >= MAX_CACHED) sweep();
+    cache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS });
+  }
   return value;
 }
 

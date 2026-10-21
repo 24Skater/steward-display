@@ -72,3 +72,19 @@ describe("applyOrgScope", () => {
     expect(() => applyOrgScope("Newthing", "findMany", {}, "org-a")).toThrow(/Classify it/);
   });
 });
+
+describe("applyOrgScope on updates", () => {
+  it("refuses to move a row to another church", () => {
+    expect(() =>
+      applyOrgScope("Screen", "updateMany", { where: {}, data: { orgId: "org-b" } }, "org-a"),
+    ).toThrow(/move rows/);
+    expect(() =>
+      applyOrgScope(
+        "Screen",
+        "upsert",
+        { where: {}, create: {}, update: { orgId: "org-b" } },
+        "org-a",
+      ),
+    ).toThrow(/move rows/);
+  });
+});

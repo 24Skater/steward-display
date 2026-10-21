@@ -12,7 +12,7 @@ import { deviceNameSchema } from "./schemas";
  *  2. Someone signed in types the code into the admin (`claimPairing`), names
  *     the TV and picks its screen. That creates the device.
  *  3. The TV, polling with its secret (`collectPairing`), is handed its device
- *     token, once. Only the token's hash is stored.
+ *     token. Only the token's hash is stored, and collecting again replaces it.
  *
  * The code alone is worth nothing: it can only attach a TV to the church of
  * whoever typed it, and only the TV holding the poll secret receives the token.
@@ -111,20 +111,21 @@ export async function collectPairing(
   }
 
   const tooLate = now.getTime() - pairing.createdAt.getTime() > COLLECT_WINDOW_MS;
-  if (pairing.deliveredAt || tooLate) return { status: "expired" };
+  if (tooLate) return { status: "expired" };
 
+  // Each collect issues a fresh token and retires the previous one. A TV whose
+  // first answer was lost on the way (a Wi-Fi blip) asks again and still
+  // pairs; only the TV holds the poll secret, so nobody else can ask.
   const deviceToken = newSecret("sdt");
-  return db().$transaction(async (tx) => {
-    // A pairing pays out once, even to two polls in flight.
-    const { count } = await tx.pairing.updateMany({
-      where: { id: pairing.id, deliveredAt: null },
-      data: { deliveredAt: now },
-    });
-    if (count !== 1) return { status: "expired" as const };
-    await tx.device.update({
-      where: { id: pairing.device!.id },
-      data: { tokenHash: hashSecret(deviceToken), lastSeenAt: now },
-    });
-    return { status: "paired" as const, deviceToken, deviceName: pairing.device!.name };
-  });
+  await db().$transaction([
+    db().device.update({
+      where: { id: pairing.device.id },
+      data: { tokenHash: hashSecret(deviceToken) },
+    }),
+    db().pairing.update({
+      where: { id: pairing.id },
+      data: { deliveredAt: pairing.deliveredAt ?? now },
+    }),
+  ]);
+  return { status: "paired", deviceToken, deviceName: pairing.device.name };
 }

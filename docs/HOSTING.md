@@ -10,9 +10,18 @@ cp .env.example .env      # set POSTGRES_PASSWORD to something long
 docker compose up -d
 ```
 
-Open <http://localhost:3000>. The first visit shows a setup page: your church's name, and the
-owner's name, email and password. It appears once; after that the page sends people to sign
-in.
+Open <http://localhost:3000>. The first visit shows a setup page: a setup code, your church's
+name, and the owner's name, email and password. It appears once; after that the page sends
+people to sign in.
+
+The setup code proves the person on the setup page also runs the server, so a stranger who
+finds a fresh install cannot make themselves its owner. Display prints it in its log:
+
+```sh
+docker compose logs app | grep '\[setup\]'
+```
+
+Or choose one in advance with `SETUP_CODE` in `.env`.
 
 On every start the container applies any new database migrations, then starts the server. An
 up-to-date database makes that a no-op. Set `SKIP_MIGRATIONS=true` to run them some other way.
@@ -25,6 +34,9 @@ up-to-date database makes that a no-op. Set `SKIP_MIGRATIONS=true` to run them s
 | `POSTGRES_PASSWORD`    | (required) | Compose only: the database password.                                                          |
 | `PORT`                 | `3000`     | The port the server listens on (and that compose publishes).                                  |
 | `TRUST_PROXY`          | `false`    | `true` behind a reverse proxy: rate limits use `X-Forwarded-For`, cookies honour its `https`. |
+| `TRUSTED_PROXY_HOPS`   | `1`        | How many proxies are in front. The visitor is read that many entries from the right.          |
+| `BIND_ADDRESS`         | `0.0.0.0`  | Compose only. `127.0.0.1` behind a proxy on the same machine, so nothing can skip it.         |
+| `SETUP_CODE`           | random     | The code first-run setup asks for. Random and printed in the log when unset.                  |
 | `PLATFORM_ROOT_DOMAIN` | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
 
 ## Pairing TVs
@@ -33,7 +45,8 @@ On the TV's browser, open `https://your-display-address/tv`. It shows a six-char
 Sign in from any phone or computer, open **TVs**, choose **Pair a TV** and type the code. The
 code lasts ten minutes; the TV gets a new one by itself.
 
-A paired TV checks for changes about every 30 seconds. If the network drops it keeps showing
+A paired TV checks for changes about every 30 seconds. Clocks, dates and countdowns on TVs use
+the church's time zone from Settings, whatever zone the TV itself is set to. If the network drops it keeps showing
 the last screen that loaded, including after a reboot. Unpairing a TV from the TVs page stops
 it at its next check and it shows a new code.
 
@@ -43,7 +56,8 @@ Raspberry Pi in kiosk mode pointed at `/tv` does.
 ## TLS, HSTS and compression
 
 The app does not terminate TLS or compress responses. Put it behind a reverse proxy that does,
-and set `TRUST_PROXY=true`. With Caddy:
+set `TRUST_PROXY=true`, and set `BIND_ADDRESS=127.0.0.1` so the app's port is not reachable
+around the proxy. With Caddy:
 
 ```caddyfile
 display.example.org {

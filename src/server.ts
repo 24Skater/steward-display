@@ -2,7 +2,8 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { isSameOriginWrite, isSetupPath } from "./server/gate";
+import { bodySizeRefusal, isSameOriginWrite, isSetupPath } from "./server/gate";
+import { announceSetupCode } from "./server/setup-code";
 import { runInOrg } from "./server/org-context";
 import { resolveOrg } from "./server/org-resolver";
 
@@ -55,6 +56,9 @@ function withBaselineHeaders(response: Response): Response {
   for (const [name, value] of Object.entries(BASELINE_HEADERS)) {
     if (!headers.has(name)) headers.set(name, value);
   }
+  // Pages and server functions carry one person's data: no shared cache may
+  // keep them. Static assets set their own caching and never come through here.
+  if (!headers.has("cache-control")) headers.set("cache-control", "private, no-store");
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -78,6 +82,8 @@ async function handle(request: Request, env: unknown, ctx: unknown): Promise<Res
   if (!isSameOriginWrite(request)) {
     return plainResponse(403, "This request did not come from this site.");
   }
+  const sizeRefusal = bodySizeRefusal(request);
+  if (sizeRefusal) return plainResponse(sizeRefusal, "That request body is not acceptable.");
 
   const handler = await getServerEntry();
   const run = async () => normalizeCatastrophicSsrResponse(await handler.fetch(request, env, ctx));
@@ -87,6 +93,7 @@ async function handle(request: Request, env: unknown, ctx: unknown): Promise<Res
     case "org":
       return runInOrg(resolution.org, run);
     case "setup": {
+      announceSetupCode();
       const { pathname } = new URL(request.url);
       if (isSetupPath(pathname)) return run();
       if (pathname.startsWith("/api/")) return plainResponse(503, "Not set up yet.");
