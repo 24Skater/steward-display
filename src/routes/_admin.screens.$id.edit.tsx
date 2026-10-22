@@ -26,6 +26,7 @@ import { getScreenDimensions, type WidgetType } from "@/types";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CONTENT_WIDGETS } from "@/components/editor/WidgetContentForm";
 import { MonitorOff } from "lucide-react";
 import { INTERACTIVE_GUARD_SELECTOR } from "@/lib/keyboardGuard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -95,7 +96,10 @@ function EditorPage() {
   }
 
   // Owners decided: phones edit what a screen says, tablets and computers its layout.
-  if (screen && isPhone && !layoutOnPhone) {
+  // A screen with no words yet goes straight to the layout templates, which
+  // work on a phone; there is nothing for quick edit to offer.
+  const hasContent = screen?.widgets.some((w) => CONTENT_WIDGETS.has(w.widgetType)) ?? false;
+  if (screen && isPhone && hasContent && !layoutOnPhone) {
     return (
       <main className="mx-auto max-w-md px-4 py-10">
         <EmptyState

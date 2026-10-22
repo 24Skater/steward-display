@@ -22,7 +22,8 @@ import type { Screen, WidgetInstance, WidgetType } from "@/types";
  * server says so, this store takes their version, and the person is told
  * rather than one of the two edits disappearing.
  */
-export type SaveStatus = "saved" | "pending" | "saving" | "error";
+/** "conflict": someone else saved first and this browser's last changes were dropped. */
+export type SaveStatus = "saved" | "pending" | "saving" | "error" | "conflict";
 
 interface ScreenState {
   screens: Screen[];
@@ -130,13 +131,13 @@ export const useScreenStore = create<ScreenState>((set, get) => {
         return;
       }
       if (result.status === "conflict") {
-        const lostEdits = (revisions.get(id) ?? 0) !== revision;
+        // The refused save carried this browser's changes, so they are gone,
+        // along with any made while it was in flight.
         replaceScreen(result.screen);
         revisions.set(id, (revisions.get(id) ?? 0) + 1);
-        setStatus(id, "saved");
+        setStatus(id, "conflict");
         toast.warning(
-          `Someone else saved "${screen.name}" while you were editing. You're now looking at their version` +
-            (lostEdits ? "; your last few changes were not saved." : "."),
+          `Someone else saved "${screen.name}" while you were editing. You're now looking at their version; your last changes were not saved.`,
         );
         return;
       }
@@ -330,5 +331,7 @@ export const useScreenStore = create<ScreenState>((set, get) => {
 
 /** Whether any screen has changes the server has not confirmed. */
 export function hasUnsavedScreens(): boolean {
-  return Object.values(useScreenStore.getState().saveStatus).some((s) => s !== "saved");
+  return Object.values(useScreenStore.getState().saveStatus).some(
+    (s) => s !== "saved" && s !== "conflict",
+  );
 }
