@@ -144,5 +144,10 @@ export async function changePassword(
   await db().user.update(
     bypass({ where: { id: userId }, data: { passwordHash: await hashPassword(newPassword) } }),
   );
+  // A reset link sent before the change must not undo it.
+  await db().userToken.updateMany({
+    where: { userId, purpose: "RESET_PASSWORD", usedAt: null },
+    data: { usedAt: new Date() },
+  });
   return { signedOut: await revokeSessionsEverywhere(userId, keepSessionId) };
 }

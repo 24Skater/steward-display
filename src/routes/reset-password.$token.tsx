@@ -6,10 +6,11 @@ import { AuthCard, FormError } from "@/components/auth/AuthCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { resetPasswordFn } from "@/lib/api/auth.functions";
+import { resetLinkStatusFn, resetPasswordFn } from "@/lib/api/auth.functions";
 import { errorMessage } from "@/lib/errors";
 
 export const Route = createFileRoute("/reset-password/$token")({
+  loader: ({ params }) => resetLinkStatusFn({ data: { token: params.token } }),
   head: () => ({ meta: [{ title: "Choose a new password — Steward Display" }] }),
   component: ResetPasswordPage,
 });
@@ -20,6 +21,22 @@ function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { valid } = Route.useLoaderData();
+
+  if (!valid) {
+    return (
+      <AuthCard title="This reset link has expired">
+        <p className="text-sm text-muted-foreground">
+          Reset links work once, for one hour. Ask for a new one and use the newest email.
+        </p>
+        <p className="mt-6 text-center text-sm">
+          <Link to="/forgot-password" className="text-blue underline-offset-4 hover:underline">
+            Send me a new link
+          </Link>
+        </p>
+      </AuthCard>
+    );
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();

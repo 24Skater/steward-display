@@ -15,7 +15,7 @@ import {
   signOutFn,
 } from "@/lib/api/auth.functions";
 import { errorMessage } from "@/lib/errors";
-import { useChurch, useViewer } from "@/lib/viewer";
+import { useCanEmail, useChurch, useViewer } from "@/lib/viewer";
 
 export const Route = createFileRoute("/_admin/account")({
   head: () => ({ meta: [{ title: "Your account — Steward Display" }] }),
@@ -25,6 +25,7 @@ export const Route = createFileRoute("/_admin/account")({
 function AccountPage() {
   const viewer = useViewer();
   const church = useChurch();
+  const canEmail = useCanEmail();
   const navigate = useNavigate();
 
   async function signOut() {
@@ -38,11 +39,8 @@ function AccountPage() {
   async function resend() {
     try {
       const { sent } = await resendVerificationFn();
-      toast[sent ? "success" : "info"](
-        sent
-          ? `Sent a confirmation link to ${viewer.email}.`
-          : "This server can't send email yet, so there's nothing to confirm with.",
-      );
+      if (sent) toast.success(`Sent a confirmation link to ${viewer.email}.`);
+      else toast.error("Couldn't send the email just now. Try again in a few minutes.");
     } catch (error) {
       toast.error(errorMessage(error));
     }
@@ -74,13 +72,15 @@ function AccountPage() {
             {viewer.email}{" "}
             {viewer.emailVerified ? (
               <span className="text-xs text-emerald">Confirmed</span>
-            ) : (
+            ) : canEmail ? (
               <button
                 onClick={() => void resend()}
                 className="text-xs text-blue underline-offset-4 hover:underline"
               >
                 Not confirmed yet: send a link
               </button>
+            ) : (
+              <span className="text-xs text-muted-foreground">Not confirmed</span>
             )}
           </dd>
           <dt className="text-muted-foreground">Role</dt>

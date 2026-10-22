@@ -69,7 +69,7 @@ export function passwordResetEmail(input: { to: string; churchName: string; link
 export function verificationEmail(input: { to: string; churchName: string; link: string }): Email {
   const lines = [
     `Confirm that this is your email address for Steward Display at ${input.churchName}.`,
-    "It lets you reset your password by email if you ever forget it.",
+    "It tells your church's team that mail from Steward Display reaches you.",
   ];
   const footer = "The link lasts 24 hours. If you didn't create an account, ignore this email.";
   return {

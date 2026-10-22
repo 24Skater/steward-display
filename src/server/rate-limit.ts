@@ -90,10 +90,21 @@ export const limits = {
   tvScreenPoll: new RateLimiter({ limit: 120, windowMs: 15 * MINUTE }),
   /** Per owner: invitations sent. Enough for a whole team in one sitting. */
   invite: new RateLimiter({ limit: 30, windowMs: 60 * MINUTE }),
-  /** Per address: reset requests, accepting invitations, using emailed links. */
+  /** Per address: reset requests and using emailed links. */
   emailLinks: new RateLimiter({ limit: 10, windowMs: 15 * MINUTE }),
-  /** Per email address: reset emails, so nobody can flood one inbox. */
+  /** Per church and email address: reset emails, so nobody can flood one inbox. */
   resetPerEmail: new RateLimiter({ limit: 3, windowMs: 60 * MINUTE }),
+  /** Per person: confirmation emails, separate so they never use up someone's resets. */
+  verifyPerUser: new RateLimiter({ limit: 3, windowMs: 60 * MINUTE }),
+  /** Per invited address at a church: re-invitations, so one inbox cannot be flooded. */
+  invitePerRecipient: new RateLimiter({ limit: 3, windowMs: 24 * 60 * MINUTE }),
+  /**
+   * Accepting invitations: per address and link (wrong-password retries), and a
+   * looser cap per address, because a whole volunteer team may join from one
+   * church Wi-Fi after Sunday training.
+   */
+  acceptPerLink: new RateLimiter({ limit: 10, windowMs: 15 * MINUTE }),
+  acceptPerIp: new RateLimiter({ limit: 60, windowMs: 15 * MINUTE }),
   /** Per address: requests that fail authentication or bring no credential. */
   tvUnauthenticated: new RateLimiter({ limit: 1000, windowMs: 15 * MINUTE }),
 };

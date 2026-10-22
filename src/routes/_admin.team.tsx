@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Copy, MailCheck, UserPlus, X } from "lucide-react";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { FormError } from "@/components/auth/AuthCard";
@@ -62,6 +62,9 @@ function TeamPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
   const [removing, setRemoving] = useState<TeamMember | null>(null);
+  const [demotingSelf, setDemotingSelf] = useState<TeamMember | null>(null);
+  const [savingRole, setSavingRole] = useState<string | null>(null);
+  const router = useRouter();
 
   const refresh = useCallback(async () => {
     try {
@@ -84,6 +87,26 @@ function TeamPage() {
     } catch (error) {
       toast.error(errorMessage(error));
     }
+  }
+
+  async function setRole(member: TeamMember, role: Role) {
+    setSavingRole(member.membershipId);
+    await run(
+      () => changeRoleFn({ data: { membershipId: member.membershipId, role } }),
+      member.userId === team?.me
+        ? "You're now an editor."
+        : `${member.name} is now ${role === "OWNER" ? "an owner" : "an editor"}.`,
+    );
+    setSavingRole(null);
+    // Your own role changed: the rest of the app has to see it straight away.
+    if (member.userId === team?.me) await router.invalidate();
+  }
+
+  function onRoleChange(member: TeamMember, role: Role) {
+    if (role === member.role) return;
+    // Stepping down cannot be undone by yourself, so it is asked, not assumed.
+    if (member.userId === team?.me && role !== "OWNER") setDemotingSelf(member);
+    else void setRole(member, role);
   }
 
   return (
@@ -142,19 +165,9 @@ function TeamPage() {
                   <select
                     aria-label={`Role for ${member.name}`}
                     value={member.role}
-                    onChange={(e) =>
-                      void run(
-                        () =>
-                          changeRoleFn({
-                            data: {
-                              membershipId: member.membershipId,
-                              role: e.target.value as Role,
-                            },
-                          }),
-                        `${member.name} is now ${e.target.value === "OWNER" ? "an owner" : "an editor"}.`,
-                      )
-                    }
-                    className="h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    disabled={savingRole === member.membershipId}
+                    onChange={(e) => onRoleChange(member, e.target.value as Role)}
+                    className="h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                   >
                     <option value="OWNER">Owner</option>
                     <option value="EDITOR">Editor</option>
@@ -195,12 +208,20 @@ function TeamPage() {
                     {team.isOwner && (
                       <Button
                         variant="ghost"
-                        onClick={() =>
-                          void run(
-                            () => revokeInvitationFn({ data: { id: invitation.id } }),
-                            `Cancelled the invitation for ${invitation.email}.`,
-                          )
-                        }
+                        onClick={async () => {
+                          try {
+                            const { revoked } = await revokeInvitationFn({
+                              data: { id: invitation.id },
+                            });
+                            if (revoked)
+                              toast.success(`Cancelled the invitation for ${invitation.email}.`);
+                            else
+                              toast.info(`${invitation.email} accepted before it was cancelled.`);
+                            await refresh();
+                          } catch (error) {
+                            toast.error(errorMessage(error));
+                          }
+                        }}
                       >
                         Cancel
                       </Button>
@@ -230,6 +251,30 @@ function TeamPage() {
           />
         </>
       )}
+
+      <AlertDialog open={!!demotingSelf} onOpenChange={(open) => !open && setDemotingSelf(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Step down to editor?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You'll no longer be able to manage the team or rename the church. Only another owner
+              can make you an owner again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay an owner</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const me = demotingSelf;
+                setDemotingSelf(null);
+                if (me) void setRole(me, "EDITOR");
+              }}
+            >
+              Step down
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!removing} onOpenChange={(open) => !open && setRemoving(null)}>
         <AlertDialogContent>
@@ -275,10 +320,14 @@ function InviteDialog({ open, onOpenChange, canEmail, onInvited }: InviteDialogP
   const [role, setRole] = useState<Role>("EDITOR");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ link: string; emailed: boolean } | null>(null);
+  const [result, setResult] = useState<{ link: string | null; emailed: boolean } | null>(null);
+  // Bumped whenever the dialog closes, so a request still in flight cannot
+  // land its result in the next, unrelated invitation.
+  const generation = useRef(0);
 
   function close(next: boolean) {
     if (!next) {
+      generation.current++;
       setEmail("");
       setRole("EDITOR");
       setError(null);
@@ -291,8 +340,11 @@ function InviteDialog({ open, onOpenChange, canEmail, onInvited }: InviteDialogP
     event.preventDefault();
     setBusy(true);
     setError(null);
+    const mine = generation.current;
     try {
-      setResult(await inviteFn({ data: { email, role } }));
+      const invited = await inviteFn({ data: { email, role } });
+      if (mine !== generation.current) return;
+      setResult(invited);
       onInvited();
     } catch (err) {
       setError(errorMessage(err));
@@ -316,30 +368,30 @@ function InviteDialog({ open, onOpenChange, canEmail, onInvited }: InviteDialogP
         {result ? (
           <>
             <DialogHeader>
-              <DialogTitle>
-                {result.emailed ? "Invitation sent" : "Send them this link"}
-              </DialogTitle>
+              <DialogTitle>{result.link ? "Send them this link" : "Invitation sent"}</DialogTitle>
               <DialogDescription>
-                {result.emailed
-                  ? `We emailed ${email}. You can also send them this link yourself. It works once, for seven days.`
-                  : "This server can't send email, so pass this link on yourself: a text message works. It works once, for seven days."}
+                {result.link
+                  ? "This server couldn't email it, so pass this link on yourself: a text message works. It works once, for seven days."
+                  : `We emailed ${email} a link to join. It works once, for seven days. Nothing arriving? Cancel and invite again.`}
               </DialogDescription>
             </DialogHeader>
-            <div className="mt-4 flex gap-2">
-              <Input
-                readOnly
-                value={result.link}
-                aria-label="Invitation link"
-                className="font-mono text-xs"
-              />
-              <Button
-                variant="outline"
-                onClick={() => void copy(result.link)}
-                aria-label="Copy link"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
+            {result.link && (
+              <div className="mt-4 flex gap-2">
+                <Input
+                  readOnly
+                  value={result.link}
+                  aria-label="Invitation link"
+                  className="font-mono text-xs"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => void copy(result.link!)}
+                  aria-label="Copy link"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
             <DialogFooter className="mt-6">
               <Button onClick={() => close(false)}>Done</Button>
             </DialogFooter>
@@ -351,7 +403,7 @@ function InviteDialog({ open, onOpenChange, canEmail, onInvited }: InviteDialogP
               <DialogDescription>
                 {canEmail
                   ? "They'll get an email with a link to join."
-                  : "You'll get a link to send them."}
+                  : "If this server can't email them, you'll get a link to send them yourself."}
               </DialogDescription>
             </DialogHeader>
             <div className="mt-5 space-y-4">

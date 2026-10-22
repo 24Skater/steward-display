@@ -46,9 +46,7 @@ function VerifyEmailPage() {
   if (state === "done") {
     return (
       <AuthCard title="Email confirmed">
-        <p className="text-sm text-muted-foreground">
-          Thanks. If you ever forget your password, you can now reset it by email.
-        </p>
+        <p className="text-sm text-muted-foreground">Thanks. Your address is confirmed.</p>
         {home}
       </AuthCard>
     );

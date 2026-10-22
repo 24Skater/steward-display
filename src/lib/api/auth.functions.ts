@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import {
   canEmailLinks,
   deleteAccount,
+  isResetLinkValid,
   requestPasswordReset,
   resetPassword,
   sendVerification,
@@ -116,12 +117,10 @@ export const forgotPasswordFn = createServerFn({ method: "POST" })
   .validator((input: { email: string }) => input)
   .handler(async ({ data }) => {
     enforceLimit(limits.emailLinks, clientIp());
-    enforceLimit(
-      limits.resetPerEmail,
-      String(data.email ?? "")
-        .trim()
-        .toLowerCase(),
-    );
+    const email = String(data.email ?? "")
+      .trim()
+      .toLowerCase();
+    enforceLimit(limits.resetPerEmail, `${currentOrg()?.orgId}|${email}`);
     await requestPasswordReset(data);
     return { ok: true as const };
   });
@@ -135,6 +134,11 @@ export const resetPasswordFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+export const resetLinkStatusFn = createServerFn({ method: "GET" })
+  .middleware([safeErrors])
+  .validator((input: { token: string }) => input)
+  .handler(async ({ data }) => ({ valid: await isResetLinkValid(data.token) }));
+
 export const verifyEmailFn = createServerFn({ method: "POST" })
   .middleware([safeErrors])
   .validator((input: { token: string }) => input)
@@ -147,7 +151,7 @@ export const verifyEmailFn = createServerFn({ method: "POST" })
 export const resendVerificationFn = createServerFn({ method: "POST" })
   .middleware([signedIn])
   .handler(async ({ context }) => {
-    enforceLimit(limits.resetPerEmail, context.viewer.email);
+    enforceLimit(limits.verifyPerUser, context.viewer.userId);
     return { sent: await sendVerification(context.viewer.userId) };
   });
 

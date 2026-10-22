@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import type { Prisma } from "@/generated/prisma/client";
 import type { Role } from "@/generated/prisma/enums";
 import { db } from "./db";
 import { invitationEmail } from "./emails";
@@ -82,19 +83,24 @@ export async function listTeam(now: Date = new Date()): Promise<{
 }
 
 /**
- * Invites `email` with `role`. Returns the link, always, so an owner can pass it
- * on themselves when this server cannot send email.
+ * Invites `email` with `role`.
+ *
+ * When the invitation is emailed, the link goes only to the invited address
+ * and never back to the owner. An owner holding a link for an address they do
+ * not control could otherwise open it and create that person's account before
+ * they do. When it cannot be emailed the owner has to pass it on, and the real
+ * person can still take the account back: an open invitation is reason enough
+ * to send them a password reset (see account-recovery.ts).
  *
  * `requestOrigin` is the owner's own address bar, used only on a self-hosted
- * install with no PUBLIC_URL. That is safe where it would not be for a password
- * reset: the owner is signed in and sent this request from their own page.
+ * install with no PUBLIC_URL, and such a link is emailed only if it is https.
  */
 export async function inviteMember(
   inviter: Viewer,
   input: unknown,
   requestOrigin: string,
   now: Date = new Date(),
-): Promise<{ link: string; emailed: boolean }> {
+): Promise<{ link: string | null; emailed: boolean }> {
   const { email, role } = z.object({ email: emailSchema, role: roleSchema }).parse(input);
   const org = requireOrg();
 
@@ -116,15 +122,22 @@ export async function inviteMember(
     }),
   });
 
-  const link = `${publicUrl(org.slug) ?? requestOrigin}/invite/${token}`;
-  const result = await sendEmail(
-    invitationEmail({ to: email, churchName: org.name, inviterName: inviter.name, role, link }),
-  );
-  return { link, emailed: result.sent };
+  const base = publicUrl(org.slug);
+  const link = `${base ?? requestOrigin}/invite/${token}`;
+  // A guessed, plain-http address (a LAN IP, say) is not one to put in an email.
+  const emailable = base !== null || requestOrigin.startsWith("https://");
+  const result = emailable
+    ? await sendEmail(
+        invitationEmail({ to: email, churchName: org.name, inviterName: inviter.name, role, link }),
+      )
+    : { sent: false as const };
+  return result.sent ? { link: null, emailed: true } : { link, emailed: false };
 }
 
-export async function revokeInvitation(id: string): Promise<void> {
-  await db().invitation.deleteMany({ where: { id, acceptedAt: null } });
+/** Cancels an invitation. False when it was accepted (or cancelled) in the meantime. */
+export async function revokeInvitation(id: string): Promise<boolean> {
+  const { count } = await db().invitation.deleteMany({ where: { id, acceptedAt: null } });
+  return count === 1;
 }
 
 /** What the invitation page shows before anyone types anything. */
@@ -185,7 +198,7 @@ export async function acceptInvitation(
   if (existing) {
     if (!existing.passwordHash || !(await verifyPassword(password, existing.passwordHash))) {
       throw new UserError(
-        `That isn't the password for ${invitation.email}. Use the one you sign in with elsewhere.`,
+        `That isn't the password for ${invitation.email}. Forgot it? Use "Forgot your password?" on the sign-in page.`,
         401,
       );
     }
@@ -196,30 +209,58 @@ export async function acceptInvitation(
 
   // All or nothing: marking the invitation used, creating the account and
   // joining. Two tabs accepting at once leave one member and no stray account.
-  const userId = await db().$transaction(async (tx) => {
-    const { count } = await tx.invitation.updateMany({
-      where: { id: invitation.id, acceptedAt: null },
-      data: { acceptedAt: now },
+  let userId: string;
+  try {
+    userId = await db().$transaction(async (tx) => {
+      const { count } = await tx.invitation.updateMany({
+        where: { id: invitation.id, acceptedAt: null },
+        data: { acceptedAt: now },
+      });
+      if (count !== 1) throw new UserError("This invitation was just used.", 409);
+      const id = newAccount
+        ? (
+            await tx.user.create({
+              data: { email: invitation.email, ...newAccount },
+              select: { id: true },
+            })
+          ).id
+        : existing!.id;
+      await tx.membership.create({ data: inOrg({ userId: id, role: invitation.role }) });
+      return id;
     });
-    if (count !== 1) throw new UserError("This invitation was just used.", 409);
-    const id = newAccount
-      ? (
-          await tx.user.create({
-            data: { email: invitation.email, ...newAccount },
-            select: { id: true },
-          })
-        ).id
-      : existing!.id;
-    await tx.membership.create({ data: inOrg({ userId: id, role: invitation.role }) });
-    return id;
-  });
+  } catch (error) {
+    // The address got an account between reading and writing (another
+    // invitation accepted at the same moment): ask them to use that one.
+    if ((error as { code?: string }).code === "P2002") {
+      throw new UserError(
+        `${invitation.email} now has an account. Reload this page and enter its password.`,
+        409,
+      );
+    }
+    throw error;
+  }
 
   return createSession(userId, userAgent);
 }
 
+/**
+ * Runs `fn` with this church's owner list locked, so two owners demoting or
+ * removing each other at the same moment cannot leave the church with none.
+ */
+async function withOwnersLocked<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+  const lockKey = `owners:${requireOrg().orgId}`;
+  return db().$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+    return fn(tx);
+  });
+}
+
 /** Owners can never all go: every church keeps at least one person who can manage it. */
-async function assertAnotherOwner(membershipId: string): Promise<void> {
-  const owners = await db().membership.count({
+async function assertAnotherOwner(
+  tx: Prisma.TransactionClient,
+  membershipId: string,
+): Promise<void> {
+  const owners = await tx.membership.count({
     where: { role: "OWNER", id: { not: membershipId } },
   });
   if (owners === 0) {
@@ -230,19 +271,42 @@ async function assertAnotherOwner(membershipId: string): Promise<void> {
   }
 }
 
+/**
+ * Cancels invitations someone sent that nobody has accepted yet. Run when they
+ * lose the right to invite: an owner who is removed or demoted must not be
+ * able to walk back in through an invitation they sent themselves.
+ */
+async function retireInvitationsFrom(tx: Prisma.TransactionClient, userId: string): Promise<void> {
+  await tx.invitation.deleteMany({ where: { invitedById: userId, acceptedAt: null } });
+}
+
 export async function changeRole(membershipId: string, role: unknown): Promise<void> {
   const next = roleSchema.parse(role);
-  const membership = await db().membership.findUnique({ where: { id: membershipId } });
-  if (!membership) throw new UserError("That person is no longer on the team.", 404);
-  if (membership.role === "OWNER" && next !== "OWNER") await assertAnotherOwner(membershipId);
-  await db().membership.update({ where: { id: membershipId }, data: { role: next } });
+  await withOwnersLocked(async (tx) => {
+    const membership = await tx.membership.findUnique({ where: { id: membershipId } });
+    if (!membership) throw new UserError("That person is no longer on the team.", 404);
+    if (membership.role === "OWNER" && next !== "OWNER") {
+      await assertAnotherOwner(tx, membershipId);
+      await retireInvitationsFrom(tx, membership.userId);
+    }
+    await tx.membership.update({ where: { id: membershipId }, data: { role: next } });
+  });
 }
 
 /** Removes someone from this church and signs them out of it. Their account stays. */
 export async function removeMember(membershipId: string): Promise<void> {
-  const membership = await db().membership.findUnique({ where: { id: membershipId } });
-  if (!membership) return;
-  if (membership.role === "OWNER") await assertAnotherOwner(membershipId);
-  await db().membership.delete({ where: { id: membershipId } });
-  await db().session.deleteMany({ where: { userId: membership.userId } });
+  await withOwnersLocked(async (tx) => {
+    const membership = await tx.membership.findUnique({ where: { id: membershipId } });
+    if (!membership) return;
+    if (membership.role === "OWNER") await assertAnotherOwner(tx, membershipId);
+    await retireInvitationsFrom(tx, membership.userId);
+    await tx.membership.delete({ where: { id: membershipId } });
+    await tx.session.deleteMany({ where: { userId: membership.userId } });
+  });
+}
+
+/** The same owner lock, for deleting an account (account-recovery.ts), one church at a time. */
+export async function lockOwners(tx: Prisma.TransactionClient, orgId: string): Promise<void> {
+  const lockKey = `owners:${orgId}`;
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
 }

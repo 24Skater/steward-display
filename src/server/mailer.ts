@@ -29,6 +29,11 @@ function transport(env: EnvBag): Transporter {
     host: env.EMAIL_SERVER_HOST,
     port: Number(env.EMAIL_SERVER_PORT ?? 587),
     secure: Number(env.EMAIL_SERVER_PORT ?? 587) === 465,
+    // Nodemailer waits minutes by default; an owner should not stare at
+    // "Inviting..." that long because a mail server is down.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
     auth: env.EMAIL_SERVER_USER
       ? { user: env.EMAIL_SERVER_USER, pass: env.EMAIL_SERVER_PASSWORD }
       : undefined,

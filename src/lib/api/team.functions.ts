@@ -19,6 +19,8 @@ import {
   removeMember,
   revokeInvitation,
 } from "@/server/team";
+import { requireOrg } from "@/server/org-context";
+import { hashSecret } from "@/server/secrets";
 import { safeErrors, signedIn } from "./middleware";
 
 export const getTeamFn = createServerFn({ method: "GET" })
@@ -36,6 +38,10 @@ export const inviteFn = createServerFn({ method: "POST" })
   .handler(({ data, context }) => {
     requireOwner(context.viewer);
     enforceLimit(limits.invite, context.viewer.userId);
+    const recipient = String(data.email ?? "")
+      .trim()
+      .toLowerCase();
+    enforceLimit(limits.invitePerRecipient, `${requireOrg().orgId}|${recipient}`);
     return inviteMember(context.viewer, data, new URL(getRequest().url).origin);
   });
 
@@ -44,8 +50,7 @@ export const revokeInvitationFn = createServerFn({ method: "POST" })
   .validator((input: { id: string }) => input)
   .handler(async ({ data, context }) => {
     requireOwner(context.viewer);
-    await revokeInvitation(String(data.id));
-    return { ok: true as const };
+    return { revoked: await revokeInvitation(String(data.id)) };
   });
 
 export const changeRoleFn = createServerFn({ method: "POST" })
@@ -81,7 +86,9 @@ export const acceptInvitationFn = createServerFn({ method: "POST" })
   .middleware([safeErrors])
   .validator((input: AcceptInput) => input)
   .handler(async ({ data }) => {
-    enforceLimit(limits.emailLinks, clientIp());
+    const ip = clientIp();
+    enforceLimit(limits.acceptPerIp, ip);
+    enforceLimit(limits.acceptPerLink, `${ip}|${hashSecret(String(data.token ?? ""))}`);
     const session = await acceptInvitation(data, userAgent());
     setSessionCookie(session.token, session.expiresAt);
     return { ok: true as const };
