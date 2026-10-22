@@ -41,7 +41,7 @@ export function WidgetRenderer({ widget }: { widget: WidgetInstance }) {
   const style = widget.style ?? {};
   return (
     <div
-      className="h-full w-full overflow-hidden"
+      className="widget-surface h-full w-full overflow-hidden"
       style={{
         backgroundColor: style.backgroundColor,
         color: style.textColor,
