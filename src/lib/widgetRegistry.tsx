@@ -144,11 +144,11 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
   {
     type: "weather",
     label: "Weather",
-    description: "Current conditions (needs API key).",
+    description: "Current conditions and the next days.",
     category: "Data",
     icon: CloudSun,
     defaultSize: { w: 6, h: 4 },
-    defaultConfig: { city: "" },
+    defaultConfig: { units: "fahrenheit", showForecast: true },
     Component: WeatherWidget,
   },
   {

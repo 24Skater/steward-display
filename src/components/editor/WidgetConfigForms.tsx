@@ -12,6 +12,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import type { WidgetInstance } from "@/types";
 import { AnnouncementWidget } from "@/components/widgets/AnnouncementWidget";
+import { WeatherPlacePicker } from "./WeatherPlacePicker";
 
 function Field({
   label,
@@ -545,13 +546,28 @@ export function WidgetConfigForm({
       );
     case "weather":
       return (
-        <Field label="City" hint="Requires OpenWeatherMap API key in Settings">
-          <Input
-            value={cfg.city ?? ""}
-            onChange={(e) => set("city", e.target.value)}
-            placeholder="Nashville, TN"
-          />
-        </Field>
+        <div className="space-y-4">
+          <Field label="Place" hint="Search, then pick the right one from the list.">
+            <WeatherPlacePicker value={cfg.place} onChange={(place) => set("place", place)} />
+          </Field>
+          <Field label="Units">
+            <Select value={cfg.units ?? "fahrenheit"} onValueChange={(v) => set("units", v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fahrenheit">Fahrenheit (°F)</SelectItem>
+                <SelectItem value="celsius">Celsius (°C)</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Show the next three days">
+            <Switch
+              checked={cfg.showForecast !== false}
+              onCheckedChange={(v) => set("showForecast", v)}
+            />
+          </Field>
+        </div>
       );
     case "event-list":
       return (

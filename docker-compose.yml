@@ -46,6 +46,7 @@ services:
       AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET:-}
       AUTH0_BUTTON_LABEL: ${AUTH0_BUTTON_LABEL:-}
       ALLOW_LOCAL_PASSWORD_LOGIN: ${ALLOW_LOCAL_PASSWORD_LOGIN:-true}
+      OPEN_METEO_API_KEY: ${OPEN_METEO_API_KEY:-}
     ports:
       # Behind a proxy on the same machine, set BIND_ADDRESS=127.0.0.1 so the
       # app is reachable only through it (Docker's published ports bypass ufw).
