@@ -12,10 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TvRouteImport } from './routes/tv'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin.index'
+import { Route as VerifyEmailTokenRouteImport } from './routes/verify-email.$token'
+import { Route as ResetPasswordTokenRouteImport } from './routes/reset-password.$token'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AdminWidgetsRouteImport } from './routes/_admin.widgets'
 import { Route as AdminTvsRouteImport } from './routes/_admin.tvs'
+import { Route as AdminTeamRouteImport } from './routes/_admin.team'
 import { Route as AdminSettingsRouteImport } from './routes/_admin.settings'
 import { Route as AdminPresetsRouteImport } from './routes/_admin.presets'
 import { Route as AdminAccountRouteImport } from './routes/_admin.account'
@@ -41,6 +46,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => rootRouteImport,
@@ -50,6 +60,21 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const VerifyEmailTokenRoute = VerifyEmailTokenRouteImport.update({
+  id: '/verify-email/$token',
+  path: '/verify-email/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordTokenRoute = ResetPasswordTokenRouteImport.update({
+  id: '/reset-password/$token',
+  path: '/reset-password/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminWidgetsRoute = AdminWidgetsRouteImport.update({
   id: '/widgets',
   path: '/widgets',
@@ -58,6 +83,11 @@ const AdminWidgetsRoute = AdminWidgetsRouteImport.update({
 const AdminTvsRoute = AdminTvsRouteImport.update({
   id: '/tvs',
   path: '/tvs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -108,14 +138,19 @@ const AdminScreensIdEditRoute = AdminScreensIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/tv': typeof TvRoute
   '/account': typeof AdminAccountRoute
   '/presets': typeof AdminPresetsRoute
   '/settings': typeof AdminSettingsRoute
+  '/team': typeof AdminTeamRoute
   '/tvs': typeof AdminTvsRoute
   '/widgets': typeof AdminWidgetsRoute
+  '/invite/$token': typeof InviteTokenRoute
+  '/reset-password/$token': typeof ResetPasswordTokenRoute
+  '/verify-email/$token': typeof VerifyEmailTokenRoute
   '/screens/new': typeof AdminScreensNewRoute
   '/api/tv/pair': typeof ApiTvPairRouteWithChildren
   '/api/tv/screen': typeof ApiTvScreenRoute
@@ -124,14 +159,19 @@ export interface FileRoutesByFullPath {
   '/api/tv/pair/status': typeof ApiTvPairStatusRoute
 }
 export interface FileRoutesByTo {
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/tv': typeof TvRoute
   '/account': typeof AdminAccountRoute
   '/presets': typeof AdminPresetsRoute
   '/settings': typeof AdminSettingsRoute
+  '/team': typeof AdminTeamRoute
   '/tvs': typeof AdminTvsRoute
   '/widgets': typeof AdminWidgetsRoute
+  '/invite/$token': typeof InviteTokenRoute
+  '/reset-password/$token': typeof ResetPasswordTokenRoute
+  '/verify-email/$token': typeof VerifyEmailTokenRoute
   '/': typeof AdminIndexRoute
   '/screens/new': typeof AdminScreensNewRoute
   '/api/tv/pair': typeof ApiTvPairRouteWithChildren
@@ -143,14 +183,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_admin': typeof AdminRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/tv': typeof TvRoute
   '/_admin/account': typeof AdminAccountRoute
   '/_admin/presets': typeof AdminPresetsRoute
   '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/team': typeof AdminTeamRoute
   '/_admin/tvs': typeof AdminTvsRoute
   '/_admin/widgets': typeof AdminWidgetsRoute
+  '/invite/$token': typeof InviteTokenRoute
+  '/reset-password/$token': typeof ResetPasswordTokenRoute
+  '/verify-email/$token': typeof VerifyEmailTokenRoute
   '/_admin/': typeof AdminIndexRoute
   '/_admin/screens/new': typeof AdminScreensNewRoute
   '/api/tv/pair': typeof ApiTvPairRouteWithChildren
@@ -163,14 +208,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/setup'
     | '/tv'
     | '/account'
     | '/presets'
     | '/settings'
+    | '/team'
     | '/tvs'
     | '/widgets'
+    | '/invite/$token'
+    | '/reset-password/$token'
+    | '/verify-email/$token'
     | '/screens/new'
     | '/api/tv/pair'
     | '/api/tv/screen'
@@ -179,14 +229,19 @@ export interface FileRouteTypes {
     | '/api/tv/pair/status'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/forgot-password'
     | '/login'
     | '/setup'
     | '/tv'
     | '/account'
     | '/presets'
     | '/settings'
+    | '/team'
     | '/tvs'
     | '/widgets'
+    | '/invite/$token'
+    | '/reset-password/$token'
+    | '/verify-email/$token'
     | '/'
     | '/screens/new'
     | '/api/tv/pair'
@@ -197,14 +252,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_admin'
+    | '/forgot-password'
     | '/login'
     | '/setup'
     | '/tv'
     | '/_admin/account'
     | '/_admin/presets'
     | '/_admin/settings'
+    | '/_admin/team'
     | '/_admin/tvs'
     | '/_admin/widgets'
+    | '/invite/$token'
+    | '/reset-password/$token'
+    | '/verify-email/$token'
     | '/_admin/'
     | '/_admin/screens/new'
     | '/api/tv/pair'
@@ -216,9 +276,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   SetupRoute: typeof SetupRoute
   TvRoute: typeof TvRoute
+  InviteTokenRoute: typeof InviteTokenRoute
+  ResetPasswordTokenRoute: typeof ResetPasswordTokenRoute
+  VerifyEmailTokenRoute: typeof VerifyEmailTokenRoute
   ApiTvPairRoute: typeof ApiTvPairRouteWithChildren
   ApiTvScreenRoute: typeof ApiTvScreenRoute
   ScreensIdPreviewRoute: typeof ScreensIdPreviewRoute
@@ -247,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin': {
       id: '/_admin'
       path: ''
@@ -261,6 +332,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/verify-email/$token': {
+      id: '/verify-email/$token'
+      path: '/verify-email/$token'
+      fullPath: '/verify-email/$token'
+      preLoaderRoute: typeof VerifyEmailTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password/$token': {
+      id: '/reset-password/$token'
+      path: '/reset-password/$token'
+      fullPath: '/reset-password/$token'
+      preLoaderRoute: typeof ResetPasswordTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin/widgets': {
       id: '/_admin/widgets'
       path: '/widgets'
@@ -273,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/tvs'
       fullPath: '/tvs'
       preLoaderRoute: typeof AdminTvsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/team': {
+      id: '/_admin/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/settings': {
@@ -345,6 +444,7 @@ interface AdminRouteChildren {
   AdminAccountRoute: typeof AdminAccountRoute
   AdminPresetsRoute: typeof AdminPresetsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTeamRoute: typeof AdminTeamRoute
   AdminTvsRoute: typeof AdminTvsRoute
   AdminWidgetsRoute: typeof AdminWidgetsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -356,6 +456,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAccountRoute: AdminAccountRoute,
   AdminPresetsRoute: AdminPresetsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminTeamRoute: AdminTeamRoute,
   AdminTvsRoute: AdminTvsRoute,
   AdminWidgetsRoute: AdminWidgetsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -379,9 +480,13 @@ const ApiTvPairRouteWithChildren = ApiTvPairRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   SetupRoute: SetupRoute,
   TvRoute: TvRoute,
+  InviteTokenRoute: InviteTokenRoute,
+  ResetPasswordTokenRoute: ResetPasswordTokenRoute,
+  VerifyEmailTokenRoute: VerifyEmailTokenRoute,
   ApiTvPairRoute: ApiTvPairRouteWithChildren,
   ApiTvScreenRoute: ApiTvScreenRoute,
   ScreensIdPreviewRoute: ScreensIdPreviewRoute,

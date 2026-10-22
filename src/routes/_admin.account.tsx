@@ -7,9 +7,15 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { changePasswordFn, signOutEverywhereFn, signOutFn } from "@/lib/api/auth.functions";
+import {
+  changePasswordFn,
+  deleteAccountFn,
+  resendVerificationFn,
+  signOutEverywhereFn,
+  signOutFn,
+} from "@/lib/api/auth.functions";
 import { errorMessage } from "@/lib/errors";
-import { useChurch, useViewer } from "@/lib/viewer";
+import { useCanEmail, useChurch, useViewer } from "@/lib/viewer";
 
 export const Route = createFileRoute("/_admin/account")({
   head: () => ({ meta: [{ title: "Your account — Steward Display" }] }),
@@ -19,6 +25,7 @@ export const Route = createFileRoute("/_admin/account")({
 function AccountPage() {
   const viewer = useViewer();
   const church = useChurch();
+  const canEmail = useCanEmail();
   const navigate = useNavigate();
 
   async function signOut() {
@@ -26,6 +33,16 @@ function AccountPage() {
       await signOutFn();
     } finally {
       await navigate({ to: "/login", search: { next: "/" }, replace: true });
+    }
+  }
+
+  async function resend() {
+    try {
+      const { sent } = await resendVerificationFn();
+      if (sent) toast.success(`Sent a confirmation link to ${viewer.email}.`);
+      else toast.error("Couldn't send the email just now. Try again in a few minutes.");
+    } catch (error) {
+      toast.error(errorMessage(error));
     }
   }
 
@@ -51,7 +68,21 @@ function AccountPage() {
           <dt className="text-muted-foreground">Name</dt>
           <dd className="text-foreground">{viewer.name}</dd>
           <dt className="text-muted-foreground">Email</dt>
-          <dd className="break-all text-foreground">{viewer.email}</dd>
+          <dd className="break-all text-foreground">
+            {viewer.email}{" "}
+            {viewer.emailVerified ? (
+              <span className="text-xs text-emerald">Confirmed</span>
+            ) : canEmail ? (
+              <button
+                onClick={() => void resend()}
+                className="text-xs text-blue underline-offset-4 hover:underline"
+              >
+                Not confirmed yet: send a link
+              </button>
+            ) : (
+              <span className="text-xs text-muted-foreground">Not confirmed</span>
+            )}
+          </dd>
           <dt className="text-muted-foreground">Role</dt>
           <dd className="text-foreground">{viewer.role === "OWNER" ? "Owner" : "Editor"}</dd>
         </dl>
@@ -73,7 +104,68 @@ function AccountPage() {
           </Button>
         </div>
       </section>
+
+      <DeleteAccount />
     </main>
+  );
+}
+
+function DeleteAccount() {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await deleteAccountFn({ data: { password } });
+      toast.success("Your account is deleted.");
+      await navigate({ to: "/login", search: { next: "/" }, replace: true });
+    } catch (err) {
+      setError(errorMessage(err));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mt-6 rounded-xl border border-destructive/30 bg-card p-6 shadow-steward-sm">
+      <h2 className="text-h3 font-semibold">Delete your account</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Removes you from every church you help at. Screens and TVs stay with the church. This can't
+        be undone.
+      </p>
+      {open ? (
+        <form onSubmit={submit} className="mt-4 space-y-3" noValidate>
+          <div className="space-y-1.5">
+            <Label htmlFor="delete-password">Enter your password to confirm</Label>
+            <Input
+              id="delete-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <FormError id="delete-error" message={error} />
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" variant="destructive" disabled={busy || !password}>
+              {busy ? "Deleting…" : "Delete my account"}
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              Keep it
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <Button variant="outline" className="mt-4 text-destructive" onClick={() => setOpen(true)}>
+          Delete my account…
+        </Button>
+      )}
+    </section>
   );
 }
 

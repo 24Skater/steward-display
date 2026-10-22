@@ -1,5 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import {
+  canEmailLinks,
+  deleteAccount,
+  isResetLinkValid,
+  requestPasswordReset,
+  resetPassword,
+  sendVerification,
+  verifyEmail,
+} from "@/server/account-recovery";
 import { changePassword, setUpInstallation, signIn } from "@/server/accounts";
 import {
   clearSessionCookie,
@@ -19,6 +28,8 @@ export interface AppState {
   /** Null before first-run setup has created the church. */
   church: { name: string } | null;
   viewer: Viewer | null;
+  /** Whether this server can email reset and verification links. */
+  canEmail: boolean;
 }
 
 /** Who is looking, at which church. Read by the admin layout on every navigation. */
@@ -26,8 +37,12 @@ export const getAppState = createServerFn({ method: "GET" })
   .middleware([safeErrors])
   .handler(async (): Promise<AppState> => {
     const org = currentOrg();
-    if (!org) return { church: null, viewer: null };
-    return { church: { name: org.name }, viewer: await currentViewer() };
+    if (!org) return { church: null, viewer: null, canEmail: false };
+    return {
+      church: { name: org.name },
+      viewer: await currentViewer(),
+      canEmail: canEmailLinks(),
+    };
   });
 
 export interface SetupInput {
@@ -95,4 +110,57 @@ export const changePasswordFn = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     enforceLimit(limits.signIn, `${clientIp()}|${context.viewer.email}`);
     return changePassword(context.viewer.userId, context.viewer.sessionId, data);
+  });
+
+export const forgotPasswordFn = createServerFn({ method: "POST" })
+  .middleware([safeErrors])
+  .validator((input: { email: string }) => input)
+  .handler(async ({ data }) => {
+    enforceLimit(limits.emailLinks, clientIp());
+    const email = String(data.email ?? "")
+      .trim()
+      .toLowerCase();
+    enforceLimit(limits.resetPerEmail, `${currentOrg()?.orgId}|${email}`);
+    await requestPasswordReset(data);
+    return { ok: true as const };
+  });
+
+export const resetPasswordFn = createServerFn({ method: "POST" })
+  .middleware([safeErrors])
+  .validator((input: { token: string; newPassword: string }) => input)
+  .handler(async ({ data }) => {
+    enforceLimit(limits.emailLinks, clientIp());
+    await resetPassword(data);
+    return { ok: true as const };
+  });
+
+export const resetLinkStatusFn = createServerFn({ method: "GET" })
+  .middleware([safeErrors])
+  .validator((input: { token: string }) => input)
+  .handler(async ({ data }) => ({ valid: await isResetLinkValid(data.token) }));
+
+export const verifyEmailFn = createServerFn({ method: "POST" })
+  .middleware([safeErrors])
+  .validator((input: { token: string }) => input)
+  .handler(async ({ data }) => {
+    enforceLimit(limits.emailLinks, clientIp());
+    await verifyEmail(data.token);
+    return { ok: true as const };
+  });
+
+export const resendVerificationFn = createServerFn({ method: "POST" })
+  .middleware([signedIn])
+  .handler(async ({ context }) => {
+    enforceLimit(limits.verifyPerUser, context.viewer.userId);
+    return { sent: await sendVerification(context.viewer.userId) };
+  });
+
+export const deleteAccountFn = createServerFn({ method: "POST" })
+  .middleware([signedIn])
+  .validator((input: { password: string }) => input)
+  .handler(async ({ data, context }) => {
+    enforceLimit(limits.signIn, `${clientIp()}|${context.viewer.email}`);
+    await deleteAccount(context.viewer.userId, data.password);
+    clearSessionCookie();
+    return { ok: true as const };
   });

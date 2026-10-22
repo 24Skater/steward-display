@@ -35,6 +35,12 @@ services:
       TRUST_PROXY: ${TRUST_PROXY:-false}
       TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
       SETUP_CODE: ${SETUP_CODE:-}
+      PUBLIC_URL: ${PUBLIC_URL:-}
+      EMAIL_SERVER_HOST: ${EMAIL_SERVER_HOST:-}
+      EMAIL_SERVER_PORT: ${EMAIL_SERVER_PORT:-587}
+      EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
+      EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
     ports:
       # Behind a proxy on the same machine, set BIND_ADDRESS=127.0.0.1 so the
       # app is reachable only through it (Docker's published ports bypass ufw).

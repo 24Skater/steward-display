@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 import { AuthCard, FormError } from "@/components/auth/AuthCard";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/login")({
     const state = await getAppState();
     if (!state.church) throw redirect({ to: "/setup" });
     if (state.viewer) throw redirect({ href: search.next });
-    return { churchName: state.church.name };
+    return { churchName: state.church.name, canEmail: state.canEmail };
   },
   head: () => ({ meta: [{ title: "Sign in — Steward Display" }] }),
   component: LoginPage,
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const { next } = Route.useSearch();
-  const { churchName } = Route.useRouteContext();
+  const { churchName, canEmail } = Route.useRouteContext();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,8 +74,15 @@ function LoginPage() {
         <Button type="submit" className="w-full" disabled={busy || !email || !password}>
           {busy ? "Signing in…" : "Sign in"}
         </Button>
-        <p className="text-center text-xs text-muted-foreground">
-          Forgot your password? Whoever runs Display's server for your church can reset it.
+        <p className="text-center text-sm">
+          <Link to="/forgot-password" className="text-blue underline-offset-4 hover:underline">
+            Forgot your password?
+          </Link>
+          {!canEmail && (
+            <span className="block text-xs text-muted-foreground">
+              Whoever runs Display for your church can reset it.
+            </span>
+          )}
         </p>
       </form>
     </AuthCard>

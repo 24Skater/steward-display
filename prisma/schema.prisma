@@ -23,6 +23,11 @@ enum Role {
   EDITOR
 }
 
+enum UserTokenPurpose {
+  RESET_PASSWORD
+  VERIFY_EMAIL
+}
+
 /// A church. The tenant root.
 model Org {
   id        String    @id @default(cuid())
@@ -33,6 +38,7 @@ model Org {
 
   memberships Membership[]
   sessions    Session[]
+  invitations Invitation[]
   screens     Screen[]
   presets     Preset[]
   settings    OrgSettings?
@@ -42,15 +48,55 @@ model Org {
 
 /// A person. Global: one login may serve several churches.
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String
   /// scrypt, see src/server/password.ts. Null once a user signs in only with SSO.
-  passwordHash String?
-  createdAt    DateTime @default(now())
+  passwordHash    String?
+  /// Set when the person proves they receive mail at `email`: a verification
+  /// link or a password-reset link. Accepting an invitation does not count:
+  /// the owner may have passed the link on by hand.
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
 
   memberships Membership[]
   sessions    Session[]
+  tokens      UserToken[]
+  invited     Invitation[] @relation("InvitedBy")
+}
+
+/// A single-use link emailed to a person: reset a password, or verify an address.
+/// Global, like the user it belongs to. Only the SHA-256 of the token is stored.
+model UserToken {
+  id        String           @id @default(cuid())
+  userId    String
+  purpose   UserTokenPurpose
+  tokenHash String           @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+}
+
+/// An invitation to join a church, by email, with a role. Accepted once.
+model Invitation {
+  id          String    @id @default(cuid())
+  orgId       String
+  email       String
+  role        Role      @default(EDITOR)
+  tokenHash   String    @unique
+  invitedById String?
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  org       Org   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invitedBy User? @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([orgId, email])
 }
 
 model Membership {

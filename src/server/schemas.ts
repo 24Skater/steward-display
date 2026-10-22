@@ -165,9 +165,27 @@ export const emailSchema = z
   .max(254)
   .email("Enter an email address like name@church.org");
 
-export const personNameSchema = z.string().trim().min(1, "Enter your name").max(120);
+/**
+ * Names go into emails sent from the church's address. A "name" that is really
+ * a web address ("Security alert: visit evil.example") would turn invitations
+ * into a phishing relay, so names cannot contain one.
+ */
+const NOT_AN_ADDRESS =
+  /^(?!.*(:\/\/|www\.|\.(com|net|org|io|co|info|xyz|app|dev|link|click)\b)).*$/i;
 
-export const churchNameSchema = z.string().trim().min(2, "Enter your church's name").max(120);
+export const personNameSchema = z
+  .string()
+  .trim()
+  .min(1, "Enter your name")
+  .max(120)
+  .regex(NOT_AN_ADDRESS, { message: "A name can't contain a web address" });
+
+export const churchNameSchema = z
+  .string()
+  .trim()
+  .min(2, "Enter your church's name")
+  .max(120)
+  .regex(NOT_AN_ADDRESS, { message: "A church name can't contain a web address" });
 
 /** A short label for a TV, like "Lobby left". */
 export const deviceNameSchema = z.string().trim().min(1, "Name the TV").max(60);

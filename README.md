@@ -53,12 +53,12 @@ prints it), your church's name, and creates the owner's account. Production setu
 
 Pre-release. What works today, and what is next:
 
-|                            |                                                                                                                                              |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Works**                  | Accounts and sign-in, screens and presets on the server, TV pairing, offline TVs, editor, widgets, templates, import/export, Docker, CI      |
-| **Not yet**                | Inviting teammates (one owner account per church for now), emailed password reset (an operator command resets it), weather data, Steward SSO |
-| **Next**                   | Team invitations with roles, email verification and reset, Steward SSO, Open-Meteo weather, phone quick-edit for announcement text           |
-| **Then: Steward platform** | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                        |
+|                            |                                                                                                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Works**                  | Accounts, team invitations with roles, emailed password reset and confirmation, account deletion, screens and presets on the server, TV pairing, offline TVs, editor, widgets, templates, import/export, Docker, CI |
+| **Not yet**                | Weather data, Steward SSO, phone quick-edit for announcement text                                                                                                                                                   |
+| **Next**                   | Steward SSO, Open-Meteo weather, phone quick-edit for announcement text                                                                                                                                             |
+| **Then: Steward platform** | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                                                                                               |
 
 ## Development
 
