@@ -110,6 +110,14 @@ export const limits = {
    * page can link to it, so it is not limited; only completing a sign-in is.
    */
   ssoCallback: new RateLimiter({ limit: 50, windowMs: 15 * MINUTE }),
+  /** Per person: place searches in the weather widget (each one is a call to Open-Meteo). */
+  placeSearch: new RateLimiter({ limit: 60, windowMs: 15 * MINUTE }),
+  /**
+   * Per person: weather readings for the editor. Each widget refreshes every ten
+   * minutes, so this is plenty for real editing and a hard stop for anyone
+   * walking the map to spend the church's (or the platform's) Open-Meteo quota.
+   */
+  weatherLookup: new RateLimiter({ limit: 120, windowMs: 15 * MINUTE }),
   /** Per address: requests that fail authentication or bring no credential. */
   tvUnauthenticated: new RateLimiter({ limit: 1000, windowMs: 15 * MINUTE }),
 };
