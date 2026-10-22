@@ -31,6 +31,7 @@ import { Route as AdminScreensNewRouteImport } from './routes/_admin.screens.new
 import { Route as ApiTvPairStatusRouteImport } from './routes/api.tv.pair.status'
 import { Route as ApiAuthSsoStartRouteImport } from './routes/api.auth.sso.start'
 import { Route as ApiAuthSsoCallbackRouteImport } from './routes/api.auth.sso.callback'
+import { Route as AdminScreensIdQuickRouteImport } from './routes/_admin.screens.$id.quick'
 import { Route as AdminScreensIdEditRouteImport } from './routes/_admin.screens.$id.edit'
 
 const TvRoute = TvRouteImport.update({
@@ -142,6 +143,11 @@ const ApiAuthSsoCallbackRoute = ApiAuthSsoCallbackRouteImport.update({
   path: '/api/auth/sso/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminScreensIdQuickRoute = AdminScreensIdQuickRouteImport.update({
+  id: '/screens/$id/quick',
+  path: '/screens/$id/quick',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminScreensIdEditRoute = AdminScreensIdEditRouteImport.update({
   id: '/screens/$id/edit',
   path: '/screens/$id/edit',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/screens/$id/quick': typeof AdminScreensIdQuickRoute
   '/api/auth/sso/callback': typeof ApiAuthSsoCallbackRoute
   '/api/auth/sso/start': typeof ApiAuthSsoStartRoute
   '/api/tv/pair/status': typeof ApiTvPairStatusRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/screens/$id/quick': typeof AdminScreensIdQuickRoute
   '/api/auth/sso/callback': typeof ApiAuthSsoCallbackRoute
   '/api/auth/sso/start': typeof ApiAuthSsoStartRoute
   '/api/tv/pair/status': typeof ApiTvPairStatusRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/_admin/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/_admin/screens/$id/quick': typeof AdminScreensIdQuickRoute
   '/api/auth/sso/callback': typeof ApiAuthSsoCallbackRoute
   '/api/auth/sso/start': typeof ApiAuthSsoStartRoute
   '/api/tv/pair/status': typeof ApiTvPairStatusRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/screens/$id/edit'
+    | '/screens/$id/quick'
     | '/api/auth/sso/callback'
     | '/api/auth/sso/start'
     | '/api/tv/pair/status'
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/screens/$id/edit'
+    | '/screens/$id/quick'
     | '/api/auth/sso/callback'
     | '/api/auth/sso/start'
     | '/api/tv/pair/status'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/_admin/screens/$id/edit'
+    | '/_admin/screens/$id/quick'
     | '/api/auth/sso/callback'
     | '/api/auth/sso/start'
     | '/api/tv/pair/status'
@@ -470,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSsoCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/screens/$id/quick': {
+      id: '/_admin/screens/$id/quick'
+      path: '/screens/$id/quick'
+      fullPath: '/screens/$id/quick'
+      preLoaderRoute: typeof AdminScreensIdQuickRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/screens/$id/edit': {
       id: '/_admin/screens/$id/edit'
       path: '/screens/$id/edit'
@@ -490,6 +509,7 @@ interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminScreensNewRoute: typeof AdminScreensNewRoute
   AdminScreensIdEditRoute: typeof AdminScreensIdEditRoute
+  AdminScreensIdQuickRoute: typeof AdminScreensIdQuickRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -502,6 +522,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminScreensNewRoute: AdminScreensNewRoute,
   AdminScreensIdEditRoute: AdminScreensIdEditRoute,
+  AdminScreensIdQuickRoute: AdminScreensIdQuickRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

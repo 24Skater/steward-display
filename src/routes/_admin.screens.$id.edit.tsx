@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Eye, Keyboard } from "lucide-react";
+import { ArrowLeft, Eye, Keyboard, Smartphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DndContext,
@@ -25,6 +25,8 @@ import { useEditorStore } from "@/store/editorStore";
 import { getScreenDimensions, type WidgetType } from "@/types";
 import { getWidgetDefinition } from "@/lib/widgetRegistry";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { CONTENT_WIDGETS } from "@/components/editor/WidgetContentForm";
 import { MonitorOff } from "lucide-react";
 import { INTERACTIVE_GUARD_SELECTOR } from "@/lib/keyboardGuard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -41,6 +43,8 @@ function EditorPage() {
   const { id } = Route.useParams();
   const screen = useScreenStore((s) => s.screens.find((x) => x.id === id));
   const hydrated = useScreenStore((s) => s.hydrated);
+  const isPhone = useIsMobile();
+  const [layoutOnPhone, setLayoutOnPhone] = useState(false);
   const updateScreen = useScreenStore((s) => s.updateScreen);
   const addWidget = useScreenStore((s) => s.addWidget);
   const updateWidget = useScreenStore((s) => s.updateWidget);
@@ -89,6 +93,34 @@ function EditorPage() {
 
   if (!hydrated) {
     return <div className="p-10 text-muted-foreground">Loading…</div>;
+  }
+
+  // Owners decided: phones edit what a screen says, tablets and computers its layout.
+  // A screen with no words yet goes straight to the layout templates, which
+  // work on a phone; there is nothing for quick edit to offer.
+  const hasContent = screen?.widgets.some((w) => CONTENT_WIDGETS.has(w.widgetType)) ?? false;
+  if (screen && isPhone && hasContent && !layoutOnPhone) {
+    return (
+      <main className="mx-auto max-w-md px-4 py-10">
+        <EmptyState
+          icon={Smartphone}
+          title="Edit the words from your phone"
+          body="Moving and resizing things needs a bigger screen. On a phone you can change everything this screen says."
+          action={
+            <div className="flex flex-col items-center gap-3">
+              <Button asChild>
+                <Link to="/screens/$id/quick" params={{ id: screen.id }}>
+                  Edit text on this phone
+                </Link>
+              </Button>
+              <Button variant="ghost" onClick={() => setLayoutOnPhone(true)}>
+                Open the layout editor anyway
+              </Button>
+            </div>
+          }
+        />
+      </main>
+    );
   }
 
   if (!screen) {

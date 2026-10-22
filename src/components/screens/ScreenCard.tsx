@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { MoreHorizontal, Copy, Trash2, Pencil, Play } from "lucide-react";
+import { MoreHorizontal, Copy, Trash2, Pencil, Play, Type } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,6 +98,11 @@ export function ScreenCard({ screen }: { screen: Screen }) {
                 onClick={() => navigate({ to: "/screens/$id/edit", params: { id: screen.id } })}
               >
                 <Pencil className="mr-2 h-4 w-4" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate({ to: "/screens/$id/quick", params: { id: screen.id } })}
+              >
+                <Type className="mr-2 h-4 w-4" /> Quick edit (text only)
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => window.open(`/screens/${screen.id}/preview`, "_blank")}
