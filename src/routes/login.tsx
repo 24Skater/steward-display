@@ -19,6 +19,8 @@ const SSO_ERRORS: Record<string, string> = {
   sso_failed: "Steward ID sign-in didn't complete. Try again.",
   sso_unavailable: "Steward ID can't be reached right now. Try again, or use your password.",
   sso_busy: "Too many sign-in attempts. Wait a few minutes and try again.",
+  sso_mismatch:
+    "This account is linked to a different Steward ID. Sign in with that one, or with your password.",
 };
 
 export const Route = createFileRoute("/login")({

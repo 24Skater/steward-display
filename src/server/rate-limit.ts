@@ -105,6 +105,11 @@ export const limits = {
    */
   acceptPerLink: new RateLimiter({ limit: 10, windowMs: 15 * MINUTE }),
   acceptPerIp: new RateLimiter({ limit: 60, windowMs: 15 * MINUTE }),
+  /**
+   * Per address: Steward ID callbacks. The start route costs nothing and any
+   * page can link to it, so it is not limited; only completing a sign-in is.
+   */
+  ssoCallback: new RateLimiter({ limit: 50, windowMs: 15 * MINUTE }),
   /** Per address: requests that fail authentication or bring no credential. */
   tvUnauthenticated: new RateLimiter({ limit: 1000, windowMs: 15 * MINUTE }),
 };

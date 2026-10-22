@@ -23,7 +23,7 @@ import {
 import { UserError } from "@/server/errors";
 import { currentOrg } from "@/server/org-context";
 import { isLocalPasswordLoginAllowed, ssoButtonLabel } from "@/server/sso";
-import { isSsoAvailable } from "@/server/sso-flow";
+import { isSsoAvailable, ssoSignOutUrl } from "@/server/sso-flow";
 import { revokeAllSessions, revokeSession, type Viewer } from "@/server/sessions";
 import { safeErrors, signedIn } from "./middleware";
 
@@ -95,13 +95,17 @@ export const signInFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+/**
+ * Signs out here. For a Steward ID session it also returns the provider's
+ * sign-out address, so the browser can end that session too.
+ */
 export const signOutFn = createServerFn({ method: "POST" })
   .middleware([safeErrors])
-  .handler(async () => {
+  .handler(async (): Promise<{ ok: true; ssoSignOutUrl: string | null }> => {
     const token = sessionToken();
-    if (token) await revokeSession(token);
+    const { viaSso } = token ? await revokeSession(token) : { viaSso: false };
     clearSessionCookie();
-    return { ok: true as const };
+    return { ok: true, ssoSignOutUrl: viaSso ? await ssoSignOutUrl() : null };
   });
 
 /** Signs this person out of every other browser at this church. */

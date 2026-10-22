@@ -13,7 +13,11 @@ export function safeNext(next: unknown): string {
   try {
     const base = "http://this-site.invalid";
     const url = new URL(next, base);
-    return url.origin === base && next.startsWith("/") ? url.pathname + url.search + url.hash : "/";
+    if (url.origin !== base || !next.startsWith("/")) return "/";
+    const out = url.pathname + url.search + url.hash;
+    // "/.//evil.com" resolves to the path "//evil.com", which a browser reads as
+    // another site. Check what comes out, not only what went in.
+    return out.startsWith("//") || out.startsWith("/\\") ? "/" : out;
   } catch {
     return "/";
   }

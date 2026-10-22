@@ -57,6 +57,10 @@ model User {
   /// link or a password-reset link. Accepting an invitation does not count:
   /// the owner may have passed the link on by hand.
   emailVerifiedAt DateTime?
+  /// The Steward ID identity (`issuer|sub`) this account is bound to, set on
+  /// its first single sign-on. After that only the same identity signs in as
+  /// this account, whatever email another identity claims.
+  ssoSubject      String?   @unique
   createdAt       DateTime  @default(now())
 
   memberships Membership[]
@@ -120,6 +124,8 @@ model Session {
   userId     String
   tokenHash  String   @unique
   userAgent  String?
+  /// Started with Steward ID: signing out also ends the identity provider's session.
+  viaSso     Boolean  @default(false)
   createdAt  DateTime @default(now())
   lastSeenAt DateTime @default(now())
   expiresAt  DateTime

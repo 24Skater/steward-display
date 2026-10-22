@@ -126,12 +126,23 @@ three `AUTH0_*` settings nothing about it appears.
 
 Steward ID never creates an account. Someone signs in with it only if their Steward ID email
 belongs to someone already on the church's team, and only once Steward ID has confirmed that
-address. Everyone else is asked to get an invitation first. Unset `AUTH0_ISSUER` to turn it
-off; sessions already signed in keep working.
+address. Everyone else is asked to get an invitation first.
+
+The first Steward ID sign-in binds that account to that identity. After that, only the same
+identity signs in as it, even if another one claims the same confirmed address. In Auth0, enable
+only the connections you trust to confirm addresses honestly (usually the Steward database
+connection); a connection that marks every address as confirmed would otherwise let its users
+claim any account on first use.
+
+Signing out of Display also signs the person out of Steward ID, so the next person on a shared
+church computer is not signed straight back in.
+
+Unset `AUTH0_ISSUER` to turn it off; sessions already signed in keep working.
 
 `ALLOW_LOCAL_PASSWORD_LOGIN=false` hides the email-and-password form once everyone uses
-Steward ID. Leave it on until then: an Auth0 outage should never lock a church out of its
-own screens.
+Steward ID. Accepting an invitation still asks for a password, which then simply goes unused.
+Leave it on until everyone has switched: an Auth0 outage should never lock a church out of
+its own screens.
 
 ## Resetting a password
 

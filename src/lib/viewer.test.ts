@@ -1,7 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-vi.mock("@/lib/api/auth.functions", () => ({ getAppState: vi.fn() }));
-const { safeNext } = await import("./viewer");
+import { safeNext } from "./safe-next";
 
 describe("safeNext", () => {
   it("keeps paths on this site", () => {
@@ -17,11 +16,23 @@ describe("safeNext", () => {
       "/\n/evil.com",
       "https://evil.com",
       "evil.com",
+      // Dot segments that resolve to a path starting "//".
+      "/.//evil.com",
+      "/..//evil.com",
+      "/a/..//evil.com",
+      "/%2e//evil.com",
+      "/%2e%2e//evil.com",
       42,
       null,
     ];
     for (const bad of offSite) {
-      expect(safeNext(bad)).toBe("/");
+      expect(safeNext(bad), String(bad)).toBe("/");
+    }
+  });
+
+  it("gives the same answer when applied twice", () => {
+    for (const input of ["/tvs", "/.//evil.com", "/a/../b?c=d", "//x"]) {
+      expect(safeNext(safeNext(input))).toBe(safeNext(input));
     }
   });
 });
