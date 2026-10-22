@@ -17,10 +17,11 @@ export const searchPlacesFn = createServerFn({ method: "GET" })
 export const getWeatherFn = createServerFn({ method: "GET" })
   .middleware([signedIn])
   .validator((input: { latitude: number; longitude: number; units: Units }) => input)
-  .handler(({ data }) =>
-    getWeather({
+  .handler(({ data, context }) => {
+    enforceLimit(limits.weatherLookup, context.viewer.userId);
+    return getWeather({
       latitude: Number(data.latitude),
       longitude: Number(data.longitude),
       units: data.units === "celsius" ? "celsius" : "fahrenheit",
-    }),
-  );
+    });
+  });

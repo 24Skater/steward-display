@@ -23,11 +23,24 @@ export const REFRESH_MS = 10 * 60 * 1000;
 export const STALE_AFTER_MS = 3 * 60 * 60 * 1000;
 const TIMEOUT_MS = 5_000;
 const MAX_CACHED = 2_000;
+/** After a failed fetch, leave a place alone this long; longer when Open-Meteo says "too many". */
+const FAILURE_COOLDOWN_MS = 2 * 60 * 1000;
+const RATE_LIMITED_COOLDOWN_MS = 10 * 60 * 1000;
 
 export type Units = "fahrenheit" | "celsius";
 
 /** How the server reaches Open-Meteo; replaced in tests. */
 export type Fetcher = (url: URL) => Promise<Response>;
+
+/** Never follows a redirect: an answer from Open-Meteo cannot send the server anywhere else. */
+const defaultFetcher: Fetcher = (url) =>
+  fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS), redirect: "error" });
+
+class UpstreamError extends Error {
+  constructor(readonly status: number) {
+    super(`Open-Meteo answered ${status}`);
+  }
+}
 
 export interface Place {
   name: string;
@@ -98,7 +111,7 @@ const forecastResponse = z.object({
 
 async function getJson(url: URL, fetcher: Fetcher): Promise<unknown> {
   const response = await fetcher(url);
-  if (!response.ok) throw new Error(`Open-Meteo answered ${response.status}`);
+  if (!response.ok) throw new UpstreamError(response.status);
   return response.json();
 }
 
@@ -106,7 +119,7 @@ async function getJson(url: URL, fetcher: Fetcher): Promise<unknown> {
 export async function searchPlaces(
   query: unknown,
   env: EnvBag = process.env,
-  fetcher: Fetcher = (url) => fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) }),
+  fetcher: Fetcher = defaultFetcher,
 ): Promise<Place[]> {
   const name = z.string().trim().min(2, "Type at least two letters").max(80).parse(query);
   const api = endpoints(env);
@@ -135,38 +148,80 @@ export function weatherKey(latitude: number, longitude: number, units: Units): s
 
 const cache = new Map<string, WeatherReport>();
 const inFlight = new Map<string, Promise<WeatherReport | null>>();
+/** Places whose last fetch failed, and when to try them again. */
+const coolingDown = new Map<string, number>();
+
+function remember(key: string, report: WeatherReport): void {
+  // Least recently used goes first: re-inserting moves a key to the back.
+  cache.delete(key);
+  if (cache.size >= MAX_CACHED) cache.delete(cache.keys().next().value!);
+  cache.set(key, report);
+}
+
+function normalise(input: { latitude: number; longitude: number; units: Units }) {
+  const { latitude, longitude } = coordinatesSchema.parse(input);
+  const units: Units = input.units === "celsius" ? "celsius" : "fahrenheit";
+  return { latitude, longitude, units, key: weatherKey(latitude, longitude, units) };
+}
 
 /**
  * Current weather for a place: fresh from the cache, otherwise from Open-Meteo,
  * otherwise the last reading if it is not yet stale, otherwise null. Never
- * throws: a weather outage must not take a TV's screen down with it.
+ * throws for an outage: a weather problem must not take a TV's screen down.
+ *
+ * A place whose fetch just failed is left alone for a couple of minutes (ten
+ * after a "too many requests"), so an outage does not turn every poll into
+ * another request and keep a quota block going.
  */
 export async function getWeather(
   input: { latitude: number; longitude: number; units: Units },
   now: Date = new Date(),
   env: EnvBag = process.env,
-  fetcher: Fetcher = (url) => fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) }),
+  fetcher: Fetcher = defaultFetcher,
 ): Promise<WeatherReport | null> {
-  const { latitude, longitude } = coordinatesSchema.parse(input);
-  const units: Units = input.units === "celsius" ? "celsius" : "fahrenheit";
-  const key = weatherKey(latitude, longitude, units);
+  const { latitude, longitude, units, key } = normalise(input);
   const cached = cache.get(key);
   const age = cached ? now.getTime() - Date.parse(cached.fetchedAt) : Infinity;
-  if (cached && age < REFRESH_MS) return cached;
+  const usable = cached && age < STALE_AFTER_MS ? cached : null;
+  if (cached && age < REFRESH_MS) {
+    remember(key, cached);
+    return cached;
+  }
+  if ((coolingDown.get(key) ?? 0) > now.getTime()) return usable;
 
   let pending = inFlight.get(key);
   if (!pending) {
-    pending = fetchWeather(latitude, longitude, units, now, env, fetcher).finally(() =>
-      inFlight.delete(key),
-    );
+    pending = fetchWeather(latitude, longitude, units, now, env, fetcher)
+      .then((result) => {
+        if (result.report) {
+          coolingDown.delete(key);
+          remember(key, result.report);
+          return result.report;
+        }
+        if (coolingDown.size >= MAX_CACHED) coolingDown.clear();
+        coolingDown.set(key, now.getTime() + result.cooldownMs);
+        return null;
+      })
+      .finally(() => inFlight.delete(key));
     inFlight.set(key, pending);
   }
-  const fresh = await pending;
-  if (fresh) {
-    if (!cache.has(key) && cache.size >= MAX_CACHED) cache.delete(cache.keys().next().value!);
-    cache.set(key, fresh);
-    return fresh;
-  }
+  return (await pending) ?? usable;
+}
+
+/**
+ * For a TV poll: whatever is cached now, without waiting, and a refresh in the
+ * background when it is due. A TV's answer never waits on Open-Meteo; the
+ * refreshed reading arrives on its next poll.
+ */
+export function peekWeather(
+  input: { latitude: number; longitude: number; units: Units },
+  now: Date = new Date(),
+  fetcher: Fetcher = defaultFetcher,
+): WeatherReport | null {
+  const { key } = normalise(input);
+  const cached = cache.get(key);
+  const age = cached ? now.getTime() - Date.parse(cached.fetchedAt) : Infinity;
+  if (age >= REFRESH_MS) void getWeather(input, now, process.env, fetcher);
   return cached && age < STALE_AFTER_MS ? cached : null;
 }
 
@@ -177,7 +232,7 @@ async function fetchWeather(
   now: Date,
   env: EnvBag,
   fetcher: Fetcher,
-): Promise<WeatherReport | null> {
+): Promise<{ report: WeatherReport | null; cooldownMs: number }> {
   const api = endpoints(env);
   const url = new URL(api.forecast);
   url.search = new URLSearchParams({
@@ -192,7 +247,7 @@ async function fetchWeather(
   if (api.key) url.searchParams.set("apikey", api.key);
   try {
     const body = forecastResponse.parse(await getJson(url, fetcher));
-    return {
+    const report: WeatherReport = {
       temperature: Math.round(body.current.temperature_2m),
       code: body.current.weather_code,
       isDay: body.current.is_day === 1,
@@ -205,9 +260,11 @@ async function fetchWeather(
       })),
       fetchedAt: now.toISOString(),
     };
+    return { report, cooldownMs: 0 };
   } catch (error) {
     console.error("[weather] forecast failed:", error);
-    return null;
+    const limited = error instanceof UpstreamError && error.status === 429;
+    return { report: null, cooldownMs: limited ? RATE_LIMITED_COOLDOWN_MS : FAILURE_COOLDOWN_MS };
   }
 }
 
@@ -215,4 +272,5 @@ async function fetchWeather(
 export function clearWeatherCache(): void {
   cache.clear();
   inFlight.clear();
+  coolingDown.clear();
 }

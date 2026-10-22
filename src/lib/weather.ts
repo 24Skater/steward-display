@@ -46,6 +46,31 @@ export function weatherKey(place: WeatherPlace, units: "fahrenheit" | "celsius")
 
 export const WeatherReportsContext = createContext<Record<string, WeatherReport> | null>(null);
 
+/**
+ * The widget's place, or undefined when it is missing or not a real place.
+ * Stored config is whatever was saved (imports, older builds), so it is
+ * checked before anything relies on it, the same way the server checks it.
+ */
+export function placeOf(config: WeatherConfig): WeatherPlace | undefined {
+  const place = config.place as Partial<WeatherPlace> | undefined;
+  if (!place || typeof place !== "object") return undefined;
+  const { name, latitude, longitude } = place;
+  if (typeof name !== "string" || !name.trim()) return undefined;
+  if (typeof latitude !== "number" || !Number.isFinite(latitude) || Math.abs(latitude) > 90) {
+    return undefined;
+  }
+  if (typeof longitude !== "number" || !Number.isFinite(longitude) || Math.abs(longitude) > 180) {
+    return undefined;
+  }
+  return {
+    name,
+    latitude,
+    longitude,
+    region: typeof place.region === "string" ? place.region : undefined,
+    country: typeof place.country === "string" ? place.country : undefined,
+  };
+}
+
 export function isFresh(report: WeatherReport, now = Date.now()): boolean {
   return now - Date.parse(report.fetchedAt) < STALE_AFTER_MS;
 }
@@ -54,27 +79,30 @@ export function isFresh(report: WeatherReport, now = Date.now()): boolean {
 export function useWeather(config: WeatherConfig): WeatherReport | undefined {
   const provided = useContext(WeatherReportsContext);
   const units = config.units === "celsius" ? "celsius" : "fahrenheit";
-  const key = config.place ? weatherKey(config.place, units) : null;
-  const [fetched, setFetched] = useState<WeatherReport | undefined>(undefined);
+  const place = placeOf(config);
+  const key = place ? weatherKey(place, units) : null;
+  // The reading travels with the key it is for, so picking another place never
+  // shows the old place's weather under the new name while the new one loads.
+  const [fetched, setFetched] = useState<{ key: string; report?: WeatherReport } | null>(null);
 
   useEffect(() => {
-    if (provided || !config.place) return;
+    if (provided || !place || !key) return;
     let stopped = false;
-    const place = config.place;
     const load = () =>
       getWeatherFn({ data: { latitude: place.latitude, longitude: place.longitude, units } })
-        .then((report) => !stopped && setFetched(report ?? undefined))
-        .catch(() => !stopped && setFetched(undefined));
+        .then((report) => !stopped && setFetched({ key, report: report ?? undefined }))
+        .catch(() => !stopped && setFetched({ key }));
     void load();
     const timer = setInterval(() => void load(), REFRESH_MS);
     return () => {
       stopped = true;
       clearInterval(timer);
     };
-    // key captures the place and units; the place object itself changes identity on every edit.
+    // key captures the place and units; the place object itself changes identity on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provided, key]);
 
   if (!key) return undefined;
-  return provided ? provided[key] : fetched;
+  if (provided) return provided[key];
+  return fetched?.key === key ? fetched.report : undefined;
 }

@@ -147,11 +147,9 @@ its own screens.
 
 ## Weather
 
-The weather widget uses [Open-Meteo](https://open-meteo.com). Only the server talks to it: each
-place is fetched at most every ten minutes however many screens show it, and TVs get the reading
-inside the screen data they already poll for. If Open-Meteo is unreachable, the last reading is
+The weather widget uses [Open-Meteo](https://open-meteo.com). Only the server talks to it: each place is fetched at most every ten minutes however many screens show it (and left alone for a few minutes after a failed fetch), and TVs get the reading inside the screen data they already poll for, without ever waiting on Open-Meteo. If Open-Meteo is unreachable, the last reading is
 used for up to three hours, and after that the widget hides rather than show old weather as
-current. The server needs to reach `api.open-meteo.com` and `geocoding-api.open-meteo.com`.
+current. The server needs to reach `api.open-meteo.com` and `geocoding-api.open-meteo.com` (with `OPEN_METEO_API_KEY`: `customer-api.open-meteo.com` and `customer-geocoding-api.open-meteo.com`).
 
 Open-Meteo is free for non-commercial use, which covers a church running Display itself. Weather
 data is CC BY 4.0; the widget credits Open-Meteo in small print. Commercial use (such as a paid

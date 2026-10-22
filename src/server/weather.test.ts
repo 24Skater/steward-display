@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { clearWeatherCache, getWeather, searchPlaces, STALE_AFTER_MS } from "./weather";
+import {
+  clearWeatherCache,
+  getWeather,
+  peekWeather,
+  searchPlaces,
+  STALE_AFTER_MS,
+} from "./weather";
 
 const forecastBody = {
   current: { temperature_2m: 58.6, weather_code: 3, is_day: 1 },
@@ -99,5 +105,42 @@ describe("searchPlaces", () => {
       searchPlaces("Nashville", {}, async () => new Response("", { status: 500 })),
     ).rejects.toThrow(/Couldn't search for places/);
     await expect(searchPlaces("x", {})).rejects.toThrow(/at least two letters/);
+  });
+});
+
+describe("outages and quota", () => {
+  it("leaves a failing place alone for a while instead of retrying every poll", async () => {
+    const t0 = new Date("2026-10-21T20:00:00Z");
+    const down = vi.fn(async (_url: URL) => new Response("no", { status: 503 }));
+    expect(await getWeather(place, t0, {}, down)).toBeNull();
+    expect(await getWeather(place, new Date(t0.getTime() + 30_000), {}, down)).toBeNull();
+    expect(down).toHaveBeenCalledTimes(1);
+    await getWeather(place, new Date(t0.getTime() + 3 * 60_000), {}, down);
+    expect(down).toHaveBeenCalledTimes(2);
+  });
+
+  it("backs off longer when Open-Meteo says too many requests", async () => {
+    const t0 = new Date("2026-10-21T20:00:00Z");
+    const limited = vi.fn(async (_url: URL) => new Response("slow down", { status: 429 }));
+    await getWeather(place, t0, {}, limited);
+    await getWeather(place, new Date(t0.getTime() + 5 * 60_000), {}, limited);
+    expect(limited).toHaveBeenCalledTimes(1);
+  });
+
+  it("peeks without waiting, and refreshes in the background", async () => {
+    const t0 = new Date("2026-10-21T20:00:00Z");
+    let release: () => void = () => {};
+    const slow = vi.fn(
+      (_url: URL) =>
+        new Promise<Response>((resolve) => {
+          release = () => resolve(ok(forecastBody));
+        }),
+    );
+    // Nothing cached: answers at once with nothing, and starts a fetch.
+    expect(peekWeather(place, t0, slow)).toBeNull();
+    expect(slow).toHaveBeenCalledTimes(1);
+    release();
+    await vi.waitFor(() => expect(peekWeather(place, t0, slow)?.temperature).toBe(59));
+    expect(slow).toHaveBeenCalledTimes(1);
   });
 });

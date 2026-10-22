@@ -1,5 +1,5 @@
 import { describeWeather } from "@/lib/weather-codes";
-import { isFresh, useWeather, type WeatherConfig } from "@/lib/weather";
+import { isFresh, placeOf, useWeather, type WeatherConfig } from "@/lib/weather";
 import { SetupHint } from "./SetupHint";
 
 export type { WeatherConfig };
@@ -13,8 +13,9 @@ const DAY = new Intl.DateTimeFormat(undefined, { weekday: "short", timeZone: "UT
  */
 export function WeatherWidget({ config }: { config: WeatherConfig }) {
   const report = useWeather(config);
+  const place = placeOf(config);
 
-  if (!config.place) {
+  if (!place) {
     return (
       <SetupHint>
         {config.city
@@ -24,7 +25,7 @@ export function WeatherWidget({ config }: { config: WeatherConfig }) {
     );
   }
   if (!report || !isFresh(report)) {
-    return <SetupHint>Weather for {config.place.name} is loading or unavailable.</SetupHint>;
+    return <SetupHint>Weather for {place.name} is loading or unavailable.</SetupHint>;
   }
 
   const { label, Icon } = describeWeather(report.code, report.isDay);
@@ -44,7 +45,7 @@ export function WeatherWidget({ config }: { config: WeatherConfig }) {
             </span>
           </p>
           <p className="truncate opacity-80" style={{ fontSize: "clamp(0.875rem, 4cqw, 2rem)" }}>
-            {label} · {config.place.name}
+            {label} · {place.name}
           </p>
         </div>
       </div>

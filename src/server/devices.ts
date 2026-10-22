@@ -6,7 +6,7 @@ import { getOrgSettings } from "./settings";
 import { toRecord, type ScreenRecord } from "./screens";
 import {
   coordinatesSchema,
-  getWeather,
+  peekWeather,
   weatherKey,
   type Units,
   type WeatherReport,
@@ -97,11 +97,14 @@ export interface TvPayload {
   weather: Record<string, WeatherReport>;
 }
 
+/** More places than any lobby screen needs; a bound on what one TV poll can ask for. */
+const MAX_WEATHER_PLACES = 10;
+
 /** The places a screen's weather widgets show, by weatherKey(), from validated config only. */
 function weatherPlaces(screen: ScreenRecord | null) {
   const places = new Map<string, { latitude: number; longitude: number; units: Units }>();
   for (const widget of screen?.widgets ?? []) {
-    if (widget.widgetType !== "weather") continue;
+    if (widget.widgetType !== "weather" || places.size >= MAX_WEATHER_PLACES) continue;
     const config = widget.config as { place?: unknown; units?: unknown };
     const place = coordinatesSchema.safeParse(config.place);
     if (!place.success) continue;
@@ -123,12 +126,12 @@ export async function payloadForDevice(
   ]);
   const screen = row ? toRecord(row) : null;
   const weather: Record<string, WeatherReport> = {};
-  await Promise.all(
-    [...weatherPlaces(screen)].map(async ([key, place]) => {
-      const report = await getWeather(place);
-      if (report) weather[key] = report;
-    }),
-  );
+  for (const [key, place] of weatherPlaces(screen)) {
+    // Never waits on Open-Meteo: a due refresh happens in the background and
+    // reaches this TV on its next poll.
+    const report = peekWeather(place);
+    if (report) weather[key] = report;
+  }
   const payload: TvPayload = {
     deviceName: device.name,
     timezone: settings.timezone,
