@@ -41,6 +41,11 @@ services:
       EMAIL_SERVER_USER: ${EMAIL_SERVER_USER:-}
       EMAIL_SERVER_PASSWORD: ${EMAIL_SERVER_PASSWORD:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
+      AUTH0_ISSUER: ${AUTH0_ISSUER:-}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:-}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET:-}
+      AUTH0_BUTTON_LABEL: ${AUTH0_BUTTON_LABEL:-}
+      ALLOW_LOCAL_PASSWORD_LOGIN: ${ALLOW_LOCAL_PASSWORD_LOGIN:-true}
     ports:
       # Behind a proxy on the same machine, set BIND_ADDRESS=127.0.0.1 so the
       # app is reachable only through it (Docker's published ports bypass ufw).

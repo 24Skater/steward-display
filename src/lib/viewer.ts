@@ -34,22 +34,4 @@ export function useCanEmail(): boolean {
   return useRouteContext({ from: "/_admin" }).canEmail;
 }
 
-/** Backslashes and control characters (tab, newline): what browsers rewrite in a URL. */
-// eslint-disable-next-line no-control-regex -- matching control characters is the point
-const REWRITTEN_BY_BROWSERS = /[\\\u0000-\u001f]/;
-
-/**
- * Only paths on this site, so `?next=` can never send someone elsewhere after
- * signing in. Resolved the way a browser would: `/\evil.com` and a path with a
- * tab in it both become `//evil.com` in a browser, so both are refused.
- */
-export function safeNext(next: unknown): string {
-  if (typeof next !== "string" || REWRITTEN_BY_BROWSERS.test(next)) return "/";
-  try {
-    const base = "http://this-site.invalid";
-    const url = new URL(next, base);
-    return url.origin === base && next.startsWith("/") ? url.pathname + url.search + url.hash : "/";
-  } catch {
-    return "/";
-  }
-}
+export { safeNext } from "./safe-next";

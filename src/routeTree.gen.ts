@@ -29,6 +29,8 @@ import { Route as ApiTvScreenRouteImport } from './routes/api.tv.screen'
 import { Route as ApiTvPairRouteImport } from './routes/api.tv.pair'
 import { Route as AdminScreensNewRouteImport } from './routes/_admin.screens.new'
 import { Route as ApiTvPairStatusRouteImport } from './routes/api.tv.pair.status'
+import { Route as ApiAuthSsoStartRouteImport } from './routes/api.auth.sso.start'
+import { Route as ApiAuthSsoCallbackRouteImport } from './routes/api.auth.sso.callback'
 import { Route as AdminScreensIdEditRouteImport } from './routes/_admin.screens.$id.edit'
 
 const TvRoute = TvRouteImport.update({
@@ -130,6 +132,16 @@ const ApiTvPairStatusRoute = ApiTvPairStatusRouteImport.update({
   path: '/status',
   getParentRoute: () => ApiTvPairRoute,
 } as any)
+const ApiAuthSsoStartRoute = ApiAuthSsoStartRouteImport.update({
+  id: '/api/auth/sso/start',
+  path: '/api/auth/sso/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSsoCallbackRoute = ApiAuthSsoCallbackRouteImport.update({
+  id: '/api/auth/sso/callback',
+  path: '/api/auth/sso/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminScreensIdEditRoute = AdminScreensIdEditRouteImport.update({
   id: '/screens/$id/edit',
   path: '/screens/$id/edit',
@@ -156,6 +168,8 @@ export interface FileRoutesByFullPath {
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/api/auth/sso/callback': typeof ApiAuthSsoCallbackRoute
+  '/api/auth/sso/start': typeof ApiAuthSsoStartRoute
   '/api/tv/pair/status': typeof ApiTvPairStatusRoute
 }
 export interface FileRoutesByTo {
@@ -178,6 +192,8 @@ export interface FileRoutesByTo {
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/api/auth/sso/callback': typeof ApiAuthSsoCallbackRoute
+  '/api/auth/sso/start': typeof ApiAuthSsoStartRoute
   '/api/tv/pair/status': typeof ApiTvPairStatusRoute
 }
 export interface FileRoutesById {
@@ -202,6 +218,8 @@ export interface FileRoutesById {
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
   '/_admin/screens/$id/edit': typeof AdminScreensIdEditRoute
+  '/api/auth/sso/callback': typeof ApiAuthSsoCallbackRoute
+  '/api/auth/sso/start': typeof ApiAuthSsoStartRoute
   '/api/tv/pair/status': typeof ApiTvPairStatusRoute
 }
 export interface FileRouteTypes {
@@ -226,6 +244,8 @@ export interface FileRouteTypes {
     | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/screens/$id/edit'
+    | '/api/auth/sso/callback'
+    | '/api/auth/sso/start'
     | '/api/tv/pair/status'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -248,6 +268,8 @@ export interface FileRouteTypes {
     | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/screens/$id/edit'
+    | '/api/auth/sso/callback'
+    | '/api/auth/sso/start'
     | '/api/tv/pair/status'
   id:
     | '__root__'
@@ -271,6 +293,8 @@ export interface FileRouteTypes {
     | '/api/tv/screen'
     | '/screens/$id/preview'
     | '/_admin/screens/$id/edit'
+    | '/api/auth/sso/callback'
+    | '/api/auth/sso/start'
     | '/api/tv/pair/status'
   fileRoutesById: FileRoutesById
 }
@@ -286,6 +310,8 @@ export interface RootRouteChildren {
   ApiTvPairRoute: typeof ApiTvPairRouteWithChildren
   ApiTvScreenRoute: typeof ApiTvScreenRoute
   ScreensIdPreviewRoute: typeof ScreensIdPreviewRoute
+  ApiAuthSsoCallbackRoute: typeof ApiAuthSsoCallbackRoute
+  ApiAuthSsoStartRoute: typeof ApiAuthSsoStartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -430,6 +456,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTvPairStatusRouteImport
       parentRoute: typeof ApiTvPairRoute
     }
+    '/api/auth/sso/start': {
+      id: '/api/auth/sso/start'
+      path: '/api/auth/sso/start'
+      fullPath: '/api/auth/sso/start'
+      preLoaderRoute: typeof ApiAuthSsoStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/sso/callback': {
+      id: '/api/auth/sso/callback'
+      path: '/api/auth/sso/callback'
+      fullPath: '/api/auth/sso/callback'
+      preLoaderRoute: typeof ApiAuthSsoCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin/screens/$id/edit': {
       id: '/_admin/screens/$id/edit'
       path: '/screens/$id/edit'
@@ -490,6 +530,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTvPairRoute: ApiTvPairRouteWithChildren,
   ApiTvScreenRoute: ApiTvScreenRoute,
   ScreensIdPreviewRoute: ScreensIdPreviewRoute,
+  ApiAuthSsoCallbackRoute: ApiAuthSsoCallbackRoute,
+  ApiAuthSsoStartRoute: ApiAuthSsoStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

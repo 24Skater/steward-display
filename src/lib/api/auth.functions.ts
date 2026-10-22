@@ -20,7 +20,10 @@ import {
   setSessionCookie,
   userAgent,
 } from "@/server/http";
+import { UserError } from "@/server/errors";
 import { currentOrg } from "@/server/org-context";
+import { isLocalPasswordLoginAllowed, ssoButtonLabel } from "@/server/sso";
+import { isSsoAvailable, ssoSignOutUrl } from "@/server/sso-flow";
 import { revokeAllSessions, revokeSession, type Viewer } from "@/server/sessions";
 import { safeErrors, signedIn } from "./middleware";
 
@@ -30,6 +33,10 @@ export interface AppState {
   viewer: Viewer | null;
   /** Whether this server can email reset and verification links. */
   canEmail: boolean;
+  /** The Steward ID button's label, or null when single sign-on is not offered here. */
+  sso: { label: string } | null;
+  /** Whether the email-and-password form is offered (ALLOW_LOCAL_PASSWORD_LOGIN). */
+  passwordLogin: boolean;
 }
 
 /** Who is looking, at which church. Read by the admin layout on every navigation. */
@@ -37,11 +44,14 @@ export const getAppState = createServerFn({ method: "GET" })
   .middleware([safeErrors])
   .handler(async (): Promise<AppState> => {
     const org = currentOrg();
-    if (!org) return { church: null, viewer: null, canEmail: false };
+    const passwordLogin = isLocalPasswordLoginAllowed();
+    if (!org) return { church: null, viewer: null, canEmail: false, sso: null, passwordLogin };
     return {
       church: { name: org.name },
       viewer: await currentViewer(),
       canEmail: canEmailLinks(),
+      sso: isSsoAvailable() ? { label: ssoButtonLabel() } : null,
+      passwordLogin,
     };
   });
 
@@ -72,6 +82,9 @@ export const signInFn = createServerFn({ method: "POST" })
   .middleware([safeErrors])
   .validator((input: SignInInput) => input)
   .handler(async ({ data }) => {
+    if (!isLocalPasswordLoginAllowed()) {
+      throw new UserError("Sign in with Steward ID here; email and password sign-in is off.", 403);
+    }
     const ip = clientIp();
     const key = `${ip}|${String(data.email).trim().toLowerCase()}`;
     enforceLimit(limits.signInPerIp, ip);
@@ -82,13 +95,17 @@ export const signInFn = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+/**
+ * Signs out here. For a Steward ID session it also returns the provider's
+ * sign-out address, so the browser can end that session too.
+ */
 export const signOutFn = createServerFn({ method: "POST" })
   .middleware([safeErrors])
-  .handler(async () => {
+  .handler(async (): Promise<{ ok: true; ssoSignOutUrl: string | null }> => {
     const token = sessionToken();
-    if (token) await revokeSession(token);
+    const { viaSso } = token ? await revokeSession(token) : { viaSso: false };
     clearSessionCookie();
-    return { ok: true as const };
+    return { ok: true, ssoSignOutUrl: viaSso ? await ssoSignOutUrl() : null };
   });
 
 /** Signs this person out of every other browser at this church. */

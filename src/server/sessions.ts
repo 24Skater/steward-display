@@ -38,6 +38,7 @@ export async function createSession(
   userId: string,
   userAgent: string | null,
   now: Date = new Date(),
+  opts: { viaSso?: boolean } = {},
 ): Promise<{ token: string; expiresAt: Date }> {
   const token = newSecret("sds");
   const expiresAt = new Date(now.getTime() + SESSION_TTL_MS);
@@ -46,6 +47,7 @@ export async function createSession(
       userId,
       tokenHash: hashSecret(token),
       userAgent: userAgent?.slice(0, 300) ?? null,
+      viaSso: opts.viaSso ?? false,
       expiresAt,
     }),
   });
@@ -93,8 +95,12 @@ export async function viewerForToken(
   };
 }
 
-export async function revokeSession(token: string): Promise<void> {
-  await db().session.deleteMany({ where: { tokenHash: hashSecret(token) } });
+/** Ends one session. Says whether it was a Steward ID one, so sign-out can end that too. */
+export async function revokeSession(token: string): Promise<{ viaSso: boolean }> {
+  const tokenHash = hashSecret(token);
+  const session = await db().session.findUnique({ where: { tokenHash }, select: { viaSso: true } });
+  await db().session.deleteMany({ where: { tokenHash } });
+  return { viaSso: session?.viaSso ?? false };
 }
 
 /** Signs a person out of every browser at this church, optionally keeping one. */

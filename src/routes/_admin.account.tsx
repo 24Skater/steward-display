@@ -29,10 +29,13 @@ function AccountPage() {
   const navigate = useNavigate();
 
   async function signOut() {
+    let ssoSignOutUrl: string | null = null;
     try {
-      await signOutFn();
+      ({ ssoSignOutUrl } = await signOutFn());
     } finally {
-      await navigate({ to: "/login", search: { next: "/" }, replace: true });
+      // Signed in with Steward ID: end that session too, then come back to sign-in.
+      if (ssoSignOutUrl) window.location.assign(ssoSignOutUrl);
+      else await navigate({ to: "/login", search: { next: "/" }, replace: true });
     }
   }
 
