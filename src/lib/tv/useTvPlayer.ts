@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { Screen } from "@/types";
+import type { WeatherReport } from "@/lib/weather";
 
 /**
  * The paired TV's loop.
@@ -16,6 +17,8 @@ export interface TvPayload {
   deviceName: string;
   timezone: string;
   screen: Screen | null;
+  /** Older servers sent none. */
+  weather?: Record<string, WeatherReport>;
 }
 
 export type TvState =

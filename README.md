@@ -29,7 +29,7 @@ and kept up to date from a phone.
 - **Screens** are full-screen layouts on a 12 × 12 grid, landscape or portrait, from 720p to
   4K, saved to your church's account so everyone on the team edits the same ones.
 - **Widgets** fill them: clock, date, announcement, countdown, scripture, giving progress,
-  event list, text, image, video, weather and dividers.
+  event list, text, image, video, weather (live, from Open-Meteo) and dividers.
 - **The editor** is drag-and-drop with snapping, layout templates, presets and undo. Changes
   save on their own a moment after you stop.
 - **TVs pair with a code.** Open `/tv` in the TV's browser, type the six-character code it
@@ -53,12 +53,12 @@ prints it), your church's name, and creates the owner's account. Production setu
 
 Pre-release. What works today, and what is next:
 
-|                            |                                                                                                                                                                                                                                                |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Works**                  | Accounts, team invitations with roles, emailed password reset and confirmation, account deletion, Steward ID single sign-on, screens and presets on the server, TV pairing, offline TVs, editor, widgets, templates, import/export, Docker, CI |
-| **Not yet**                | Weather data, phone quick-edit for announcement text                                                                                                                                                                                           |
-| **Next**                   | Open-Meteo weather, phone quick-edit for announcement text                                                                                                                                                                                     |
-| **Then: Steward platform** | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                                                                                                                          |
+|                            |                                                                                                                                                                                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Works**                  | Accounts, team invitations with roles, emailed password reset and confirmation, account deletion, Steward ID single sign-on, live weather, screens and presets on the server, TV pairing, offline TVs, editor, widgets, templates, import/export, Docker, CI |
+| **Not yet**                | Phone quick-edit for announcement text                                                                                                                                                                                                                       |
+| **Next**                   | Phone quick-edit for announcement text                                                                                                                                                                                                                       |
+| **Then: Steward platform** | Provisioned and billed from the Steward console alongside Congregation, Table and VBS                                                                                                                                                                        |
 
 ## Development
 

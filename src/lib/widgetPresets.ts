@@ -141,10 +141,11 @@ export const WIDGET_PRESETS: Record<string, WidgetPreset[]> = {
       config: { orientation: "vertical", thickness: 2, opacity: 0.5 },
     },
   ],
+  // Presets keep whichever place the widget already has; they only change how it shows.
   weather: [
-    { id: "nashville", label: "Nashville, TN", config: { city: "Nashville, TN" } },
-    { id: "ny", label: "New York, NY", config: { city: "New York, NY" } },
-    { id: "la", label: "Los Angeles, CA", config: { city: "Los Angeles, CA" } },
+    { id: "with-forecast", label: "Today and next days", config: { showForecast: true } },
+    { id: "today-only", label: "Today only", config: { showForecast: false } },
+    { id: "celsius", label: "Celsius", config: { units: "celsius" } },
   ],
   "event-list": [
     { id: "this-week", label: "This Week", config: { title: "This Week" } },

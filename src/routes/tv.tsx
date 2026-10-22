@@ -51,7 +51,14 @@ function TvPage() {
       </IdleSlate>
     );
   }
-  return <DisplayStage screen={payload.screen} timeZone={payload.timezone} overlay={dot} />;
+  return (
+    <DisplayStage
+      screen={payload.screen}
+      timeZone={payload.timezone}
+      weather={payload.weather ?? {}}
+      overlay={dot}
+    />
+  );
 }
 
 function PairingCode({ code }: { code: string }) {

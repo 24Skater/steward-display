@@ -4,6 +4,13 @@ import { hashSecret } from "./secrets";
 import { deviceNameSchema } from "./schemas";
 import { getOrgSettings } from "./settings";
 import { toRecord, type ScreenRecord } from "./screens";
+import {
+  coordinatesSchema,
+  peekWeather,
+  weatherKey,
+  type Units,
+  type WeatherReport,
+} from "./weather";
 
 /** A TV that has not polled for this long is shown as offline. */
 export const ONLINE_WINDOW_MS = 2 * 60 * 1000;
@@ -86,6 +93,28 @@ export interface TvPayload {
   deviceName: string;
   timezone: string;
   screen: ScreenRecord | null;
+  /** Readings for the screen's weather widgets, keyed by weatherKey(). */
+  weather: Record<string, WeatherReport>;
+}
+
+/** More places than any lobby screen needs; a bound on what one TV poll can ask for. */
+const MAX_WEATHER_PLACES = 10;
+
+/** The places a screen's weather widgets show, by weatherKey(), from validated config only. */
+function weatherPlaces(screen: ScreenRecord | null) {
+  const places = new Map<string, { latitude: number; longitude: number; units: Units }>();
+  for (const widget of screen?.widgets ?? []) {
+    if (widget.widgetType !== "weather" || places.size >= MAX_WEATHER_PLACES) continue;
+    const config = widget.config as { place?: unknown; units?: unknown };
+    const place = coordinatesSchema.safeParse(config.place);
+    if (!place.success) continue;
+    const units: Units = config.units === "celsius" ? "celsius" : "fahrenheit";
+    places.set(weatherKey(place.data.latitude, place.data.longitude, units), {
+      ...place.data,
+      units,
+    });
+  }
+  return places;
 }
 
 export async function payloadForDevice(
@@ -95,12 +124,25 @@ export async function payloadForDevice(
     device.screenId ? db().screen.findUnique({ where: { id: device.screenId } }) : null,
     getOrgSettings(),
   ]);
+  const screen = row ? toRecord(row) : null;
+  const weather: Record<string, WeatherReport> = {};
+  for (const [key, place] of weatherPlaces(screen)) {
+    // Never waits on Open-Meteo: a due refresh happens in the background and
+    // reaches this TV on its next poll.
+    const report = peekWeather(place);
+    if (report) weather[key] = report;
+  }
   const payload: TvPayload = {
     deviceName: device.name,
     timezone: settings.timezone,
-    screen: row ? toRecord(row) : null,
+    screen,
+    weather,
   };
-  // Changes when the screen is edited, swapped, renamed, or the time zone moves.
-  const etag = `"${hashSecret(JSON.stringify([device.name, settings.timezone, row?.id ?? null, row?.version ?? 0])).slice(0, 32)}"`;
+  // Changes when the screen is edited, swapped, renamed, the time zone moves,
+  // or a weather reading is refreshed (every ten minutes at most).
+  const weatherStamp = Object.entries(weather)
+    .map(([k, r]) => `${k}@${r.fetchedAt}`)
+    .sort();
+  const etag = `"${hashSecret(JSON.stringify([device.name, settings.timezone, row?.id ?? null, row?.version ?? 0, weatherStamp])).slice(0, 32)}"`;
   return { payload, etag };
 }

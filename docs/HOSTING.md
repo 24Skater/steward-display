@@ -46,6 +46,7 @@ up-to-date database makes that a no-op. Set `SKIP_MIGRATIONS=true` to run them s
 | `AUTH0_CLIENT_ID`            | unset      | The Auth0 application's client ID.                                                            |
 | `AUTH0_CLIENT_SECRET`        | unset      | The Auth0 application's client secret.                                                        |
 | `ALLOW_LOCAL_PASSWORD_LOGIN` | `true`     | `false` hides email-and-password sign-in, once everyone uses Steward ID.                      |
+| `OPEN_METEO_API_KEY`         | unset      | Open-Meteo's paid key, for commercial use. A church's own install needs none.                 |
 | `SETUP_CODE`                 | random     | The code first-run setup asks for. Random and printed in the log when unset.                  |
 | `PLATFORM_ROOT_DOMAIN`       | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
 
@@ -143,6 +144,16 @@ Unset `AUTH0_ISSUER` to turn it off; sessions already signed in keep working.
 Steward ID. Accepting an invitation still asks for a password, which then simply goes unused.
 Leave it on until everyone has switched: an Auth0 outage should never lock a church out of
 its own screens.
+
+## Weather
+
+The weather widget uses [Open-Meteo](https://open-meteo.com). Only the server talks to it: each place is fetched at most every ten minutes however many screens show it (and left alone for a few minutes after a failed fetch), and TVs get the reading inside the screen data they already poll for, without ever waiting on Open-Meteo. If Open-Meteo is unreachable, the last reading is
+used for up to three hours, and after that the widget hides rather than show old weather as
+current. The server needs to reach `api.open-meteo.com` and `geocoding-api.open-meteo.com` (with `OPEN_METEO_API_KEY`: `customer-api.open-meteo.com` and `customer-geocoding-api.open-meteo.com`).
+
+Open-Meteo is free for non-commercial use, which covers a church running Display itself. Weather
+data is CC BY 4.0; the widget credits Open-Meteo in small print. Commercial use (such as a paid
+hosted service) needs an Open-Meteo subscription: set `OPEN_METEO_API_KEY`.
 
 ## Resetting a password
 
