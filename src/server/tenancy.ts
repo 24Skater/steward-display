@@ -11,6 +11,7 @@
 /** Models carrying a non-nullable `orgId`. Reads are scoped, creates are stamped. */
 export const TENANTED_MODELS = new Set([
   "device",
+  "invitation",
   "membership",
   "orgsettings",
   "pairing",
@@ -22,9 +23,10 @@ export const TENANTED_MODELS = new Set([
 /**
  * Models that are not one church's data. `org` is the tenant root; `user` is
  * global because one person may serve several churches with one login, and the
- * church-shaped half of them is `membership`.
+ * church-shaped half of them is `membership`. `usertoken` (reset and
+ * verification links) belongs to the person, not to a church.
  */
-export const GLOBAL_MODELS = new Set(["org", "user"]);
+export const GLOBAL_MODELS = new Set(["org", "user", "usertoken"]);
 
 const READ_OPS = new Set([
   "findUnique",

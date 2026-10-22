@@ -14,6 +14,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 const NAV = [
   { to: "/", label: "Screens" },
   { to: "/tvs", label: "TVs" },
+  { to: "/team", label: "Team" },
   { to: "/widgets", label: "Widgets" },
   { to: "/presets", label: "Presets" },
   { to: "/settings", label: "Settings" },

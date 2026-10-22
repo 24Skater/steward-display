@@ -88,6 +88,12 @@ export const limits = {
   tvPairPoll: new RateLimiter({ limit: 400, windowMs: 15 * MINUTE }),
   /** Per paired TV: polls every ~30 s, about 30 a window; room for reloads. */
   tvScreenPoll: new RateLimiter({ limit: 120, windowMs: 15 * MINUTE }),
+  /** Per owner: invitations sent. Enough for a whole team in one sitting. */
+  invite: new RateLimiter({ limit: 30, windowMs: 60 * MINUTE }),
+  /** Per address: reset requests, accepting invitations, using emailed links. */
+  emailLinks: new RateLimiter({ limit: 10, windowMs: 15 * MINUTE }),
+  /** Per email address: reset emails, so nobody can flood one inbox. */
+  resetPerEmail: new RateLimiter({ limit: 3, windowMs: 60 * MINUTE }),
   /** Per address: requests that fail authentication or bring no credential. */
   tvUnauthenticated: new RateLimiter({ limit: 1000, windowMs: 15 * MINUTE }),
 };

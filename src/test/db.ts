@@ -11,7 +11,7 @@ if (process.env.TEST_DATABASE_URL) process.env.DATABASE_URL = process.env.TEST_D
 /** Empties every table. Each integration file calls it before each test. */
 export async function resetDatabase(): Promise<void> {
   await db().$executeRawUnsafe(
-    'TRUNCATE "Pairing", "Device", "Preset", "OrgSettings", "Screen", "Session", "Membership", "User", "Org" CASCADE',
+    'TRUNCATE "Invitation", "UserToken", "Pairing", "Device", "Preset", "OrgSettings", "Screen", "Session", "Membership", "User", "Org" CASCADE',
   );
 }
 

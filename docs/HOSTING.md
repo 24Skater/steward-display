@@ -28,16 +28,22 @@ up-to-date database makes that a no-op. Set `SKIP_MIGRATIONS=true` to run them s
 
 ## Configuration
 
-| Variable               | Default    | What it does                                                                                  |
-| ---------------------- | ---------- | --------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`         | (required) | Postgres connection string. Compose builds it from `POSTGRES_PASSWORD`.                       |
-| `POSTGRES_PASSWORD`    | (required) | Compose only: the database password.                                                          |
-| `PORT`                 | `3000`     | The port the server listens on (and that compose publishes).                                  |
-| `TRUST_PROXY`          | `false`    | `true` behind a reverse proxy: rate limits use `X-Forwarded-For`, cookies honour its `https`. |
-| `TRUSTED_PROXY_HOPS`   | `1`        | How many proxies are in front. The visitor is read that many entries from the right.          |
-| `BIND_ADDRESS`         | `0.0.0.0`  | Compose only. `127.0.0.1` behind a proxy on the same machine, so nothing can skip it.         |
-| `SETUP_CODE`           | random     | The code first-run setup asks for. Random and printed in the log when unset.                  |
-| `PLATFORM_ROOT_DOMAIN` | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
+| Variable                | Default    | What it does                                                                                  |
+| ----------------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | (required) | Postgres connection string. Compose builds it from `POSTGRES_PASSWORD`.                       |
+| `POSTGRES_PASSWORD`     | (required) | Compose only: the database password.                                                          |
+| `PORT`                  | `3000`     | The port the server listens on (and that compose publishes).                                  |
+| `TRUST_PROXY`           | `false`    | `true` behind a reverse proxy: rate limits use `X-Forwarded-For`, cookies honour its `https`. |
+| `TRUSTED_PROXY_HOPS`    | `1`        | How many proxies are in front. The visitor is read that many entries from the right.          |
+| `BIND_ADDRESS`          | `0.0.0.0`  | Compose only. `127.0.0.1` behind a proxy on the same machine, so nothing can skip it.         |
+| `PUBLIC_URL`            | unset      | The address people use. Needed for emailed links (resets, invitations).                       |
+| `EMAIL_SERVER_HOST`     | unset      | SMTP server. With `EMAIL_FROM`, turns on emailed invitations, resets and confirmations.       |
+| `EMAIL_SERVER_PORT`     | `587`      | SMTP port; 465 uses TLS from the start.                                                       |
+| `EMAIL_SERVER_USER`     | unset      | SMTP username, if the server needs one.                                                       |
+| `EMAIL_SERVER_PASSWORD` | unset      | SMTP password.                                                                                |
+| `EMAIL_FROM`            | unset      | The sender, e.g. `Steward Display <display@yourchurch.org>`.                                  |
+| `SETUP_CODE`            | random     | The code first-run setup asks for. Random and printed in the log when unset.                  |
+| `PLATFORM_ROOT_DOMAIN`  | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
 
 ## Pairing TVs
 
@@ -90,9 +96,23 @@ docker compose exec -T db pg_restore -U display -d display --clean --if-exists <
 Keep copies off the machine. A backup you have never restored is a hope, not a backup: try a
 restore once into a scratch database.
 
+## Email
+
+Email is optional. With it (`EMAIL_SERVER_*`, `EMAIL_FROM` and `PUBLIC_URL`), owners invite
+teammates by email, people reset forgotten passwords themselves, and accounts can confirm their
+address. Without it, an invitation gives the owner a link to send however they like, and
+passwords are reset with the command below.
+
+`PUBLIC_URL` matters even with email configured: links are never built from the address a
+request arrived on, because on a self-hosted install anyone can send a request with any
+address, and a reset link pointing at their site would hand them the account.
+
+Any SMTP service works: your church's email provider, or a transactional service such as
+Postmark, Resend or Amazon SES.
+
 ## Resetting a password
 
-Until email is set up, whoever runs the server resets passwords. This sets a new random
+Without email, whoever runs the server resets passwords. This sets a new random
 password, prints it, and signs that person out everywhere:
 
 ```sh

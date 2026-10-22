@@ -31,6 +31,7 @@ export interface Viewer {
   name: string;
   email: string;
   role: Role;
+  emailVerified: boolean;
 }
 
 export async function createSession(
@@ -72,7 +73,7 @@ export async function viewerForToken(
   const [user, membership] = await Promise.all([
     db().user.findUnique({
       where: { id: session.userId },
-      select: { name: true, email: true },
+      select: { name: true, email: true, emailVerifiedAt: true },
     }),
     db().membership.findFirst({ where: { userId: session.userId }, select: { role: true } }),
   ]);
@@ -88,6 +89,7 @@ export async function viewerForToken(
     name: user.name,
     email: user.email,
     role: membership.role,
+    emailVerified: !!user.emailVerifiedAt,
   };
 }
 
