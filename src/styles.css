@@ -219,6 +219,12 @@
     letter-spacing: -0.01em;
   }
 
+  /* Widgets take their text colour from the screen, never the admin theme:
+     the rule above would paint a title navy on a dark screen. */
+  .widget-surface :is(h1, h2, h3, h4) {
+    color: inherit;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
