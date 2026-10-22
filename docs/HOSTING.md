@@ -28,22 +28,26 @@ up-to-date database makes that a no-op. Set `SKIP_MIGRATIONS=true` to run them s
 
 ## Configuration
 
-| Variable                | Default    | What it does                                                                                  |
-| ----------------------- | ---------- | --------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`          | (required) | Postgres connection string. Compose builds it from `POSTGRES_PASSWORD`.                       |
-| `POSTGRES_PASSWORD`     | (required) | Compose only: the database password.                                                          |
-| `PORT`                  | `3000`     | The port the server listens on (and that compose publishes).                                  |
-| `TRUST_PROXY`           | `false`    | `true` behind a reverse proxy: rate limits use `X-Forwarded-For`, cookies honour its `https`. |
-| `TRUSTED_PROXY_HOPS`    | `1`        | How many proxies are in front. The visitor is read that many entries from the right.          |
-| `BIND_ADDRESS`          | `0.0.0.0`  | Compose only. `127.0.0.1` behind a proxy on the same machine, so nothing can skip it.         |
-| `PUBLIC_URL`            | unset      | The address people use. Needed for emailed links (resets, invitations).                       |
-| `EMAIL_SERVER_HOST`     | unset      | SMTP server. With `EMAIL_FROM`, turns on emailed invitations, resets and confirmations.       |
-| `EMAIL_SERVER_PORT`     | `587`      | SMTP port; 465 uses TLS from the start.                                                       |
-| `EMAIL_SERVER_USER`     | unset      | SMTP username, if the server needs one.                                                       |
-| `EMAIL_SERVER_PASSWORD` | unset      | SMTP password.                                                                                |
-| `EMAIL_FROM`            | unset      | The sender, e.g. `Steward Display <display@yourchurch.org>`.                                  |
-| `SETUP_CODE`            | random     | The code first-run setup asks for. Random and printed in the log when unset.                  |
-| `PLATFORM_ROOT_DOMAIN`  | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
+| Variable                     | Default    | What it does                                                                                  |
+| ---------------------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`               | (required) | Postgres connection string. Compose builds it from `POSTGRES_PASSWORD`.                       |
+| `POSTGRES_PASSWORD`          | (required) | Compose only: the database password.                                                          |
+| `PORT`                       | `3000`     | The port the server listens on (and that compose publishes).                                  |
+| `TRUST_PROXY`                | `false`    | `true` behind a reverse proxy: rate limits use `X-Forwarded-For`, cookies honour its `https`. |
+| `TRUSTED_PROXY_HOPS`         | `1`        | How many proxies are in front. The visitor is read that many entries from the right.          |
+| `BIND_ADDRESS`               | `0.0.0.0`  | Compose only. `127.0.0.1` behind a proxy on the same machine, so nothing can skip it.         |
+| `PUBLIC_URL`                 | unset      | The address people use. Needed for emailed links (resets, invitations).                       |
+| `EMAIL_SERVER_HOST`          | unset      | SMTP server. With `EMAIL_FROM`, turns on emailed invitations, resets and confirmations.       |
+| `EMAIL_SERVER_PORT`          | `587`      | SMTP port; 465 uses TLS from the start.                                                       |
+| `EMAIL_SERVER_USER`          | unset      | SMTP username, if the server needs one.                                                       |
+| `EMAIL_SERVER_PASSWORD`      | unset      | SMTP password.                                                                                |
+| `EMAIL_FROM`                 | unset      | The sender, e.g. `Steward Display <display@yourchurch.org>`.                                  |
+| `AUTH0_ISSUER`               | unset      | Steward ID (Auth0) issuer. With the two below, adds "Continue with Steward ID".               |
+| `AUTH0_CLIENT_ID`            | unset      | The Auth0 application's client ID.                                                            |
+| `AUTH0_CLIENT_SECRET`        | unset      | The Auth0 application's client secret.                                                        |
+| `ALLOW_LOCAL_PASSWORD_LOGIN` | `true`     | `false` hides email-and-password sign-in, once everyone uses Steward ID.                      |
+| `SETUP_CODE`                 | random     | The code first-run setup asks for. Random and printed in the log when unset.                  |
+| `PLATFORM_ROOT_DOMAIN`       | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
 
 ## Pairing TVs
 
@@ -109,6 +113,25 @@ address, and a reset link pointing at their site would hand them the account.
 
 Any SMTP service works: your church's email provider, or a transactional service such as
 Postmark, Resend or Amazon SES.
+
+## Single sign-on
+
+Display can offer **Continue with Steward ID** (Auth0) beside email and password, the same way
+Congregation, Table and VBS do. It is one more way in, never a replacement, and without the
+three `AUTH0_*` settings nothing about it appears.
+
+1. In Auth0, create a **Regular Web Application** for Display. Add
+   `<PUBLIC_URL>/api/auth/sso/callback` to **Allowed Callback URLs**.
+2. Set `AUTH0_ISSUER`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET` and `PUBLIC_URL`, and restart.
+
+Steward ID never creates an account. Someone signs in with it only if their Steward ID email
+belongs to someone already on the church's team, and only once Steward ID has confirmed that
+address. Everyone else is asked to get an invitation first. Unset `AUTH0_ISSUER` to turn it
+off; sessions already signed in keep working.
+
+`ALLOW_LOCAL_PASSWORD_LOGIN=false` hides the email-and-password form once everyone uses
+Steward ID. Leave it on until then: an Auth0 outage should never lock a church out of its
+own screens.
 
 ## Resetting a password
 
