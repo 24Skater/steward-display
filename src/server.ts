@@ -6,6 +6,7 @@ import { bodySizeRefusal, isSameOriginWrite, isSetupPath } from "./server/gate";
 import { announceSetupCode } from "./server/setup-code";
 import { runInOrg } from "./server/org-context";
 import { resolveOrg } from "./server/org-resolver";
+import { accessRefusal } from "./server/platform/access";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -74,9 +75,20 @@ function plainResponse(status: number, message: string): Response {
 }
 
 /**
+ * The Steward console calling in with its service token. It runs before the
+ * hostname picks a church because its job is to create one; the handler
+ * authenticates every call itself (`server/provision.ts`).
+ */
+function isPlatformCall(pathname: string): boolean {
+  return pathname === "/api/internal/provision";
+}
+
+/**
  * Every request runs inside the church its hostname names (see
  * `server/org-resolver.ts`), so the database guard always knows whose data a
- * query may touch. Before a church exists, only setup runs.
+ * query may touch. Before a church exists, only setup runs. On the hosted
+ * platform, a church whose subscription is revoked, or that never bought
+ * Display, is refused before anything runs (`server/platform/access.ts`).
  */
 async function handle(request: Request, env: unknown, ctx: unknown): Promise<Response> {
   if (!isSameOriginWrite(request)) {
@@ -88,10 +100,14 @@ async function handle(request: Request, env: unknown, ctx: unknown): Promise<Res
   const handler = await getServerEntry();
   const run = async () => normalizeCatastrophicSsrResponse(await handler.fetch(request, env, ctx));
 
+  if (isPlatformCall(new URL(request.url).pathname)) return run();
+
   const resolution = await resolveOrg(request.headers.get("host"));
   switch (resolution.kind) {
-    case "org":
-      return runInOrg(resolution.org, run);
+    case "org": {
+      const refusal = await accessRefusal(request, resolution.org);
+      return refusal ?? runInOrg(resolution.org, run);
+    }
     case "setup": {
       announceSetupCode();
       const { pathname } = new URL(request.url);

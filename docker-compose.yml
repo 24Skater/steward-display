@@ -47,6 +47,10 @@ services:
       AUTH0_BUTTON_LABEL: ${AUTH0_BUTTON_LABEL:-}
       ALLOW_LOCAL_PASSWORD_LOGIN: ${ALLOW_LOCAL_PASSWORD_LOGIN:-true}
       OPEN_METEO_API_KEY: ${OPEN_METEO_API_KEY:-}
+      # Hosted Steward platform only; empty on your own server.
+      PLATFORM_ROOT_DOMAIN: ${PLATFORM_ROOT_DOMAIN:-}
+      PLATFORM_CONSOLE_URL: ${PLATFORM_CONSOLE_URL:-}
+      PLATFORM_SERVICE_TOKEN: ${PLATFORM_SERVICE_TOKEN:-}
     ports:
       # Behind a proxy on the same machine, set BIND_ADDRESS=127.0.0.1 so the
       # app is reachable only through it (Docker's published ports bypass ufw).

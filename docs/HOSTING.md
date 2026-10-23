@@ -49,6 +49,8 @@ up-to-date database makes that a no-op. Set `SKIP_MIGRATIONS=true` to run them s
 | `OPEN_METEO_API_KEY`         | unset      | Open-Meteo's paid key, for commercial use. A church's own install needs none.                 |
 | `SETUP_CODE`                 | random     | The code first-run setup asks for. Random and printed in the log when unset.                  |
 | `PLATFORM_ROOT_DOMAIN`       | unset      | Hosted Steward platform only. Leave unset on your own server.                                 |
+| `PLATFORM_CONSOLE_URL`       | unset      | Hosted Steward platform only. The console that provisions churches and issues subscriptions.  |
+| `PLATFORM_SERVICE_TOKEN`     | unset      | Hosted Steward platform only. This app's token from the console, `stw_svc_display_...`.       |
 
 ## Pairing TVs
 
@@ -183,6 +185,23 @@ DATABASE_URL=postgresql://... PORT=3000 node .output/server/index.mjs
 The admin app and TV pages are private. Every response carries `X-Robots-Tag: noindex,
 nofollow`, pages carry a robots meta tag, and `robots.txt` disallows everything. Do not remove
 these; product marketing belongs on a separate site.
+
+## On the hosted Steward platform
+
+With `PLATFORM_CONSOLE_URL` and `PLATFORM_SERVICE_TOKEN` set, the Steward console creates
+churches by calling `POST /api/internal/provision` with the service token, and makes the person
+who signed up the church's owner; they sign in with Steward ID. Each church's subscription is
+then checked against the console:
+
+| Subscription           | What the church gets                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| Active, or in grace    | Everything.                                                                                |
+| Read-only              | Can sign in and look, but changes are refused. Paired TVs keep playing.                    |
+| Revoked, or not bought | A "not active" page. TVs keep their last screen and stay paired, so renewing restores all. |
+
+Answers are cached for a minute. If the console is unreachable, the last answer is honoured for
+24 hours and then treated as read-only, so a console outage never stops a Sunday. Without
+these two variables (your own server) nothing is checked.
 
 ## Platform boundaries
 

@@ -27,6 +27,7 @@ import { Route as AdminAccountRouteImport } from './routes/_admin.account'
 import { Route as ScreensIdPreviewRouteImport } from './routes/screens.$id.preview'
 import { Route as ApiTvScreenRouteImport } from './routes/api.tv.screen'
 import { Route as ApiTvPairRouteImport } from './routes/api.tv.pair'
+import { Route as ApiInternalProvisionRouteImport } from './routes/api.internal.provision'
 import { Route as AdminScreensNewRouteImport } from './routes/_admin.screens.new'
 import { Route as ApiTvPairStatusRouteImport } from './routes/api.tv.pair.status'
 import { Route as ApiAuthSsoStartRouteImport } from './routes/api.auth.sso.start'
@@ -123,6 +124,11 @@ const ApiTvPairRoute = ApiTvPairRouteImport.update({
   path: '/api/tv/pair',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInternalProvisionRoute = ApiInternalProvisionRouteImport.update({
+  id: '/api/internal/provision',
+  path: '/api/internal/provision',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminScreensNewRoute = AdminScreensNewRouteImport.update({
   id: '/screens/new',
   path: '/screens/new',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/reset-password/$token': typeof ResetPasswordTokenRoute
   '/verify-email/$token': typeof VerifyEmailTokenRoute
   '/screens/new': typeof AdminScreensNewRoute
+  '/api/internal/provision': typeof ApiInternalProvisionRoute
   '/api/tv/pair': typeof ApiTvPairRouteWithChildren
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/verify-email/$token': typeof VerifyEmailTokenRoute
   '/': typeof AdminIndexRoute
   '/screens/new': typeof AdminScreensNewRoute
+  '/api/internal/provision': typeof ApiInternalProvisionRoute
   '/api/tv/pair': typeof ApiTvPairRouteWithChildren
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/verify-email/$token': typeof VerifyEmailTokenRoute
   '/_admin/': typeof AdminIndexRoute
   '/_admin/screens/new': typeof AdminScreensNewRoute
+  '/api/internal/provision': typeof ApiInternalProvisionRoute
   '/api/tv/pair': typeof ApiTvPairRouteWithChildren
   '/api/tv/screen': typeof ApiTvScreenRoute
   '/screens/$id/preview': typeof ScreensIdPreviewRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/reset-password/$token'
     | '/verify-email/$token'
     | '/screens/new'
+    | '/api/internal/provision'
     | '/api/tv/pair'
     | '/api/tv/screen'
     | '/screens/$id/preview'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/verify-email/$token'
     | '/'
     | '/screens/new'
+    | '/api/internal/provision'
     | '/api/tv/pair'
     | '/api/tv/screen'
     | '/screens/$id/preview'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/verify-email/$token'
     | '/_admin/'
     | '/_admin/screens/new'
+    | '/api/internal/provision'
     | '/api/tv/pair'
     | '/api/tv/screen'
     | '/screens/$id/preview'
@@ -319,6 +331,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   ResetPasswordTokenRoute: typeof ResetPasswordTokenRoute
   VerifyEmailTokenRoute: typeof VerifyEmailTokenRoute
+  ApiInternalProvisionRoute: typeof ApiInternalProvisionRoute
   ApiTvPairRoute: typeof ApiTvPairRouteWithChildren
   ApiTvScreenRoute: typeof ApiTvScreenRoute
   ScreensIdPreviewRoute: typeof ScreensIdPreviewRoute
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTvPairRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/internal/provision': {
+      id: '/api/internal/provision'
+      path: '/api/internal/provision'
+      fullPath: '/api/internal/provision'
+      preLoaderRoute: typeof ApiInternalProvisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin/screens/new': {
       id: '/_admin/screens/new'
       path: '/screens/new'
@@ -548,6 +568,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   ResetPasswordTokenRoute: ResetPasswordTokenRoute,
   VerifyEmailTokenRoute: VerifyEmailTokenRoute,
+  ApiInternalProvisionRoute: ApiInternalProvisionRoute,
   ApiTvPairRoute: ApiTvPairRouteWithChildren,
   ApiTvScreenRoute: ApiTvScreenRoute,
   ScreensIdPreviewRoute: ScreensIdPreviewRoute,
