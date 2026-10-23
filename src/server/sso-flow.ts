@@ -2,6 +2,7 @@ import * as client from "openid-client";
 
 import { safeNext } from "@/lib/safe-next";
 
+import { claimUnprovenAccount } from "./account-claim";
 import { db } from "./db";
 import { isSecureRequest } from "./http";
 import { requireOrg } from "./org-context";
@@ -169,6 +170,9 @@ export async function linkSsoIdentity(
   if (!member) return { ok: false, reason: "sso_no_account" };
 
   if (!user.ssoSubject) {
+    // Steward ID just proved the address. If nobody had before, whatever was
+    // set up on this account may be a stranger's: see account-claim.ts.
+    await claimUnprovenAccount(user.id);
     // Bind on first use, unless that identity is already bound to someone else.
     const { count } = await db().user.updateMany({
       where: { id: user.id, ssoSubject: null },

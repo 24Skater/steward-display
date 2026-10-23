@@ -1,8 +1,16 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient, type Prisma } from "@/generated/prisma/client";
+import { UserError } from "./errors";
 import { currentOrgId } from "./org-context";
+import { checkEntitlement } from "./platform/entitlements";
+import { requiresWriteEntitlement } from "./platform/write-policy";
 import { applyOrgScope } from "./tenancy";
+
+/** What a person sees when their church's subscription has lapsed to read-only. */
+export const READ_ONLY_MESSAGE =
+  "This church's Steward Display subscription is read-only, so nothing can be changed. " +
+  "Screens keep playing. Renew it in the Steward console to make changes again.";
 
 /**
  * The database client, with tenancy enforced inside it.
@@ -17,6 +25,14 @@ import { applyOrgScope } from "./tenancy";
  *
  * Nested writes (a `create` inside another model's `data`) are invisible to a
  * query extension. Nothing here uses them on tenanted models; keep it so.
+ *
+ * Writes are also checked against the church's Steward entitlement here, so
+ * "a read-only church cannot change anything" is a property of the data layer
+ * rather than something every server function has to remember. Which writes
+ * a read-only church may still make is in `platform/write-policy.ts`. With no
+ * Steward console configured (self-hosted) the check allows everything.
+ * A bypassed write made inside a church's request is checked too: renaming
+ * the church is one.
  */
 function createPrismaClient() {
   const url = process.env.DATABASE_URL;
@@ -29,11 +45,16 @@ function createPrismaClient() {
       $allModels: {
         async $allOperations({ model, operation, args, query }) {
           const bag = args as Record<string, unknown> & { _bypassOrgScope?: boolean };
+          const orgId = currentOrgId();
           if (bag?._bypassOrgScope === true) {
             delete bag._bypassOrgScope;
-            return query(args);
+          } else {
+            applyOrgScope(model ?? "", operation, bag, orgId);
           }
-          applyOrgScope(model ?? "", operation, bag, currentOrgId());
+          if (orgId && requiresWriteEntitlement(model ?? "", operation, bag)) {
+            const decision = await checkEntitlement(orgId, true);
+            if (!decision.allow) throw new UserError(READ_ONLY_MESSAGE, 403);
+          }
           return query(args);
         },
       },

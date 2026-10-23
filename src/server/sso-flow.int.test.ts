@@ -29,6 +29,31 @@ describeDb("linking a Steward ID to an account", () => {
     expect(user?.ssoSubject).toBe(`${ISSUER}|auth0|pat`);
   });
 
+  it("drops a password nobody proved the address for, once Steward ID proves it", async () => {
+    // Whoever accepted an invitation to pat@grace.org set this password. Until
+    // now nothing showed that was Pat; Steward ID just did.
+    const grace = await makeOrg("Grace");
+    const userId = await member(grace.orgId, "pat@grace.org");
+    await db().user.update(bypass({ where: { id: userId }, data: { passwordHash: "someone's" } }));
+    await asOrg(grace, () => linkSsoIdentity(claims("pat@grace.org"), ISSUER));
+    const user = await db().user.findUnique({ where: { id: userId } });
+    expect(user?.passwordHash).toBeNull();
+    expect(user?.emailVerifiedAt).not.toBeNull();
+  });
+
+  it("keeps the password of an account whose address was already proven", async () => {
+    const grace = await makeOrg("Grace");
+    const userId = await member(grace.orgId, "pat@grace.org");
+    await db().user.update(
+      bypass({
+        where: { id: userId },
+        data: { passwordHash: "pat's", emailVerifiedAt: new Date() },
+      }),
+    );
+    await asOrg(grace, () => linkSsoIdentity(claims("pat@grace.org"), ISSUER));
+    expect((await db().user.findUnique({ where: { id: userId } }))?.passwordHash).toBe("pat's");
+  });
+
   it("refuses an unverified address, or an identity with no subject", async () => {
     const grace = await makeOrg("Grace");
     await member(grace.orgId, "pat@grace.org");
