@@ -1,5 +1,6 @@
 @import "tailwindcss" source(none);
 @import "@steward-apps/tokens/css" layer(steward-tokens);
+@import "@steward-apps/tokens/themes/display" layer(steward-tokens);
 @source "../src";
 @import "tw-animate-css";
 @import "@fontsource-variable/inter";
@@ -93,31 +94,29 @@
   --radius: 0.75rem;
 
   /*
-   * Steward palette. Brand primitives come from @steward-apps/tokens (imported
-   * above into the steward-tokens layer, so these unlayered declarations always
-   * win where the package's unprefixed names collide with shadcn's).
-   *
-   * The literals below are Display's own values: the ones the Display product
-   * theme in steward-brand carries (themes/products/display.json). Once a
-   * tokens release with that theme is out, they become --st-border,
-   * --st-muted and --st-success.
+   * Steward palette. Brand primitives come from @steward-apps/tokens and
+   * Display's own values from its product theme (themes/display, scoped to
+   * [data-product="display"], which <html> carries). Both are imported into
+   * the steward-tokens layer, so these unlayered declarations always win
+   * where the package's unprefixed names (--border, --muted, --accent...)
+   * collide with shadcn's.
    */
   --navy: var(--st-color-brand-navy);
-  --navy-deep: #0d1b2e; /* foreground and marks; the theme's --st-fg */
+  --navy-deep: var(--st-fg); /* foreground and marks */
   --gold: var(--st-color-brand-gold);
   --gold-dark: var(--st-color-brand-goldDark);
   --blue: var(--st-color-brand-blue);
-  --emerald: #15803d; /* brand emerald darkened so white text on it is AA */
+  --emerald: var(--st-success); /* brand emerald darkened so white text on it is AA */
   --amber: var(--st-color-brand-amber);
   --red: var(--st-color-brand-red);
   --ink: var(--st-color-neutral-ink);
   --slate: var(--st-color-neutral-slate);
-  --muted-fg: #57647a; /* AA on parchment */
+  --muted-fg: var(--st-muted); /* AA on parchment */
   --surface: var(--st-color-neutral-surface);
   --subtle: var(--st-color-neutral-subtle);
   --parchment: var(--st-color-neutral-warmSubtle);
   --warm-surface: var(--st-color-neutral-warmSurface);
-  --line: #b8a778; /* borders that delimit drop zones: 3:1 on parchment */
+  --line: var(--st-border); /* borders that delimit drop zones: 3:1 on parchment */
   --wash: #f1ead6; /* shadcn "muted" fill, between parchment and warm surface */
 
   /* Shadcn aliases mapped to the palette above */
@@ -152,7 +151,7 @@
   --sidebar-primary-foreground: var(--navy);
   --sidebar-accent: var(--navy-deep);
   --sidebar-accent-foreground: var(--warm-surface);
-  --sidebar-border: #1a2f4a;
+  --sidebar-border: var(--st-sidebar-border);
   --sidebar-ring: var(--gold);
 }
 
